@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@layer components {
+  .main-navbar {
+    @apply fixed top-0 z-10 bg-transparent shadow-none w-18 p-2;
+  }
+  .main-aside {
+    @apply -left-64 dense:-left-18 w-64 dense:w-18 min-w-64 dense:min-w-18
+      aside-open:block fixed z-1 h-[calc(100vh)] top-0 overflow-y-auto
+      overflow-x-hidden bg-base-200 border-r border-base-300 aside-open:left-0
+      aside-open:dense:left-0 transition-[left] ease-in-out duration-200;
+  }
+  .main-outlet {
+    @apply p-4 min-w-[320px] min-h-screen sm:aside-open:ml-64
+      sm:dense:aside-open:ml-18 flex-1 transition-all ease-in-out duration-200;
+  }
+  .main-aside-bottom {
+    @apply absolute bottom-0 w-full p-3 flex justify-center items-center
+      dense:flex-col gap-3;
+  }
+}
+
+@custom-variant aside-open {
+  &:where([data-aside="1"] *) {
+    @slot;
+  }
+}
+
+@custom-variant aside-closed {
+  &:where([data-aside="0"] *) {
+    @slot;
+  }
+}
+
+@custom-variant dense {
+  &:where([data-dense="1"] *) {
+    @slot;
+  }
+}

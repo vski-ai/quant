@@ -1,0 +1,161 @@
+<mxfile host="65bd71144e">
+    <diagram name="Quant Analytics Dataflow" id="C4-Y8h_k-l_m-N9o_p-Q">
+        <mxGraphModel dx="1662" dy="1275" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="33" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="200" y="710" width="667" height="310" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="Client Application" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="33" vertex="1">
+                    <mxGeometry x="637" y="110" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="getReport()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="33" vertex="1">
+                    <mxGeometry x="277" y="115" width="120" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="7. Query Report" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="33" source="22" target="23" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="427" y="140" as="sourcePoint"/>
+                        <mxPoint x="377" y="140" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="25" value="&lt;b&gt;Querying Flow&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="33" vertex="1">
+                    <mxGeometry width="260" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="Redis Event Buffer&lt;br&gt;&lt;b&gt;query()&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="33" vertex="1">
+                    <mxGeometry x="277" y="260" width="120" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="8a. Query Real-time" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="33" source="23" target="26" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="337" y="165" as="sourcePoint"/>
+                        <mxPoint x="337" y="215" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="28" value="MongoDB&lt;br&gt;&lt;b&gt;queryMongo()&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="33" vertex="1">
+                    <mxGeometry y="115" width="120" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="8b. Query Historical" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="33" source="23" target="28" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="277" y="140" as="sourcePoint"/>
+                        <mxPoint x="227" y="140" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="30" value="9. Merge Results" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="33" source="28" target="23" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="157" y="115" as="sourcePoint"/>
+                        <mxPoint x="157" y="65" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="157" y="80"/>
+                            <mxPoint x="337" y="80"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="31" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="33" source="26" target="23" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="337" y="230" as="sourcePoint"/>
+                        <mxPoint x="337" y="180" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="32" value="10. Return Report" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="33" source="23" target="22" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="397" y="140" as="sourcePoint"/>
+                        <mxPoint x="447" y="140" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="34" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="200" y="180" width="1132" height="410" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="Client Application" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="34" vertex="1">
+                    <mxGeometry y="100" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="EventSource.record()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="34" vertex="1">
+                    <mxGeometry x="148" y="105" width="120" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="" style="endArrow=classic;html=1;rounded=0;" parent="34" source="2" target="3" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="194" y="130" as="sourcePoint"/>
+                        <mxPoint x="244" y="130" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="5" value="MongoDB&lt;br&gt;&lt;b&gt;events_*&lt;/b&gt; Collection" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="34" vertex="1">
+                    <mxGeometry x="447" y="90" width="100" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="1. Record Event" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="34" vertex="1" connectable="0">
+                    <mxGeometry x="84" y="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="2. Insert Document" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="34" vertex="1" connectable="0">
+                    <mxGeometry x="354" y="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="" style="endArrow=classic;html=1;rounded=0;" parent="34" source="3" target="5" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="364" y="130" as="sourcePoint"/>
+                        <mxPoint x="414" y="130" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9" value="Aggregation Service&lt;br&gt;&lt;b&gt;onEventInserted()&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="34" vertex="1">
+                    <mxGeometry x="762" y="105" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="3. MongoDB Change Stream" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="34" source="5" target="9" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="534" y="130" as="sourcePoint"/>
+                        <mxPoint x="584" y="130" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="11" value="getMetricsFromEvent()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="34" vertex="1">
+                    <mxGeometry x="757" width="150" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="4. Generate Metrics" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="34" source="9" target="11" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="674" y="105" as="sourcePoint"/>
+                        <mxPoint x="674" y="55" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="13" value="Redis Event Buffer&lt;br&gt;&lt;b&gt;ZADD&lt;/b&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="34" vertex="1">
+                    <mxGeometry x="1021" y="90" width="100" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="5. Add to Buffer" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="34" source="9" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="902" y="130" as="sourcePoint"/>
+                        <mxPoint x="1022" y="130" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="15" value="Redis Event Buffer&lt;br&gt;&lt;b&gt;flush()&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="34" vertex="1">
+                    <mxGeometry x="1012" y="240" width="120" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="6a. Timed Interval" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="34" target="15" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="1072" y="170" as="sourcePoint"/>
+                        <mxPoint x="1022" y="220" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="17" value="MongoDB&lt;br&gt;&lt;b&gt;aggr_*&lt;/b&gt; Collection" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="34" vertex="1">
+                    <mxGeometry x="772" y="330" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="6b. ZPOPMIN" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="34" vertex="1" connectable="0">
+                    <mxGeometry x="907" y="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="6c. bulkWrite ($inc)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="34" vertex="1" connectable="0">
+                    <mxGeometry x="907" y="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="34" source="15" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="962" y="265" as="sourcePoint"/>
+                        <mxPoint x="832" y="330" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="832" y="265"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="21" value="&lt;b&gt;Recording &amp;amp; Aggregation Flow&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="34" vertex="1">
+                    <mxGeometry width="260" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="" style="endArrow=none;html=1;strokeColor=#B3B3B3;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="14" y="640" as="sourcePoint"/>
+                        <mxPoint x="1584" y="640" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

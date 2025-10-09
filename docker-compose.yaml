@@ -1,0 +1,60 @@
+services:
+  valkey:
+    image: valkey/valkey
+    hostname: valkey1
+    ports:
+      - 6379:6379
+    command: valkey-server --bind 0.0.0.0
+
+  mongo:
+    image: mongo:8.0.14-noble
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_db:/data/db
+    healthcheck:
+      test: |
+        mongosh --host localhost \
+                --port 27017 \
+                -u root \
+                -p example \
+                --eval "quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)" \
+                --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  lgtm:
+    image: grafana/otel-lgtm:latest
+    container_name: lgtm
+    extra_hosts:
+      - "host.docker.internal=host-gateway"
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "3000:3000"
+    volumes:
+      - ./prometheus.yaml:/otel-lgtm/prometheus.yaml:ro
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - mongo
+      - valkey
+
+volumes:
+  mongo_db:

@@ -1,0 +1,125 @@
+import { assertEquals, assertExists } from "@std/assert";
+import { IDatasetQuery } from "../types.ts";
+import { withTestDatabase } from "./utils.ts";
+
+const dbName = "dataset_buf_query_test_db";
+
+withTestDatabase({ dbName }, async (t, engine) => {
+  // --- 1. SETUP ---
+  const source = await engine.createEventSource({
+    name: "DatasetSource",
+    eventTypes: [{ name: "sale" }],
+  });
+
+  const report = await engine.ReportModel.create({
+    name: "Dataset Test Report",
+    active: true,
+  });
+
+  await engine.AggregationSourceModel.create({
+    reportId: report._id,
+    targetCollection: "aggr_dataset_events",
+    filter: {
+      sources: [{ name: "DatasetSource", id: source.getDefinition().id! }],
+      events: ["sale"],
+    },
+  });
+  await new Promise((r) => setTimeout(r, 1000));
+
+  // --- 2. EXECUTION ---
+  await source.record(crypto.randomUUID(), "sale", {
+    amount: 100,
+    items: 2,
+    currency: "USD",
+  });
+  await source.record(crypto.randomUUID(), "sale", {
+    amount: 150,
+    items: 3,
+    currency: "USD",
+  });
+  await source.record(crypto.randomUUID(), "sale", {
+    amount: 50,
+    items: 1,
+    currency: "EUR",
+  });
+  await source.record(crypto.randomUUID(), "sale", {
+    amount: 200,
+    currency: "EUR",
+  }); // Missing 'items'
+  await new Promise((r) => setTimeout(r, 1000));
+
+  await t.step("should query all metrics from Redis", async () => {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    const query: IDatasetQuery = {
+      reportId: report._id.toString(),
+      timeRange: { start: oneHourAgo, end: now },
+      granularity: "hour",
+    };
+
+    const reportResult = await engine.getRealtimeDataset(query);
+
+    assertEquals(reportResult.length, 1, "Expected one time bucket");
+    const dataPoint = reportResult[0];
+
+    assertExists(dataPoint);
+    assertEquals(dataPoint.sale_count, 4, "Total count should be 4)");
+    assertEquals(
+      dataPoint.amount_sum,
+      500,
+      "Total amount sum should be 500 (100+150+50+200)",
+    );
+    assertEquals(dataPoint.items_sum, 6, "Total items sum should be 6 (2+3+1)");
+
+    // Verify new compound metrics
+    assertEquals(
+      dataPoint.amount_sum_by_currency_USD,
+      250,
+      "Amount in USD should be 250",
+    );
+    assertEquals(
+      dataPoint.amount_sum_by_currency_EUR,
+      250,
+      "Amount in EUR should be 250",
+    );
+  });
+
+  await t.step("should query a subset of metrics", async () => {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    const query: IDatasetQuery = {
+      reportId: report._id.toString(),
+      metrics: ["amount"], // Only ask for 'amount'
+      timeRange: { start: oneHourAgo, end: now },
+      granularity: "hour",
+    };
+
+    const reportResult = await engine.getRealtimeDataset(query);
+    assertEquals(reportResult.length, 1);
+    const dataPoint = reportResult[0];
+
+    assertEquals(dataPoint.sale_count, 4, "Count should always be included");
+    assertEquals(
+      dataPoint.amount_sum,
+      500,
+      "Amount sum should be present when its field is requested",
+    );
+    assertEquals(
+      dataPoint.items_sum,
+      undefined,
+      "Items sum should be excluded",
+    );
+    assertEquals(
+      dataPoint.amount_sum_by_currency_USD,
+      250,
+      "Compound metrics for requested field should be included",
+    );
+    assertEquals(
+      dataPoint.amount_sum_by_currency_EUR,
+      250,
+      "Compound metrics for requested field should be included",
+    );
+  });
+});

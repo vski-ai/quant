@@ -1,0 +1,178 @@
+<mxfile host="65bd71144e">
+    <diagram name="Quant DB Schema" id="D5-f6_g-h7_i-j8_k">
+        <mxGraphModel dx="1523" dy="1168" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="header-EventSourceDefinition" value="EventSourceDefinition" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="40" width="200" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-esd-id" value="&lt;b&gt;_id&lt;/b&gt; (PK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-EventSourceDefinition" vertex="1">
+                    <mxGeometry y="26" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-esd-name" value="name: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-EventSourceDefinition" vertex="1">
+                    <mxGeometry y="54" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-esd-desc" value="description: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-EventSourceDefinition" vertex="1">
+                    <mxGeometry y="82" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="header-EventType" value="EventType" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="40" width="200" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-et-id" value="&lt;b&gt;_id&lt;/b&gt; (PK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-EventType" vertex="1">
+                    <mxGeometry y="26" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-et-sourceId" value="sourceId: ObjectId (FK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-EventType" vertex="1">
+                    <mxGeometry y="54" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-et-name" value="name: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-EventType" vertex="1">
+                    <mxGeometry y="82" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="header-Events" value="events_{sourceName}" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="190" y="292" width="200" height="166" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-ev-id" value="&lt;b&gt;_id&lt;/b&gt; (PK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Events" vertex="1">
+                    <mxGeometry y="26" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-ev-sourceId" value="sourceId: ObjectId (FK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Events" vertex="1">
+                    <mxGeometry y="54" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-ev-eventTypeId" value="eventTypeId: ObjectId (FK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Events" vertex="1">
+                    <mxGeometry y="82" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-ev-timestamp" value="timestamp: Date" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Events" vertex="1">
+                    <mxGeometry y="110" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-ev-payload" value="payload: Mixed" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Events" vertex="1">
+                    <mxGeometry y="138" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-esd-et" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=1;startFill=0;" parent="1" source="field-esd-id" target="field-et-sourceId" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="240" y="95" as="sourcePoint"/>
+                        <mxPoint x="320" y="95" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="270" y="80"/>
+                            <mxPoint x="290" y="108"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label-esd-et" value="1..M" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="rel-esd-et" vertex="1" connectable="0">
+                    <mxGeometry x="-0.5" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-esd-ev" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;endFill=1;startFill=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="field-esd-id" target="field-ev-sourceId" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="20" y="70" as="sourcePoint"/>
+                        <mxPoint x="140" y="420" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="10" y="80"/>
+                            <mxPoint x="10" y="360"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label-esd-ev" value="1..M" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="rel-esd-ev" vertex="1" connectable="0">
+                    <mxGeometry x="-0.5" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-et-ev" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;endFill=1;startFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="field-et-id" target="field-ev-eventTypeId" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="540" y="94" as="sourcePoint"/>
+                        <mxPoint x="510" y="388" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="540" y="80"/>
+                            <mxPoint x="540" y="388"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label-et-ev" value="1..M" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="rel-et-ev" vertex="1" connectable="0">
+                    <mxGeometry x="0.5" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="header-Report" value="Report" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="40" width="200" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-r-id" value="&lt;b&gt;_id&lt;/b&gt; (PK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Report" vertex="1">
+                    <mxGeometry y="26" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-r-name" value="name: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Report" vertex="1">
+                    <mxGeometry y="54" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-r-active" value="active: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Report" vertex="1">
+                    <mxGeometry y="82" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="header-AggregationSource" value="AggregationSource" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="40" width="200" height="138" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-as-id" value="&lt;b&gt;_id&lt;/b&gt; (PK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-AggregationSource" vertex="1">
+                    <mxGeometry y="26" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-as-reportId" value="reportId: ObjectId (FK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-AggregationSource" vertex="1">
+                    <mxGeometry y="54" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-as-target" value="targetCollection: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-AggregationSource" vertex="1">
+                    <mxGeometry y="82" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-as-filter" value="filter: Object" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-AggregationSource" vertex="1">
+                    <mxGeometry y="110" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-r-as" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=1;startFill=0;" parent="1" source="field-r-id" target="field-as-reportId" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="800" y="95" as="sourcePoint"/>
+                        <mxPoint x="880" y="95" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="840" y="80"/>
+                            <mxPoint x="840" y="108"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label-r-as" value="1..M" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="rel-r-as" vertex="1" connectable="0">
+                    <mxGeometry x="-0.5" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="header-Aggregates" value="aggr_{targetCollection}" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="250" width="200" height="250" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-id" value="&lt;b&gt;Composite Unique Index&lt;/b&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="26" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-timestamp" value="timestamp: Date" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="54" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-granularity" value="granularity: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="82" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-attr" value="attributionType: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="110" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-aggtype" value="aggregationType: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="138" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-field" value="payloadField: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="166" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-category" value="payloadCategory: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="194" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="field-agg-value" value="&lt;b&gt;value: Number&lt;/b&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="header-Aggregates" vertex="1">
+                    <mxGeometry y="222" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-as-agg" value="Defines ETL" style="endArrow=none;dashed=1;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="header-AggregationSource" target="header-Aggregates" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="980" y="178" as="sourcePoint"/>
+                        <mxPoint x="840" y="200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-ev-agg" value="Aggregates From" style="endArrow=none;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="header-Events" target="header-Aggregates" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="380" y="283" as="sourcePoint"/>
+                        <mxPoint x="740" y="283" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
