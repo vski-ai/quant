@@ -13,6 +13,7 @@ const RecordEventSchema = v.object({
     type: v.string(),
     value: v.string(),
   }))),
+  timestamp: v.optional(v.string()),
 });
 
 events.post(
@@ -28,7 +29,9 @@ events.post(
   async (c) => {
     const engine = c.get("engine");
     const { source } = c.req.param();
-    const { uuid, type, payload, attributions } = c.req.valid<any>("json");
+    const { uuid, type, payload, attributions, timestamp } = c.req.valid<any>(
+      "json",
+    );
 
     const eventSource = await engine.getEventSource(source);
     if (!eventSource) {
@@ -40,6 +43,7 @@ events.post(
       type,
       payload ?? {},
       attributions,
+      timestamp ? new Date(timestamp) : undefined,
     );
     return c.json(recordedEvent);
   },

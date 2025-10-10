@@ -40,6 +40,27 @@ const ReportQuerySchema = v.object({
   })),
 });
 
+const DatasetQuerySchema = v.object({
+  metrics: v.array(v.string()),
+  timeRange: v.object({
+    start: v.string(),
+    end: v.string(),
+  }),
+  granularity: v.picklist(granularity),
+  attribution: v.optional(v.object({
+    type: v.string(),
+    value: v.string(),
+  })),
+});
+
+const ReportDataPointSchema = v.object({
+  time: v.string(),
+  value: v.number(),
+  category: v.optional(v.string()),
+});
+
+const ReportDataSchema = v.array(ReportDataPointSchema);
+
 reports.post(
   "/",
   describeRoute({
@@ -109,7 +130,7 @@ reports.post(
         description: "Report data",
         content: {
           "application/json": {
-            schema: resolver(v.array(v.record(v.string(), v.any()))),
+            schema: resolver(ReportDataSchema),
           },
         },
       },
@@ -138,6 +159,48 @@ reports.post(
     });
 
     return c.json(reportData);
+  },
+);
+
+reports.post(
+  "/:id/dataset",
+  describeRoute({
+    tags: ["Reports"],
+    summary: "Query a Report's dataset",
+    responses: {
+      200: {
+        description: "Dataset data",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(v.record(v.string(), v.any()))),
+          },
+        },
+      },
+      404: ErrorResponse,
+    },
+  }),
+  vValidator("json", DatasetQuerySchema),
+  async (c) => {
+    const engine = c.get("engine");
+    const apiKey = c.get("apiKey");
+    const authStorage = c.get("authStorage");
+    const { id } = c.req.param();
+    const query = c.req.valid("json");
+
+    if (!await authStorage.isReportOwner(apiKey.owner, id)) {
+      return c.json({ error: "Not Found" }, 404);
+    }
+
+    const datasetData = await engine.getDataset({
+      reportId: id,
+      ...query as any,
+      timeRange: {
+        start: new Date(query.timeRange.start),
+        end: new Date(query.timeRange.end),
+      },
+    });
+
+    return c.json(datasetData);
   },
 );
 

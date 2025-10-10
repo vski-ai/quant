@@ -252,6 +252,7 @@ export type PostApiEventsSourceEventsData = {
       type: string;
       value: string;
     }>;
+    timestamp?: string;
   };
   path: {
     source: string;
@@ -801,12 +802,81 @@ export type PostApiReportsIdDataResponses = {
    * Report data
    */
   200: Array<{
-    [key: string]: unknown;
+    time: string;
+    value: number;
+    category?: string;
   }>;
 };
 
 export type PostApiReportsIdDataResponse =
   PostApiReportsIdDataResponses[keyof PostApiReportsIdDataResponses];
+
+export type PostApiReportsIdDatasetData = {
+  body?: {
+    metrics: Array<string>;
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    attribution?: {
+      type: string;
+      value: string;
+    };
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/dataset";
+};
+
+export type PostApiReportsIdDatasetErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdDatasetError =
+  PostApiReportsIdDatasetErrors[keyof PostApiReportsIdDatasetErrors];
+
+export type PostApiReportsIdDatasetResponses = {
+  /**
+   * Dataset data
+   */
+  200: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type PostApiReportsIdDatasetResponse =
+  PostApiReportsIdDatasetResponses[keyof PostApiReportsIdDatasetResponses];
 
 export type DeleteApiReportsIdData = {
   body?: never;

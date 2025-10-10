@@ -61,6 +61,9 @@ import type {
   PostApiReportsIdDataData,
   PostApiReportsIdDataErrors,
   PostApiReportsIdDataResponses,
+  PostApiReportsIdDatasetData,
+  PostApiReportsIdDatasetErrors,
+  PostApiReportsIdDatasetResponses,
   PostApiReportsResponses,
 } from "./types.gen.ts";
 
@@ -499,6 +502,36 @@ export const postApiReportsIdData = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/api/reports/{id}/data",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's dataset
+ */
+export const postApiReportsIdDataset = <ThrowOnError extends boolean = false>(
+  options: Options<PostApiReportsIdDatasetData, ThrowOnError>,
+) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdDatasetResponses,
+    PostApiReportsIdDatasetErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/dataset",
     ...options,
     headers: {
       "Content-Type": "application/json",
