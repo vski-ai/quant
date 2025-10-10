@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Core API",
-    "description": "HTTP API for the core engine.",
+    "description": "HTTP API for the quant core engine.",
     "version": "v1"
   },
   "components": {
@@ -95,6 +95,383 @@
             },
             "in": "path",
             "name": "source",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/event-source": {
+      "post": {
+        "operationId": "postApiEvent-source",
+        "tags": [
+          "Event Sources"
+        ],
+        "summary": "Create an Event Source",
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "eventTypes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "getApiEvent-source",
+        "tags": [
+          "Event Sources"
+        ],
+        "summary": "List all Event Sources for the user",
+        "responses": {}
+      }
+    },
+    "/api/event-source/{name}": {
+      "get": {
+        "operationId": "getApiEvent-source:name",
+        "tags": [
+          "Event Sources"
+        ],
+        "summary": "Get an Event Source by name",
+        "responses": {},
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "name",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/event-source/{name}/event-types": {
+      "get": {
+        "operationId": "getApiEvent-source:nameEvent-types",
+        "tags": [
+          "Event Sources"
+        ],
+        "summary": "List Event Types for a Source",
+        "responses": {},
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "name",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/aggregation-source": {
+      "post": {
+        "operationId": "postApiAggregation-source",
+        "tags": [
+          "Aggregation Sources"
+        ],
+        "summary": "Add an Aggregation Source to a Report",
+        "responses": {},
+        "parameters": [
+          {
+            "in": "query",
+            "name": "reportId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetCollection": {
+                    "type": "string"
+                  },
+                  "granularity": {
+                    "enum": [
+                      "100ms",
+                      "200ms",
+                      "250ms",
+                      "500ms",
+                      "second",
+                      "minute",
+                      "5minute",
+                      "10minute",
+                      "15minute",
+                      "30minute",
+                      "hour",
+                      "2hour",
+                      "4hour",
+                      "6hour",
+                      "12hour",
+                      "day",
+                      "3day",
+                      "7day",
+                      "15day",
+                      "30day",
+                      "45day",
+                      "60day",
+                      "90day"
+                    ]
+                  },
+                  "filter": {
+                    "type": "object",
+                    "properties": {
+                      "sources": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ]
+                        }
+                      },
+                      "events": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "sources",
+                      "events"
+                    ]
+                  },
+                  "aggregations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "COUNT",
+                            "SUM",
+                            "CATEGORY",
+                            "COMPOUND_SUM",
+                            "BOOLEAN"
+                          ]
+                        },
+                        "payloadField": {
+                          "type": "string"
+                        },
+                        "categoryField": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "targetCollection",
+                  "aggregations"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "getApiAggregation-source",
+        "tags": [
+          "Aggregation Sources"
+        ],
+        "summary": "List Aggregation Sources for a Report",
+        "responses": {},
+        "parameters": [
+          {
+            "in": "query",
+            "name": "reportId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/aggregation-source/{sourceId}": {
+      "delete": {
+        "operationId": "deleteApiAggregation-source:sourceId",
+        "tags": [
+          "Aggregation Sources"
+        ],
+        "summary": "Remove an Aggregation Source from a Report",
+        "responses": {},
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "sourceId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/report": {
+      "post": {
+        "operationId": "postApiReport",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Create a Report Definition",
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "getApiReport",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "List all Report Definitions for the user",
+        "responses": {}
+      }
+    },
+    "/api/report/{id}": {
+      "get": {
+        "operationId": "getApiReport:id",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Get a Report Definition",
+        "responses": {},
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patchApiReport:id",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Update a Report Definition",
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteApiReport:id",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Delete a Report Definition",
+        "responses": {},
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
             "required": true
           }
         ]

@@ -1,6 +1,6 @@
 import { Redis } from "ioredis";
 import { Hono } from "hono";
-import { createAuthStorage } from "./storage.ts";
+import { createAuthStorage } from "./db/storage.ts"; // This now points to the orchestrator
 import { createAuthMiddleware } from "./middleware.ts";
 import { createReporter, ReporterConfig } from "./reporter.ts";
 import { IHttpPlugin } from "../types.ts";
@@ -17,14 +17,22 @@ export function createAuthPlugin(config: AuthConfig = {}): IHttpPlugin {
     name: "Auth Plugin",
     version: "0.0.1",
     async register(app: Hono<any>, engine) {
-      const storage = createAuthStorage(config.redis ?? engine.redisClient);
+      const storage = createAuthStorage(
+        engine.connection,
+        config.redis ?? engine.redisClient,
+      );
       const middleware = createAuthMiddleware(storage, config.masterKey);
       if (config.reporter) {
         const reporter = createReporter(storage, config.reporter);
         reporter.start();
       }
 
-      // We only protect /api/*
+      // Make auth storage available in the context for other routes
+      app.use("*", async (c, next) => {
+        c.set("authStorage", storage);
+        await next();
+      });
+
       app.use("*", middleware);
 
       // Register admin routes if master key is provided

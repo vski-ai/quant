@@ -1,9 +1,11 @@
 import type { Engine } from "@/core/mod.ts";
 import type { Hono } from "hono";
+import { AuthStorage } from "./auth/db/storage.ts"; // This path is now correct for the new orchestrator
 
 export type HonoEnv = {
   Variables: {
     engine: Engine;
+    authStorage: AuthStorage;
   };
 };
 

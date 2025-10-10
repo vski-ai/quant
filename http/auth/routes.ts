@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import * as v from "valibot";
 import { describeRoute, validator as vValidator } from "hono-openapi";
 
-import type { AuthStorage } from "./storage.ts";
+import type { AuthStorage } from "./db/storage.ts";
 import type { ApiKey } from "./types.ts";
 import { ApiKeyNotFoundError } from "./errors.ts";
 import { HonoEnv } from "@/http/types.ts";

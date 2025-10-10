@@ -41,6 +41,159 @@ export type PostApiEventsSourceEventsResponses = {
   200: unknown;
 };
 
+export type GetApiEventSourceData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/event-source";
+};
+
+export type PostApiEventSourceData = {
+  body?: {
+    name: string;
+    description?: string;
+    eventTypes?: Array<{
+      name: string;
+      description?: string;
+    }>;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/event-source";
+};
+
+export type GetApiEventSourceNameData = {
+  body?: never;
+  path: {
+    name: string;
+  };
+  query?: never;
+  url: "/api/event-source/{name}";
+};
+
+export type GetApiEventSourceNameEventTypesData = {
+  body?: never;
+  path: {
+    name: string;
+  };
+  query?: never;
+  url: "/api/event-source/{name}/event-types";
+};
+
+export type GetApiAggregationSourceData = {
+  body?: never;
+  path?: never;
+  query: {
+    reportId: string;
+  };
+  url: "/api/aggregation-source";
+};
+
+export type PostApiAggregationSourceData = {
+  body?: {
+    targetCollection: string;
+    granularity?:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    filter?: {
+      sources: Array<{
+        id: string;
+        name: string;
+      }>;
+      events: Array<string>;
+    };
+    aggregations: Array<{
+      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      payloadField?: string;
+      categoryField?: string;
+    }>;
+  };
+  path?: never;
+  query: {
+    reportId: string;
+  };
+  url: "/api/aggregation-source";
+};
+
+export type DeleteApiAggregationSourceSourceIdData = {
+  body?: never;
+  path: {
+    sourceId: string;
+  };
+  query?: never;
+  url: "/api/aggregation-source/{sourceId}";
+};
+
+export type GetApiReportData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/report";
+};
+
+export type PostApiReportData = {
+  body?: {
+    name: string;
+    description?: string;
+    active?: boolean;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/report";
+};
+
+export type DeleteApiReportIdData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/report/{id}";
+};
+
+export type GetApiReportIdData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/report/{id}";
+};
+
+export type PatchApiReportIdData = {
+  body?: {
+    name?: string;
+    description?: string;
+    active?: boolean;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/report/{id}";
+};
+
 export type PostApiAuthKeysData = {
   body?: {
     owner: string;

@@ -7,24 +7,36 @@ import type {
   TDataShape,
 } from "./client/index.ts";
 import type {
+  DeleteApiAggregationSourceSourceIdData,
   DeleteApiAuthKeysKeyData,
   DeleteApiAuthKeysKeyErrors,
   DeleteApiAuthKeysKeyResponses,
+  DeleteApiReportIdData,
+  GetApiAggregationSourceData,
   GetApiAuthKeysKeyData,
   GetApiAuthKeysKeyErrors,
   GetApiAuthKeysKeyResponses,
   GetApiAuthUsageData,
   GetApiAuthUsageErrors,
   GetApiAuthUsageResponses,
+  GetApiEventSourceData,
+  GetApiEventSourceNameData,
+  GetApiEventSourceNameEventTypesData,
+  GetApiReportData,
+  GetApiReportIdData,
   PatchApiAuthKeysKeyData,
   PatchApiAuthKeysKeyErrors,
   PatchApiAuthKeysKeyResponses,
+  PatchApiReportIdData,
+  PostApiAggregationSourceData,
   PostApiAuthKeysData,
   PostApiAuthKeysErrors,
   PostApiAuthKeysResponses,
+  PostApiEventSourceData,
   PostApiEventsSourceEventsData,
   PostApiEventsSourceEventsErrors,
   PostApiEventsSourceEventsResponses,
+  PostApiReportData,
 } from "./types.gen.ts";
 
 export type Options<
@@ -63,6 +75,286 @@ export const postApiEventsSourceEvents = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/api/events/{source}/events",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * List all Event Sources for the user
+ */
+export const getApiEventSource = <ThrowOnError extends boolean = false>(
+  options?: Options<GetApiEventSourceData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/event-source",
+    ...options,
+  });
+};
+
+/**
+ * Create an Event Source
+ */
+export const postApiEventSource = <ThrowOnError extends boolean = false>(
+  options?: Options<PostApiEventSourceData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/event-source",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+};
+
+/**
+ * Get an Event Source by name
+ */
+export const getApiEventSourceName = <ThrowOnError extends boolean = false>(
+  options: Options<GetApiEventSourceNameData, ThrowOnError>,
+) => {
+  return (options.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/event-source/{name}",
+    ...options,
+  });
+};
+
+/**
+ * List Event Types for a Source
+ */
+export const getApiEventSourceNameEventTypes = <
+  ThrowOnError extends boolean = false,
+>(options: Options<GetApiEventSourceNameEventTypesData, ThrowOnError>) => {
+  return (options.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/event-source/{name}/event-types",
+    ...options,
+  });
+};
+
+/**
+ * List Aggregation Sources for a Report
+ */
+export const getApiAggregationSource = <ThrowOnError extends boolean = false>(
+  options: Options<GetApiAggregationSourceData, ThrowOnError>,
+) => {
+  return (options.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/aggregation-source",
+    ...options,
+  });
+};
+
+/**
+ * Add an Aggregation Source to a Report
+ */
+export const postApiAggregationSource = <ThrowOnError extends boolean = false>(
+  options: Options<PostApiAggregationSourceData, ThrowOnError>,
+) => {
+  return (options.client ?? client).post<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/aggregation-source",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Remove an Aggregation Source from a Report
+ */
+export const deleteApiAggregationSourceSourceId = <
+  ThrowOnError extends boolean = false,
+>(options: Options<DeleteApiAggregationSourceSourceIdData, ThrowOnError>) => {
+  return (options.client ?? client).delete<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/aggregation-source/{sourceId}",
+    ...options,
+  });
+};
+
+/**
+ * List all Report Definitions for the user
+ */
+export const getApiReport = <ThrowOnError extends boolean = false>(
+  options?: Options<GetApiReportData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/report",
+    ...options,
+  });
+};
+
+/**
+ * Create a Report Definition
+ */
+export const postApiReport = <ThrowOnError extends boolean = false>(
+  options?: Options<PostApiReportData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/report",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+};
+
+/**
+ * Delete a Report Definition
+ */
+export const deleteApiReportId = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteApiReportIdData, ThrowOnError>,
+) => {
+  return (options.client ?? client).delete<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/report/{id}",
+    ...options,
+  });
+};
+
+/**
+ * Get a Report Definition
+ */
+export const getApiReportId = <ThrowOnError extends boolean = false>(
+  options: Options<GetApiReportIdData, ThrowOnError>,
+) => {
+  return (options.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/report/{id}",
+    ...options,
+  });
+};
+
+/**
+ * Update a Report Definition
+ */
+export const patchApiReportId = <ThrowOnError extends boolean = false>(
+  options: Options<PatchApiReportIdData, ThrowOnError>,
+) => {
+  return (options.client ?? client).patch<unknown, unknown, ThrowOnError>({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/report/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",

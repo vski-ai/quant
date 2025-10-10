@@ -1,5 +1,5 @@
 import { MiddlewareHandler } from "hono";
-import { AuthStorage } from "./storage.ts";
+import { AuthStorage } from "./db/storage.ts";
 
 export function createAuthMiddleware(
   storage: AuthStorage,

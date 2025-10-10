@@ -1,5 +1,5 @@
 import { Connection, Document, Model, Schema, Types } from "mongoose";
-import { EventPayload, IAttribution, IRetentionPolicy } from "../types.ts";
+import { EventPayload, IAttribution } from "../types.ts";
 
 /**
  * Schema for the EventSourceDefinition collection.

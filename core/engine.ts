@@ -215,7 +215,9 @@ export class Engine {
 
   public async deleteReport(reportId: string): Promise<void> {
     await this.invalidateActiveAggregationSourcesCache();
-    await this.AggregationSourceModel.deleteMany({ reportId });
+    await this.AggregationSourceModel.deleteMany({
+      reportId: new Types.ObjectId(reportId),
+    });
     await this.ReportModel.findByIdAndDelete(reportId);
   }
 

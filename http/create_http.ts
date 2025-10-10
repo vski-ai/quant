@@ -46,7 +46,7 @@ export async function createHttp(
       info: {
         title: "Core API",
         version: "v1",
-        description: "HTTP API for the core engine.",
+        description: "HTTP API for the quant core engine.",
       },
       components: {
         securitySchemes: {

@@ -12,5 +12,5 @@ const authPlugin = createAuthPlugin({
 });
 
 export default await createHttp(engine, [
-  authPlugin
+  authPlugin,
 ]);

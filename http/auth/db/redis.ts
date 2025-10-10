@@ -1,13 +1,15 @@
 import { Redis } from "ioredis";
-import type { ApiKey, Usage } from "./types.ts";
-import { ApiKeyNotFoundError } from "./errors.ts";
+import type { ApiKey, Usage } from "../types.ts";
+import { ApiKeyNotFoundError } from "../errors.ts";
 
 const API_KEY_PREFIX = "api_key:";
 const USAGE_PREFIX = "usage:";
+const OWNER_REPORTS_PREFIX = "owner_reports:";
+const OWNER_SOURCES_PREFIX = "owner_sources:";
 
-export type AuthStorage = ReturnType<typeof createAuthStorage>;
+export type RedisAuthStorage = ReturnType<typeof createRedisAuthStorage>;
 
-export function createAuthStorage(redis?: Redis) {
+export function createRedisAuthStorage(redis?: Redis) {
   const client = redis || new Redis();
 
   return {
@@ -128,6 +130,52 @@ export function createAuthStorage(redis?: Redis) {
         day: parseInt(values[1] ?? "0", 10),
         total: parseInt(values[2] ?? "0", 10),
       };
+    },
+
+    // --- Ownership Methods ---
+
+    async associateReport(owner: string, reportId: string): Promise<void> {
+      await client.sadd(`${OWNER_REPORTS_PREFIX}${owner}`, reportId);
+    },
+
+    async disassociateReport(owner: string, reportId: string): Promise<void> {
+      await client.srem(`${OWNER_REPORTS_PREFIX}${owner}`, reportId);
+    },
+
+    async getOwnedReportIds(owner: string): Promise<string[]> {
+      return await client.smembers(`${OWNER_REPORTS_PREFIX}${owner}`);
+    },
+
+    async isReportOwner(owner: string, reportId: string): Promise<boolean> {
+      return (await client.sismember(
+        `${OWNER_REPORTS_PREFIX}${owner}`,
+        reportId,
+      )) === 1;
+    },
+
+    async associateEventSource(owner: string, sourceId: string): Promise<void> {
+      await client.sadd(`${OWNER_SOURCES_PREFIX}${owner}`, sourceId);
+    },
+
+    async disassociateEventSource(
+      owner: string,
+      sourceId: string,
+    ): Promise<void> {
+      await client.srem(`${OWNER_SOURCES_PREFIX}${owner}`, sourceId);
+    },
+
+    async getOwnedEventSourceIds(owner: string): Promise<string[]> {
+      return await client.smembers(`${OWNER_SOURCES_PREFIX}${owner}`);
+    },
+
+    async isEventSourceOwner(
+      owner: string,
+      sourceId: string,
+    ): Promise<boolean> {
+      return (await client.sismember(
+        `${OWNER_SOURCES_PREFIX}${owner}`,
+        sourceId,
+      )) === 1;
     },
   };
 }

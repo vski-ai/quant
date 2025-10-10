@@ -1,6 +1,6 @@
 // TODO: This a prototype
 
-import { AuthStorage } from "./storage.ts";
+import { AuthStorage } from "./db/storage.ts";
 
 export type ReporterConfig = {
   url: string;
