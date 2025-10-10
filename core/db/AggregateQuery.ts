@@ -206,12 +206,24 @@ export async function writeMetricsToMongo(
     return;
   }
 
+  // --- Plugin Hook: beforeMetricsWritten ---
+  const modified = await engine.pluginManager.executeWaterfallHook(
+    "beforeMetricsWritten",
+    {
+      metrics,
+      targetCollection,
+    },
+  );
+
+  const finalMetrics = modified.metrics;
+  const finalTargetCollection = modified.targetCollection;
+
   // Prepare bulk write operations for MongoDB.
   const AggregateModel = await createAggregateModel(
     engine.connection,
-    targetCollection,
+    finalTargetCollection,
   );
-  const bulkOps = metrics.map((agg) => {
+  const bulkOps = finalMetrics.map((agg: { query: { timestamp: string | number | Date; }; incrementValue: any; }) => {
     const truncatedTimestamp = new Date(agg.query.timestamp);
     const finalQuery = { ...agg.query, timestamp: truncatedTimestamp };
 
@@ -230,6 +242,12 @@ export async function writeMetricsToMongo(
   if (bulkOps.length > 0) {
     try {
       await AggregateModel.bulkWrite(bulkOps);
+
+      // --- Plugin Hook: afterMetricsWritten ---
+      await engine.pluginManager.executeActionHook("afterMetricsWritten", {
+        metrics: finalMetrics,
+        targetCollection: finalTargetCollection,
+      });
     } catch (error) {
       // sometimes duplicate keys stuck up in one session before initial write
       // so we get a conflict even with {upsert: true}
@@ -238,8 +256,8 @@ export async function writeMetricsToMongo(
         await new Promise((resolve) => setTimeout(resolve, 100 * retry));
         await writeMetricsToMongo(
           engine,
-          targetCollection,
-          metrics,
+          finalTargetCollection,
+          finalMetrics,
           retry + 1,
         );
         return;

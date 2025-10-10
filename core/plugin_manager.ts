@@ -2,7 +2,6 @@ import { Engine } from "./engine.ts";
 import {
   EventPayload,
   Granularity,
-  IAttribution,
   IEventDoc,
   IMetricUpdate,
   IPlugin,
@@ -21,7 +20,7 @@ export class PluginManager {
    * @param plugin The plugin instance to register.
    */
   public async register(plugin: IPlugin) {
-    console.log(`Registering plugin: ${plugin.name}@${plugin.version}`);
+    console.log(`Registering engine plugin: ${plugin.name}@${plugin.version}`);
     this.plugins.push(plugin);
 
     // Execute initialization hook
@@ -51,18 +50,15 @@ export class PluginManager {
    * @returns The final value after all plugins have run.
    */
   public async executeWaterfallHook(
-    hookName: "beforeEventRecord",
-    initialValue: {
-      payload: EventPayload;
-      eventType: string;
-      attributions?: IAttribution[];
-    },
-  ): Promise<{ payload: EventPayload; attributions?: IAttribution[] }> {
-    let value = initialValue;
+    hookName: "beforeEventRecord" | "beforeMetricsWritten" | "beforeReportGenerated",
+    ...args: any[]
+  ): Promise<any> {
+    let value = args[0];
     for (const plugin of this.plugins) {
       const hook = plugin[hookName];
       if (typeof hook === "function") {
-        value = await hook.call(plugin, value) as any;
+        // @ts-ignore: 
+        value = await hook.call(plugin, ...(args as [any]));
       }
     }
     return value;
@@ -74,8 +70,8 @@ export class PluginManager {
    * @param context The context object to pass to the hook.
    */
   public async executeActionHook(
-    hookName: "afterEventRecord",
-    context: { eventDoc: IEventDoc<EventPayload> },
+    hookName: "afterEventRecord" | "afterMetricsWritten" | "afterReportGenerated",
+    context: any,
   ): Promise<void> {
     for (const plugin of this.plugins) {
       const hook = plugin[hookName];

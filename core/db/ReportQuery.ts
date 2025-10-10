@@ -121,13 +121,19 @@ export async function getReport(
   query: IQuery,
   engine: Engine,
 ): Promise<IReportDataPoint[]> {
+  // --- Plugin Hook: beforeReportGenerated ---
+  const modifiedQuery = await engine.pluginManager.executeWaterfallHook(
+    "beforeReportGenerated",
+    query,
+  );
+
   // 1. Find the report configuration.
   const ReportModel = getReportModel(engine.connection);
-  const reportConfig = await ReportModel.findById(query.reportId)
+  const reportConfig = await ReportModel.findById(modifiedQuery.reportId)
     .lean();
 
   if (!reportConfig) {
-    throw new Error(`Report with ID "${query.reportId}" not found.`);
+    throw new Error(`Report with ID "${modifiedQuery.reportId}" not found.`);
   }
 
   // 2. Find all aggregation sources linked to this report.
@@ -144,7 +150,7 @@ export async function getReport(
     const collectionNames = source.partition?.enabled
       ? getPartitionedCollectionNames(
         source.targetCollection,
-        query.timeRange,
+        modifiedQuery.timeRange,
         source.granularity!,
         source.partition.length,
       )
@@ -156,7 +162,7 @@ export async function getReport(
         collectionName,
       );
       // No need to check time range here, as queryMongo handles it.
-      return await queryMongo(query, model, source.filter);
+      return await queryMongo(modifiedQuery, model, source.filter);
     });
   });
 
@@ -167,9 +173,15 @@ export async function getReport(
   // 5. Merge results from all sources (Mongo + Redis) into a final report.
   const finalResults = mergeAndAggregateResults(
     mongoResults,
-    query.granularity,
-    query.metric.type,
+    modifiedQuery.granularity,
+    modifiedQuery.metric.type,
   );
+
+  // --- Plugin Hook: afterReportGenerated ---
+  await engine.pluginManager.executeActionHook("afterReportGenerated", {
+    report: finalResults,
+    query: modifiedQuery,
+  });
 
   return finalResults;
 }

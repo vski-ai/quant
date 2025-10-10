@@ -302,6 +302,40 @@ export interface IPlugin {
   }) => Promise<IMetricUpdate[]>;
 
   /**
+   * Called before a batch of metrics is written to the database.
+   * Allows for modification of the metrics and the target collection.
+   * @returns The (potentially modified) metrics and target collection.
+   */
+  beforeMetricsWritten?: (context: {
+    metrics: IMetricUpdate[];
+    targetCollection: string;
+  }) => Promise<{ metrics: IMetricUpdate[]; targetCollection: string }>;
+
+  /**
+   * Called after a batch of metrics has been successfully written to the database.
+   */
+  afterMetricsWritten?: (context: {
+    metrics: IMetricUpdate[];
+    targetCollection: string;
+  }) => Promise<void>;
+
+  /**
+   * Called before a report is generated.
+   * Allows for modification of the report query.
+   * @returns The (potentially modified) query.
+   */
+  beforeReportGenerated?: (query: IQuery) => Promise<IQuery>;
+
+  /**
+   * Called after a report has been generated.
+   * Allows for post-processing of the report results.
+   */
+  afterReportGenerated?: (context: {
+    report: IReportDataPoint[];
+    query: IQuery;
+  }) => Promise<void>;
+
+  /**
    * Allows a plugin to add new methods to the engine instance.
    * @returns A record of method names to functions.
    */

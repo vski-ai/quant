@@ -124,6 +124,16 @@ export class EventSource implements IEventSource {
       );
     }
 
+    // --- Plugin Hook: beforeEventRecord ---
+    const modified = await this.engine.pluginManager.executeWaterfallHook(
+      "beforeEventRecord",
+      {
+        payload,
+        eventType,
+        attributions,
+      },
+    );
+
     // --- Idempotency Check ---
     // First, try to find an event with the same UUID to prevent duplicates.
     const existingEvent = await this.eventModel.findOne({ uuid });
@@ -146,13 +156,18 @@ export class EventSource implements IEventSource {
       uuid,
       sourceId: this.definitionDoc._id,
       eventTypeId: eventTypeDoc._id,
-      payload,
-      attributions,
+      payload: modified.payload,
+      attributions: modified.attributions,
       timestamp: timestamp ?? new Date(),
     });
     // Save the event to the database FIRST to get the permanent, server-side _id.
     // This prevents race conditions where a temporary client-side ID might be used.
     await newEventDoc.save();
+
+    // --- Plugin Hook: afterEventRecord ---
+    await this.engine.pluginManager.executeActionHook("afterEventRecord", {
+      eventDoc: newEventDoc,
+    });
 
     // For recent events, generate metrics and push them to the real-time buffer immediately.
 
