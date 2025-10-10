@@ -187,14 +187,13 @@ custom aggregation types, enriching event data, or triggering external actions.
 
 ### Creating a Plugin
 
-A plugin is an object that implements the `IAnalyticsPlugin` interface. It must
-have a `name` and `version`, and can optionally implement one or more hook
-methods.
+A plugin is an object that implements the `IPlugin` interface. It must have a
+`name` and `version`, and can optionally implement one or more hook methods.
 
 ```typescript
-import { Engine, IAnalyticsPlugin } from "./core/types.ts";
+import { Engine, IPlugin } from "./core/types.ts";
 
-export class MyAwesomePlugin implements IAnalyticsPlugin {
+export class MyAwesomePlugin implements IPlugin {
   name = "my-awesome-plugin";
   version = "1.0.0";
 

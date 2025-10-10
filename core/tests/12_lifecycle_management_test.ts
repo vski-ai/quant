@@ -52,20 +52,20 @@ withTestDatabase({ dbName }, async (t, engine) => {
         Date.now() - (hotDays + 2) * 24 * 60 * 60 * 1000,
       );
       const recentTimestamp = new Date();
-      await source.record(
-        crypto.randomUUID(),
-        "some_event",
-        { a: "stale" },
-        [],
-        staleTimestamp,
-      );
-      await source.record(
-        crypto.randomUUID(),
-        "some_event",
-        { a: "recent" },
-        [],
-        recentTimestamp,
-      );
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "some_event",
+        payload: { a: "stale" },
+        attributions: [],
+        timestamp: staleTimestamp,
+      });
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "some_event",
+        payload: { a: "recent" },
+        attributions: [],
+        timestamp: recentTimestamp,
+      });
 
       // Wait for events to be recorded
       await new Promise((r) => setTimeout(r, 500));
@@ -122,13 +122,13 @@ withTestDatabase({ dbName }, async (t, engine) => {
 
       // Record an event that is 10 days old, creating a stale partition
       const staleTimestamp = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
-      await source.record(
-        crypto.randomUUID(),
-        "stale_event",
-        { value: 1 },
-        [],
-        staleTimestamp,
-      );
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "stale_event",
+        payload: { value: 1 },
+        attributions: [],
+        timestamp: staleTimestamp,
+      });
 
       // Wait for aggregation
       await new Promise((r) => setTimeout(r, 2000));
@@ -197,13 +197,13 @@ withTestDatabase({ dbName }, async (t, engine) => {
 
       // Record a stale event (e.g., 4 days old)
       const staleTimestamp = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-      await source.record(
-        crypto.randomUUID(),
-        "offload_event",
-        { value: 123 },
-        [],
-        staleTimestamp,
-      );
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "offload_event",
+        payload: { value: 123 },
+        attributions: [],
+        timestamp: staleTimestamp,
+      });
 
       // Wait for aggregation
       await new Promise((r) => setTimeout(r, 2000));

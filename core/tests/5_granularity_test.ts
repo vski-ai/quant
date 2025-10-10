@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "@std/assert";
-import { AggregationType, IAnalyticsQuery } from "../mod.ts";
+import { AggregationType, IQuery } from "../mod.ts";
 import { withTestDatabase } from "./utils.ts";
 
 const dbName = "granularity_test_db";
@@ -40,19 +40,18 @@ withTestDatabase({ dbName }, async (t, engine) => {
   ];
 
   for (const event of events) {
-    await source.record(
-      crypto.randomUUID(),
-      "timed_event",
-      { amount: event.amount },
-      undefined,
-      event.timestamp,
-    );
+    await source.record({
+      uuid: crypto.randomUUID(),
+      eventType: "timed_event",
+      payload: { amount: event.amount },
+      timestamp: event.timestamp,
+    });
   }
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   await t.step("should group correctly by '5minute' granularity", async () => {
-    const query: IAnalyticsQuery = {
+    const query: IQuery = {
       reportId: report._id.toString(),
       metric: { type: AggregationType.SUM, field: "amount" },
       timeRange: {
@@ -84,7 +83,7 @@ withTestDatabase({ dbName }, async (t, engine) => {
   });
 
   await t.step("should group correctly by 'hour' granularity", async () => {
-    const query: IAnalyticsQuery = {
+    const query: IQuery = {
       reportId: report._id.toString(),
       metric: { type: AggregationType.SUM, field: "amount" },
       timeRange: {

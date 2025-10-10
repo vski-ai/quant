@@ -1,8 +1,8 @@
 import { Redis } from "ioredis";
 import {
   AggregationType,
-  IAnalyticsQuery,
   IDatasetQuery,
+  IQuery,
   IReportDataPoint,
 } from "../types.ts";
 import { IAggregationSourceFilter } from "./Aggregation.ts";
@@ -15,7 +15,7 @@ import { TOTAL_ATTRIBUTION } from "../constants.ts";
  *
  * @param redis - The ioredis client instance.
  * @param prefix - The Redis key prefix used by the buffer.
- * @param query - The analytics query to execute against the buffer.
+ * @param query - The query to execute against the buffer.
  * @param targetCollections - The specific buffer collections to query.
  * @param filter - The source/event filter for the report.
  * @returns A promise that resolves to an object containing report data points and the last flushed timestamp.
@@ -23,7 +23,7 @@ import { TOTAL_ATTRIBUTION } from "../constants.ts";
 export async function queryRedisBuffer(
   redis: Redis,
   prefix: string,
-  query: IAnalyticsQuery | IDatasetQuery,
+  query: IQuery | IDatasetQuery,
   collection?: string,
   filter?: IAggregationSourceFilter,
 ): Promise<
@@ -97,7 +97,7 @@ export async function queryRedisBuffer(
         let typeMatch = true;
         let fieldMatch = true;
 
-        if (metric) { // Analytics Query (single metric)
+        if (metric) { // Query (single metric)
           typeMatch = aggType === metric.type;
           fieldMatch = metric.type === AggregationType.COUNT
             ? payloadField === "null"
@@ -159,7 +159,7 @@ export async function queryRedisBuffer(
     return filteredMetrics;
   }
 
-  // 3. For analytics queries, aggregate the filtered results into IReportDataPoint format.
+  // 3. For queries, aggregate the filtered results into IReportDataPoint format.
   const mergedMap = new Map<string, IReportDataPoint>();
   for (const metricData of filteredMetrics) {
     // Normalize the timestamp to the query's granularity to ensure correct grouping.

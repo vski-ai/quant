@@ -1,8 +1,8 @@
 import {
   AggregationType,
-  IAnalyticsQuery,
   IDatasetDataPoint,
   IDatasetQuery,
+  IQuery,
   IReportDataPoint,
 } from "../types.ts";
 import { IMetricUpdate } from "./AggregateQuery.ts";
@@ -31,13 +31,13 @@ export interface IRealtimeService {
   /**
    * Queries the buffer to provide a real-time report, including data
    * that has not yet been flushed to the database.
-   * @param query The analytics query to execute against the buffer.
+   * @param query The query to execute against the buffer.
    * @param targetCollection The specific buffer collections to query.
    * @param filter The source/event filter for the report.
    * @returns A promise that resolves to an array of report data points.
    */
   query(
-    query: IAnalyticsQuery,
+    query: IQuery,
     targetCollection?: string,
     filter?: IAggregationSourceFilter,
   ): Promise<IReportDataPoint[]>;
@@ -132,7 +132,7 @@ export class RealtimeBuffer implements IRealtimeService {
   }
 
   async query(
-    query: IAnalyticsQuery,
+    query: IQuery,
     targetCollection?: string,
     filter?: IAggregationSourceFilter,
   ): Promise<IReportDataPoint[]> {

@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "@std/assert";
-import { AggregationType, IAnalyticsQuery } from "../mod.ts";
+import { AggregationType, IQuery } from "../mod.ts";
 import { withTestDatabase } from "./utils.ts";
 
 const dbName = "redis_granularity_test_db";
@@ -42,13 +42,12 @@ withTestDatabase(
     ];
 
     for (const event of events) {
-      await source.record(
-        crypto.randomUUID(),
-        "timed_event",
-        { amount: event.amount },
-        undefined,
-        event.timestamp,
-      );
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "timed_event",
+        payload: { amount: event.amount },
+        timestamp: event.timestamp,
+      });
     }
 
     // Wait for events to be processed by the change stream and added to the buffer
@@ -59,7 +58,7 @@ withTestDatabase(
     await t.step(
       "should group correctly by '5minute' granularity from buffer",
       async () => {
-        const query: IAnalyticsQuery = {
+        const query: IQuery = {
           reportId: report._id.toString(),
           metric: { type: AggregationType.SUM, field: "amount" },
           timeRange: {
@@ -94,7 +93,7 @@ withTestDatabase(
     await t.step(
       "should group correctly by 'hour' granularity from buffer",
       async () => {
-        const query: IAnalyticsQuery = {
+        const query: IQuery = {
           reportId: report._id.toString(),
           metric: { type: AggregationType.SUM, field: "amount" },
           timeRange: {

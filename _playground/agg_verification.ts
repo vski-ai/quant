@@ -69,7 +69,7 @@ class Ledger {
 
 /**
  * Sets up and runs the advanced playground simulation with partitioning.
- * @param engine The analytics engine instance.
+ * @param engine The engine instance.
  * @param config The configuration for the simulation.
  * @returns An object containing the ground truth results and a function to query the engine for comparison.
  */
@@ -150,13 +150,13 @@ export async function runBench(
       to: generationEndTime,
     });
 
-    await source.record(
-      crypto.randomUUID(),
+    await source.record({
+      uuid: crypto.randomUUID(),
       eventType,
       payload,
       attributions,
       timestamp,
-    );
+    });
     groundTruth.processEvent(eventType, payload);
 
     if ((i + 1) % 10000 === 0) {

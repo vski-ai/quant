@@ -8,7 +8,7 @@ import {
 } from "../types.ts";
 
 // Schemas can be defined once and reused.
-export const AnalyticsAggregateSchema = new Schema({
+export const AggregateSchema = new Schema({
   sourceId: { type: String, required: true },
   eventType: { type: String, required: true },
   timestamp: { type: Date, required: true },
@@ -40,7 +40,7 @@ export const AnalyticsAggregateSchema = new Schema({
   },
 });
 
-AnalyticsAggregateSchema.index({
+AggregateSchema.index({
   sourceId: 1,
   eventType: 1,
   timestamp: 1,
@@ -90,7 +90,7 @@ export const AggregationSourceSchema = new Schema({
   },
 });
 
-export interface IAnalyticsAggregateDoc extends Document {
+export interface IAggregateDoc extends Document {
   sourceId: string;
   eventType: string;
   timestamp: Date; // This is the truncated timestamp
@@ -138,10 +138,10 @@ export const getAggregationSourceModel = (connection: Connection) => {
 export function createAggregateModel(
   connection: Connection,
   collectionName: string,
-): Model<IAnalyticsAggregateDoc> {
+): Model<IAggregateDoc> {
   return connection.models[collectionName] ??
-    connection.model<IAnalyticsAggregateDoc>(
+    connection.model<IAggregateDoc>(
       collectionName,
-      AnalyticsAggregateSchema,
+      AggregateSchema,
     );
 }

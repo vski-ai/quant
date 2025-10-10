@@ -34,36 +34,36 @@ withTestDatabase({ dbName }, async (t, engine) => {
   const secondMinute = new Date(now.getTime() - 1 * 60 * 1000);
 
   // Events in the first time bucket
-  await source.record(
-    crypto.randomUUID(),
-    "user_interaction",
-    { is_premium: true, score: 100 },
-    [],
-    new Date(firstMinute.getTime() + 1000),
-  );
-  await source.record(
-    crypto.randomUUID(),
-    "user_interaction",
-    { is_premium: false, is_trial: true, score: 50 },
-    [],
-    new Date(firstMinute.getTime() + 2000),
-  );
-  await source.record(
-    crypto.randomUUID(),
-    "user_interaction",
-    { score: 25 },
-    [],
-    new Date(firstMinute.getTime() + 3000),
-  );
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "user_interaction",
+    payload: { is_premium: true, score: 100 },
+    attributions: [],
+    timestamp: new Date(firstMinute.getTime() + 1000),
+  });
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "user_interaction",
+    payload: { is_premium: false, is_trial: true, score: 50 },
+    attributions: [],
+    timestamp: new Date(firstMinute.getTime() + 2000),
+  });
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "user_interaction",
+    payload: { score: 25 },
+    attributions: [],
+    timestamp: new Date(firstMinute.getTime() + 3000),
+  });
 
   // Event in the second time bucket
-  await source.record(
-    crypto.randomUUID(),
-    "user_interaction",
-    { is_premium: true, is_trial: false },
-    [],
-    new Date(secondMinute.getTime() + 1000),
-  );
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "user_interaction",
+    payload: { is_premium: true, is_trial: false },
+    attributions: [],
+    timestamp: new Date(secondMinute.getTime() + 1000),
+  });
 
   // Wait for aggregator to process events
   await new Promise((resolve) => setTimeout(resolve, 3000));

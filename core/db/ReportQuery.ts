@@ -8,7 +8,7 @@ import { truncateDate } from "../utils.ts";
 import {
   AggregationType,
   Granularity,
-  IAnalyticsQuery,
+  IQuery,
   IReportDataPoint,
 } from "../types.ts";
 
@@ -17,11 +17,11 @@ import { Engine } from "../engine.ts";
 import { TOTAL_ATTRIBUTION } from "../constants.ts";
 
 /**
- * Queries a single MongoDB analytics aggregate
+ * Queries a single aggregate
  * collection based on a filter.
  */
 export async function queryMongo(
-  query: IAnalyticsQuery,
+  query: IQuery,
   model: Model<any>,
   filter?: IAggregationSourceFilter,
 ): Promise<IReportDataPoint[]> {
@@ -112,13 +112,13 @@ export async function queryMongo(
 }
 
 /**
- * Main function to retrieve an analytics report. It now supports reports
+ * Main function to retrieve a report. It now supports reports
  * that aggregate data from multiple underlying collections.
  * @param query The query defining the report to generate.
  * @returns A promise that resolves to an analytics report.
  */
 export async function getReport(
-  query: IAnalyticsQuery,
+  query: IQuery,
   engine: Engine,
 ): Promise<IReportDataPoint[]> {
   // 1. Find the report configuration.

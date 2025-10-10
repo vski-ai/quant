@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "@std/assert";
-import { AggregationType, IAnalyticsQuery } from "../mod.ts";
+import { AggregationType, IQuery } from "../mod.ts";
 import { withTestDatabase } from "./utils.ts";
 import {
   getPartitionedCollectionName,
@@ -90,13 +90,12 @@ withTestDatabase({ dbName }, async (t, engine) => {
   ];
 
   for (const event of events) {
-    await source.record(
-      crypto.randomUUID(),
-      "partition_event",
-      { amount: event.amount },
-      undefined,
-      event.timestamp,
-    );
+    await source.record({
+      uuid: crypto.randomUUID(),
+      eventType: "partition_event",
+      payload: { amount: event.amount },
+      timestamp: event.timestamp,
+    });
   }
 
   // Give aggregator time to process without buffer
@@ -133,7 +132,7 @@ withTestDatabase({ dbName }, async (t, engine) => {
   await t.step(
     "should query across multiple partitions correctly",
     async () => {
-      const query: IAnalyticsQuery = {
+      const query: IQuery = {
         reportId: report._id.toString(),
         metric: { type: AggregationType.SUM, field: "amount" },
         timeRange: {

@@ -1,6 +1,6 @@
 import { assertEquals, assertExists } from "@std/assert";
 import { truncateDate } from "../utils.ts";
-import { AggregationType, IAnalyticsQuery, IEventSource } from "../mod.ts";
+import { AggregationType, IEventSource, IQuery } from "../mod.ts";
 import { withTestDatabase } from "./utils.ts";
 
 const dbName = "delayed_events_test_db";
@@ -37,24 +37,22 @@ withTestDatabase({ dbName }, async (t, engine) => {
       const slightlyDifferentTargetTime = new Date(targetTime.getTime() + 5000); // Still in the same minute bucket
 
       // 1. Record initial positive events and flush them.
-      await source.record(
-        crypto.randomUUID(),
-        "timed_event",
-        { amount: 60 },
-        undefined,
-        targetTime,
-      );
-      await source.record(
-        crypto.randomUUID(),
-        "timed_event",
-        { amount: 40 },
-        undefined,
-        slightlyDifferentTargetTime,
-      );
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "timed_event",
+        payload: { amount: 60 },
+        timestamp: targetTime,
+      });
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "timed_event",
+        payload: { amount: 40 },
+        timestamp: slightlyDifferentTargetTime,
+      });
       await new Promise((r) => setTimeout(r, 1000)); // Wait for events to process
 
       // 2. Verify the initial state of the bucket.
-      const baseQuery: Omit<IAnalyticsQuery, "reportId" | "metric"> = {
+      const baseQuery: Omit<IQuery, "reportId" | "metric"> = {
         timeRange: {
           start: new Date(now.getTime() - 20 * 60 * 1000),
           end: now,
@@ -94,13 +92,12 @@ withTestDatabase({ dbName }, async (t, engine) => {
       assertEquals(targetBucket.value, 2, "Initial bucket count should be 2");
 
       // 3. Record a delayed "refund" event for the same past timestamp and flush it.
-      await source.record(
-        crypto.randomUUID(),
-        "timed_event",
-        { amount: -30 },
-        undefined,
-        targetTime,
-      );
+      await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "timed_event",
+        payload: { amount: -30 },
+        timestamp: targetTime,
+      });
       await new Promise((r) => setTimeout(r, 500));
 
       // 4. Query again and verify the bucket was updated correctly.

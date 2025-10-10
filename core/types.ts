@@ -58,6 +58,15 @@ export interface IEvent<T extends EventPayload> {
   attributions?: IAttribution[]; // Generic array of attributions.
 }
 
+export interface IEventTransfer<T extends EventPayload> {
+  uuid: string;
+  eventType: string;
+  payload: T;
+  attributions?: IAttribution[];
+  timestamp?: Date;
+  attachments?: any[]; // any attachments (not recorded but passed thru waterfall)
+}
+
 /**
  * Defines the necessary information to create or identify an Event Source.
  * An Event Source is a logical grouping of events, like 'Stripe' or 'InternalApp'.
@@ -102,13 +111,7 @@ export interface IEventSource {
    * @param attributions Optional array of attributions to link this event.
    * @returns A promise that resolves to the recorded event.
    */
-  record<T extends EventPayload>(
-    uuid: string,
-    eventType: string,
-    payload: T,
-    attributions?: IAttribution[],
-    timestamp?: Date,
-  ): Promise<IEvent<T>>;
+  record<T extends EventPayload>(evt: IEventTransfer<T>): Promise<IEvent<T>>;
 }
 
 /**
@@ -186,7 +189,7 @@ export const granularity = [
 /**
  * Defines the structure for a query to the reporting service.
  */
-export interface IAnalyticsQuery {
+export interface IQuery {
   reportId: string; // Query a specific, pre-configured report by its ID
   metric: {
     type: AggregationType;
@@ -202,7 +205,7 @@ export interface IAnalyticsQuery {
 
 /**
  * Defines the structure for a dataset query.
- * Unlike an analytics query, this can fetch multiple metrics at once.
+ * Unlike IQuery, this can fetch multiple metrics at once.
  */
 export interface IDatasetQuery {
   reportId: string;
@@ -260,7 +263,7 @@ export interface IDataOffloader {
 }
 
 /**
- * Defines the contract for an analytics engine plugin.
+ * Defines the contract for an engine plugin.
  * Plugins can hook into various parts of the engine's lifecycle to add or modify functionality.
  */
 export interface IPlugin {

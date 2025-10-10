@@ -38,13 +38,13 @@ events.post(
       return c.json({ error: "Source not found" }, 404);
     }
 
-    const recordedEvent = await eventSource.record(
+    const recordedEvent = await eventSource.record({
       uuid,
-      type,
-      payload ?? {},
+      eventType: type,
+      payload: payload ?? {},
       attributions,
-      timestamp ? new Date(timestamp) : undefined,
-    );
+      timestamp: timestamp ? new Date(timestamp) : undefined,
+    });
     return c.json(recordedEvent);
   },
 );

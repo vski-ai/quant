@@ -112,10 +112,7 @@ reports.get(
     const authStorage = c.get("authStorage");
 
     const ownedIds = await authStorage.getOwnedReportIds(apiKey.owner);
-    const allReports = await engine.listReportDefinitions();
-    const ownedReports = allReports.filter((r) =>
-      ownedIds.includes(r._id.toString())
-    );
+    const ownedReports = await engine.listReportDefinitions(ownedIds);
     return c.json(normalizeDocs(ownedReports));
   },
 );

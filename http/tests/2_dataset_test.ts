@@ -17,7 +17,7 @@ withTestApi({ dbName }, async (t, { client }) => {
   });
   assertExists(keyData?.key);
 
-  client.setMasterKey(null)
+  client.setMasterKey(null);
   client.setApiKey(keyData.key);
 
   const { data: source } = await client.postApiEventSources({

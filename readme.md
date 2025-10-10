@@ -1,9 +1,11 @@
-# VSKI·QUANT: Real-time Data Streaming & Aggregation Engine
+# VSKI·QUANT
+
+Real-time Data Streaming & Aggregation Engine
 
 ![Status](https://img.shields.io/badge/Status-pre--alpha-red)
 ![License](https://img.shields.io/badge/License-VSKI--SA-green)
 
-![logo](./assets/logo.svg)
+![logo](./web/assets/logo.svg)
 
 **VSKI·QUANT** is a high-performance, general-purpose engine for real-time data
 ingestion, processing, and aggregation. It is built from the ground up to power

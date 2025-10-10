@@ -16,13 +16,13 @@ import { getReport } from "./db/ReportQuery.ts";
 import { getDataset } from "./db/DatasetQuery.ts";
 import {
   EventPayload,
-  IAnalyticsQuery,
   IDataOffloader,
   IDatasetDataPoint,
   IDatasetQuery,
   IEventSource,
   IEventSourceDefinition,
   IPlugin,
+  IQuery,
   IReport,
 } from "./types.ts";
 import { Aggregator } from "./aggregator.ts";
@@ -196,8 +196,9 @@ export class Engine {
     );
   }
 
-  public async listReportDefinitions(): Promise<IReportDoc[]> {
-    return await this.ReportModel.find().lean();
+  public async listReportDefinitions(ids?: string[]): Promise<IReportDoc[]> {
+    const query = ids ? { _id: { $in: ids } } : {};
+    return await this.ReportModel.find(query).lean();
   }
 
   public async updateReport(
@@ -301,7 +302,7 @@ export class Engine {
   }
 
   public getReport(
-    query: IAnalyticsQuery,
+    query: IQuery,
   ) {
     return tracer.startActiveSpan("engine.getReport", async (span) => {
       const result = await getReport(query, this);
@@ -451,7 +452,7 @@ export class Engine {
   }
 
   public getRealtimeReport(
-    query: IAnalyticsQuery,
+    query: IQuery,
   ) {
     return tracer.startActiveSpan("engine.getRealtimeReport", async (span) => {
       if (!this.aggregator.bufferService) return [];

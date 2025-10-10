@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "@std/assert";
-import { AggregationType, IAnalyticsQuery } from "../mod.ts";
+import { AggregationType, IQuery } from "../mod.ts";
 import { IEventSource } from "../types.ts";
 import { withTestDatabase } from "./utils.ts";
 
@@ -61,46 +61,46 @@ withTestDatabase({
       const baseTime = new Date("2023-12-01T12:00:00.000Z");
 
       // Record events for Stripe
-      await stripeSource.record(
-        crypto.randomUUID(),
-        "payment_succeeded",
-        { amount: 100, currency: "USD" },
-        [{ type: "identity", value: "user_1" }],
-        new Date("2023-12-01T11:59:00.000Z"),
-      );
+      await stripeSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "payment_succeeded",
+        payload: { amount: 100, currency: "USD" },
+        attributions: [{ type: "identity", value: "user_1" }],
+        timestamp: new Date("2023-12-01T11:59:00.000Z"),
+      });
 
-      await stripeSource.record(
-        crypto.randomUUID(),
-        "payment_succeeded",
-        { amount: 150, currency: "USD" },
-        [{ type: "identity", value: "user_2" }],
-        new Date("2023-12-01T11:58:00.000Z"),
-      );
+      await stripeSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "payment_succeeded",
+        payload: { amount: 150, currency: "USD" },
+        attributions: [{ type: "identity", value: "user_2" }],
+        timestamp: new Date("2023-12-01T11:58:00.000Z"),
+      });
 
-      await stripeSource.record(
-        crypto.randomUUID(),
-        "payment_succeeded",
-        { amount: 50, currency: "EUR" },
-        [{ type: "identity", value: "user_1" }],
-        new Date("2023-12-01T11:57:00.000Z"),
-      );
+      await stripeSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "payment_succeeded",
+        payload: { amount: 50, currency: "EUR" },
+        attributions: [{ type: "identity", value: "user_1" }],
+        timestamp: new Date("2023-12-01T11:57:00.000Z"),
+      });
 
       // Record events for Adyen
-      await adyenSource.record(
-        crypto.randomUUID(),
-        "payment_succeeded",
-        { amount: 200, currency: "USD" },
-        [{ type: "identity", value: "user_2" }],
-        new Date("2023-12-01T11:56:00.000Z"),
-      );
+      await adyenSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "payment_succeeded",
+        payload: { amount: 200, currency: "USD" },
+        attributions: [{ type: "identity", value: "user_2" }],
+        timestamp: new Date("2023-12-01T11:56:00.000Z"),
+      });
 
-      await adyenSource.record(
-        crypto.randomUUID(),
-        "payment_succeeded",
-        { amount: 75, currency: "GBP" },
-        [{ type: "identity", value: "user_3" }],
-        new Date("2023-12-01T11:55:00.000Z"),
-      );
+      await adyenSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "payment_succeeded",
+        payload: { amount: 75, currency: "GBP" },
+        attributions: [{ type: "identity", value: "user_3" }],
+        timestamp: new Date("2023-12-01T11:55:00.000Z"),
+      });
 
       await new Promise((resolve) => setTimeout(resolve, 300)); // Give a moment for DB writes
 
@@ -115,7 +115,7 @@ withTestDatabase({
       };
 
       // Test 3a: Total event count (should be 5)
-      const countQuery: IAnalyticsQuery = {
+      const countQuery: IQuery = {
         reportId: report._id.toString(),
         metric: { type: AggregationType.COUNT },
         timeRange,
@@ -143,7 +143,7 @@ withTestDatabase({
       );
 
       // Test 3b: Total sum of 'amount' (100 + 150 + 50 + 200 + 75 = 575)
-      const sumQuery: IAnalyticsQuery = {
+      const sumQuery: IQuery = {
         reportId: report._id.toString(),
         metric: { type: AggregationType.SUM, field: "amount" },
         timeRange,
@@ -170,7 +170,7 @@ withTestDatabase({
       );
 
       // Test 3c: Category breakdown by 'currency'
-      const categoryQuery: IAnalyticsQuery = {
+      const categoryQuery: IQuery = {
         reportId: report._id.toString(),
         metric: { type: AggregationType.CATEGORY, field: "currency" },
         timeRange,
@@ -211,7 +211,7 @@ withTestDatabase({
       assertEquals(gbpResult.value, 1, "Should be 1 payment in GBP"); // from adyen
 
       // Test 3d: Filter by attribution (user_1 total amount = 100 + 50 = 150)
-      const attributionQuery: IAnalyticsQuery = {
+      const attributionQuery: IQuery = {
         reportId: report._id.toString(),
         metric: { type: AggregationType.SUM, field: "amount" },
         attribution: { type: "identity", value: "user_1" },
@@ -239,23 +239,23 @@ withTestDatabase({
 
       // Test 3e: Verify that events recorded *after* the manual flush are NOT included
       // Record new events that will stay in the Redis buffer
-      await stripeSource.record(
-        crypto.randomUUID(),
-        "payment_succeeded",
-        { amount: 1000, currency: "JPY" },
-        [],
-        new Date("2023-12-01T11:54:00.000Z"),
-      );
-      await adyenSource.record(
-        crypto.randomUUID(),
-        "payment_succeeded",
-        { amount: 2000, currency: "CNY" },
-        [],
-        new Date("2023-12-01T11:53:00.000Z"),
-      );
+      await stripeSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "payment_succeeded",
+        payload: { amount: 1000, currency: "JPY" },
+        attributions: [],
+        timestamp: new Date("2023-12-01T11:54:00.000Z"),
+      });
+      await adyenSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "payment_succeeded",
+        payload: { amount: 2000, currency: "CNY" },
+        attributions: [],
+        timestamp: new Date("2023-12-01T11:53:00.000Z"),
+      });
 
       await new Promise((r) => setTimeout(r, 3000));
-      const postFlushCountQuery: IAnalyticsQuery = {
+      const postFlushCountQuery: IQuery = {
         reportId: report._id.toString(),
         metric: { type: AggregationType.COUNT },
         timeRange,
@@ -275,7 +275,7 @@ withTestDatabase({
         "Total event count should be 5 (we query only db)",
       );
 
-      const postFlushSumQuery: IAnalyticsQuery = {
+      const postFlushSumQuery: IQuery = {
         reportId: report._id.toString(),
         metric: { type: AggregationType.SUM, field: "amount" },
         timeRange,

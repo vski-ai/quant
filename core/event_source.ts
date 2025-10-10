@@ -5,6 +5,7 @@ import {
   IEvent,
   IEventSource,
   IEventSourceDefinition,
+  IEventTransfer,
   IEventType,
 } from "./types.ts";
 import {
@@ -105,13 +106,13 @@ export class EventSource implements IEventSource {
     return types.map(this.toEventTypeObject);
   }
 
-  public async record<T extends EventPayload>(
-    uuid: string,
-    eventType: string,
-    payload: T,
-    attributions?: IAttribution[],
-    timestamp?: Date,
-  ): Promise<IEvent<T>> {
+  public async record<T extends EventPayload>({
+    uuid,
+    eventType,
+    payload,
+    attributions,
+    timestamp,
+  }: IEventTransfer<T>): Promise<IEvent<T>> {
     const eventTypeDoc = await this.engine.getEventTypeByName(
       this.definitionDoc._id,
       eventType,

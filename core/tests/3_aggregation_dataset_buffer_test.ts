@@ -27,24 +27,40 @@ withTestDatabase({ dbName }, async (t, engine) => {
   await new Promise((r) => setTimeout(r, 1000));
 
   // --- 2. EXECUTION ---
-  await source.record(crypto.randomUUID(), "sale", {
-    amount: 100,
-    items: 2,
-    currency: "USD",
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: {
+      amount: 100,
+      items: 2,
+      currency: "USD",
+    },
   });
-  await source.record(crypto.randomUUID(), "sale", {
-    amount: 150,
-    items: 3,
-    currency: "USD",
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: {
+      amount: 150,
+      items: 3,
+      currency: "USD",
+    },
   });
-  await source.record(crypto.randomUUID(), "sale", {
-    amount: 50,
-    items: 1,
-    currency: "EUR",
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: {
+      amount: 50,
+      items: 1,
+      currency: "EUR",
+    },
   });
-  await source.record(crypto.randomUUID(), "sale", {
-    amount: 200,
-    currency: "EUR",
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: {
+      amount: 200,
+      currency: "EUR",
+    },
   }); // Missing 'items'
   await new Promise((r) => setTimeout(r, 1000));
 

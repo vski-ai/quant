@@ -9,7 +9,7 @@ import {
 } from "./types.ts";
 
 /**
- * Manages the registration and execution of plugins within the analytics engine.
+ * Manages the registration and execution of plugins within the engine.
  */
 export class PluginManager {
   private plugins: IPlugin[] = [];

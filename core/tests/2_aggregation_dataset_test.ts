@@ -34,34 +34,34 @@ withTestDatabase({
 
   // --- 2. EXECUTION ---
   const baseTime = new Date("2023-11-20T10:00:00.000Z");
-  await source.record(
-    crypto.randomUUID(),
-    "sale",
-    { amount: 100, items: 2, currency: "USD" },
-    [],
-    new Date("2023-11-20T09:59:00.000Z"),
-  );
-  await source.record(
-    crypto.randomUUID(),
-    "sale",
-    { amount: 150, items: 3, currency: "USD" },
-    [],
-    new Date("2023-11-20T09:58:00.000Z"),
-  );
-  await source.record(
-    crypto.randomUUID(),
-    "sale",
-    { amount: 50, items: 1, currency: "EUR" },
-    [],
-    new Date("2023-11-20T09:57:00.000Z"),
-  );
-  await source.record(
-    crypto.randomUUID(),
-    "sale",
-    { amount: 200, currency: "EUR" },
-    [],
-    new Date("2023-11-20T09:56:00.000Z"),
-  ); // Missing 'items'
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: { amount: 100, items: 2, currency: "USD" },
+    attributions: [],
+    timestamp: new Date("2023-11-20T09:59:00.000Z"),
+  });
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: { amount: 150, items: 3, currency: "USD" },
+    attributions: [],
+    timestamp: new Date("2023-11-20T09:58:00.000Z"),
+  });
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: { amount: 50, items: 1, currency: "EUR" },
+    attributions: [],
+    timestamp: new Date("2023-11-20T09:57:00.000Z"),
+  });
+  await source.record({
+    uuid: crypto.randomUUID(),
+    eventType: "sale",
+    payload: { amount: 200, currency: "EUR" },
+    attributions: [],
+    timestamp: new Date("2023-11-20T09:56:00.000Z"),
+  }); // Missing 'items'
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
 

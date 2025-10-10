@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "@std/assert";
-import { AggregationType, IAnalyticsQuery } from "../mod.ts";
+import { AggregationType, IQuery } from "../mod.ts";
 import { withTestDatabase } from "./utils.ts";
 
 const dbName = "reporting_service_test_db";
@@ -53,17 +53,29 @@ withTestDatabase({ dbName }, async (t, engine) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Record some events
-    await source.record(crypto.randomUUID(), "service_event", {
-      value: 100,
-      category: "A",
+    await source.record({
+      uuid: crypto.randomUUID(),
+      eventType: "service_event",
+      payload: {
+        value: 100,
+        category: "A",
+      },
     });
-    await source.record(crypto.randomUUID(), "service_event", {
-      value: 50,
-      category: "B",
+    await source.record({
+      uuid: crypto.randomUUID(),
+      eventType: "service_event",
+      payload: {
+        value: 50,
+        category: "B",
+      },
     });
-    await source.record(crypto.randomUUID(), "service_event", {
-      value: 200,
-      category: "A",
+    await source.record({
+      uuid: crypto.randomUUID(),
+      eventType: "service_event",
+      payload: {
+        value: 200,
+        category: "A",
+      },
     });
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -73,7 +85,7 @@ withTestDatabase({ dbName }, async (t, engine) => {
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
     // Query for the total sum
-    const sumQuery: IAnalyticsQuery = {
+    const sumQuery: IQuery = {
       reportId: reportDef._id.toString(),
       metric: { type: AggregationType.SUM, field: "value" },
       timeRange: { start: oneHourAgo, end: now },
@@ -85,7 +97,7 @@ withTestDatabase({ dbName }, async (t, engine) => {
     assertEquals(sumReport[0].value, 350, "Total sum should be 350");
 
     // Query for the category breakdown
-    const categoryQuery: IAnalyticsQuery = {
+    const categoryQuery: IQuery = {
       reportId: reportDef._id.toString(),
       metric: { type: AggregationType.CATEGORY, field: "category" },
       timeRange: { start: oneHourAgo, end: now },

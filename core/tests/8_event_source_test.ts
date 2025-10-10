@@ -107,12 +107,12 @@ withTestDatabase({ dbName }, async (t, engine) => {
       });
 
       const payload = { data: "sample_data", value: 12345 };
-      const recordedEvent = await source.record(
-        crypto.randomUUID(),
-        "test_event",
+      const recordedEvent = await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "test_event",
         payload,
-        [],
-      );
+        attributions: [],
+      });
 
       assertExists(recordedEvent.id, "Recorded event should have an ID");
       assertEquals(recordedEvent.eventType, "test_event"); //
@@ -142,12 +142,12 @@ withTestDatabase({ dbName }, async (t, engine) => {
         { type: "identity", value: "user_abc_123" },
         { type: "session", value: "session_xyz_789" },
       ];
-      const recordedEvent = await source.record(
-        crypto.randomUUID(),
-        "purchase_completed",
+      const recordedEvent = await source.record({
+        uuid: crypto.randomUUID(),
+        eventType: "purchase_completed",
         payload,
         attributions,
-      );
+      });
 
       assertExists(
         recordedEvent.attributions,
@@ -165,8 +165,12 @@ withTestDatabase({ dbName }, async (t, engine) => {
 
       await assertRejects(
         async () => {
-          await source.record(crypto.randomUUID(), "non_existent_event", {
-            data: "this should fail",
+          await source.record({
+            uuid: crypto.randomUUID(),
+            eventType: "non_existent_event",
+            payload: {
+              data: "this should fail",
+            },
           });
         },
         Error, // Expected error type
