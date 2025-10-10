@@ -302,7 +302,7 @@ export type GetApiEventSourcesResponses = {
    * A list of event source definitions
    */
   200: Array<{
-    id?: string;
+    id: string;
     name: string;
     description?: string;
     eventTypes?: Array<{
@@ -338,7 +338,7 @@ export type PostApiEventSourcesResponses = {
    * Event source created successfully
    */
   201: {
-    id?: string;
+    id: string;
     name: string;
     description?: string;
     eventTypes?: Array<{
@@ -387,7 +387,7 @@ export type GetApiEventSourcesNameResponses = {
    * A single event source definition
    */
   200: {
-    id?: string;
+    id: string;
     name: string;
     description?: string;
     eventTypes?: Array<{
@@ -480,7 +480,7 @@ export type GetApiAggregationSourcesResponses = {
    * A list of aggregation sources for the report
    */
   200: Array<{
-    _id: string;
+    id: string;
     reportId: string;
     targetCollection: string;
     granularity:
@@ -507,7 +507,7 @@ export type GetApiAggregationSourcesResponses = {
       | "45day"
       | "60day"
       | "90day";
-    aggregations: Array<{
+    aggregations?: Array<{
       type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
       payloadField?: string;
       categoryField?: string;
@@ -552,7 +552,7 @@ export type PostApiAggregationSourcesData = {
       }>;
       events: Array<string>;
     };
-    aggregations: Array<{
+    aggregations?: Array<{
       type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
       payloadField?: string;
       categoryField?: string;
@@ -588,7 +588,7 @@ export type PostApiAggregationSourcesResponses = {
    * Aggregation source created successfully
    */
   201: {
-    _id: string;
+    id: string;
     reportId: string;
     targetCollection: string;
     granularity:
@@ -615,7 +615,7 @@ export type PostApiAggregationSourcesResponses = {
       | "45day"
       | "60day"
       | "90day";
-    aggregations: Array<{
+    aggregations?: Array<{
       type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
       payloadField?: string;
       categoryField?: string;
@@ -702,8 +702,8 @@ export type GetApiReportsResponses = {
     name: string;
     description?: string;
     active: boolean;
-    createdAt: unknown;
-    updatedAt: unknown;
+    createdAt: string;
+    updatedAt: string;
   }>;
 };
 
@@ -730,13 +730,83 @@ export type PostApiReportsResponses = {
     name: string;
     description?: string;
     active: boolean;
-    createdAt: unknown;
-    updatedAt: unknown;
+    createdAt: string;
+    updatedAt: string;
   };
 };
 
 export type PostApiReportsResponse =
   PostApiReportsResponses[keyof PostApiReportsResponses];
+
+export type PostApiReportsIdDataData = {
+  body?: {
+    metric: {
+      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      field?: string;
+    };
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    attribution?: {
+      type: string;
+      value: string;
+    };
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/data";
+};
+
+export type PostApiReportsIdDataErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdDataError =
+  PostApiReportsIdDataErrors[keyof PostApiReportsIdDataErrors];
+
+export type PostApiReportsIdDataResponses = {
+  /**
+   * Report data
+   */
+  200: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type PostApiReportsIdDataResponse =
+  PostApiReportsIdDataResponses[keyof PostApiReportsIdDataResponses];
 
 export type DeleteApiReportsIdData = {
   body?: never;
@@ -801,8 +871,8 @@ export type GetApiReportsIdResponses = {
     name: string;
     description?: string;
     active: boolean;
-    createdAt: unknown;
-    updatedAt: unknown;
+    createdAt: string;
+    updatedAt: string;
   };
 };
 
@@ -843,8 +913,8 @@ export type PatchApiReportsIdResponses = {
     name: string;
     description?: string;
     active: boolean;
-    createdAt: unknown;
-    updatedAt: unknown;
+    createdAt: string;
+    updatedAt: string;
   };
 };
 

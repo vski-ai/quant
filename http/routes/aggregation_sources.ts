@@ -22,7 +22,7 @@ const FullAggregationSourceSchema = v.object({
   reportId: v.string(),
   targetCollection: v.string(),
   granularity: v.picklist(granularity),
-  aggregations: v.array(AggregationDefinitionSchema),
+  aggregations: v.optional(v.array(AggregationDefinitionSchema)),
 });
 
 const AggregationSourceSchema = v.object({
@@ -34,7 +34,7 @@ const AggregationSourceSchema = v.object({
       events: v.array(v.string()),
     }),
   ),
-  aggregations: v.array(AggregationDefinitionSchema),
+  aggregations: v.optional(v.array(AggregationDefinitionSchema)),
 });
 
 aggregationSources.post(

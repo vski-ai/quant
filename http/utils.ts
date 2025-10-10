@@ -9,8 +9,10 @@ function normalize<T>(doc: Document | any): T {
   }
   const obj = doc.toObject({
     transform: (_doc, ret) => {
-      // @ts-ignore: reason
-      ret.id = ret._id.toString();
+      if (ret._id) {
+        // @ts-ignore: reason
+        ret.id = ret._id.toString();
+      }
       // @ts-ignore: reason
       delete ret._id;
       // @ts-ignore: reason

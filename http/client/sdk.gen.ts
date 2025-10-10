@@ -58,6 +58,9 @@ import type {
   PostApiEventsSourceEventsErrors,
   PostApiEventsSourceEventsResponses,
   PostApiReportsData,
+  PostApiReportsIdDataData,
+  PostApiReportsIdDataErrors,
+  PostApiReportsIdDataResponses,
   PostApiReportsResponses,
 } from "./types.gen.ts";
 
@@ -470,6 +473,36 @@ export const postApiReports = <ThrowOnError extends boolean = false>(
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's data
+ */
+export const postApiReportsIdData = <ThrowOnError extends boolean = false>(
+  options: Options<PostApiReportsIdDataData, ThrowOnError>,
+) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdDataResponses,
+    PostApiReportsIdDataErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/data",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
     },
   });
 };

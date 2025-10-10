@@ -5,6 +5,7 @@ import { HonoEnv } from "@/http/types.ts";
 import { ApiKey } from "@/http/auth/types.ts";
 import { normalizeDoc, normalizeDocs } from "@/http/utils.ts";
 import { ErrorResponse, SuccessResponse } from "@/http/schemas.ts";
+import { AggregationType, granularity } from "@/core/types.ts";
 
 const reports = new Hono<HonoEnv & { Variables: { apiKey: ApiKey } }>();
 
@@ -21,6 +22,22 @@ const ReportSchema = v.object({
   name: v.string(),
   description: v.optional(v.string()),
   active: v.optional(v.boolean(), true),
+});
+
+const ReportQuerySchema = v.object({
+  metric: v.object({
+    type: v.enum(AggregationType),
+    field: v.optional(v.string()),
+  }),
+  timeRange: v.object({
+    start: v.string(),
+    end: v.string(),
+  }),
+  granularity: v.picklist(granularity),
+  attribution: v.optional(v.object({
+    type: v.string(),
+    value: v.string(),
+  })),
 });
 
 reports.post(
@@ -79,6 +96,48 @@ reports.get(
       ownedIds.includes(r._id.toString())
     );
     return c.json(normalizeDocs(ownedReports));
+  },
+);
+
+reports.post(
+  "/:id/data",
+  describeRoute({
+    tags: ["Reports"],
+    summary: "Query a Report's data",
+    responses: {
+      200: {
+        description: "Report data",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(v.record(v.string(), v.any()))),
+          },
+        },
+      },
+      404: ErrorResponse,
+    },
+  }),
+  vValidator("json", ReportQuerySchema),
+  async (c) => {
+    const engine = c.get("engine");
+    const apiKey = c.get("apiKey");
+    const authStorage = c.get("authStorage");
+    const { id } = c.req.param();
+    const query = c.req.valid("json");
+
+    if (!await authStorage.isReportOwner(apiKey.owner, id)) {
+      return c.json({ error: "Not Found" }, 404);
+    }
+
+    const reportData = await engine.getReport({
+      reportId: id,
+      ...query as any,
+      timeRange: {
+        start: new Date(query.timeRange.start),
+        end: new Date(query.timeRange.end),
+      },
+    });
+
+    return c.json(reportData);
   },
 );
 
