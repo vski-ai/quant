@@ -1,12 +1,13 @@
 import { Hono } from "hono";
 import { randomUUID } from "node:crypto";
 import * as v from "valibot";
-import { describeRoute, validator as vValidator } from "hono-openapi";
+import { describeRoute, resolver, validator as vValidator } from "hono-openapi";
 
 import type { AuthStorage } from "./db/storage.ts";
 import type { ApiKey } from "./types.ts";
 import { ApiKeyNotFoundError } from "./errors.ts";
 import { HonoEnv } from "@/http/types.ts";
+import { ErrorResponse, SuccessResponse } from "@/http/schemas.ts";
 
 const QuotaSchema = v.object({
   requestsPerSecond: v.pipe(v.number(), v.integer(), v.minValue(1)),
@@ -23,6 +24,19 @@ const UpdateKeySchema = v.object({
   owner: v.optional(v.pipe(v.string(), v.minLength(1))),
   quotas: v.optional(v.partial(QuotaSchema)),
   enabled: v.optional(v.boolean()),
+});
+
+const ApiKeySchema = v.object({
+  key: v.string(),
+  owner: v.string(),
+  quotas: QuotaSchema,
+  enabled: v.boolean(),
+});
+
+const UsageSchema = v.object({
+  second: v.number(),
+  day: v.number(),
+  total: v.number(),
 });
 
 export function createAuthRoutes(storage: AuthStorage) {
@@ -43,9 +57,16 @@ export function createAuthRoutes(storage: AuthStorage) {
     describeRoute({
       tags: ["auth"],
       responses: {
-        201: { description: "API key created successfully" },
-        400: { description: "Invalid request body" },
-        401: { description: "Unauthorized" },
+        201: {
+          description: "API key created successfully",
+          content: {
+            "application/json": {
+              schema: resolver(ApiKeySchema),
+            },
+          },
+        },
+        400: ErrorResponse,
+        401: ErrorResponse,
       },
     }),
     vValidator("json", CreateKeySchema),
@@ -75,10 +96,17 @@ export function createAuthRoutes(storage: AuthStorage) {
     describeRoute({
       tags: ["auth"],
       responses: {
-        200: { description: "API key updated successfully" },
-        400: { description: "Invalid request body" },
-        401: { description: "Unauthorized" },
-        404: { description: "API key not found" },
+        200: {
+          description: "API key updated successfully",
+          content: {
+            "application/json": {
+              schema: resolver(ApiKeySchema),
+            },
+          },
+        },
+        400: ErrorResponse,
+        401: ErrorResponse,
+        404: ErrorResponse,
       },
     }),
     vValidator("json", UpdateKeySchema),
@@ -111,8 +139,8 @@ export function createAuthRoutes(storage: AuthStorage) {
     describeRoute({
       tags: ["auth"],
       responses: {
-        200: { description: "API key deleted successfully" },
-        401: { description: "Unauthorized (requires master api key)" },
+        200: SuccessResponse,
+        401: ErrorResponse,
       },
     }),
     async (c) => {
@@ -121,7 +149,7 @@ export function createAuthRoutes(storage: AuthStorage) {
       }
       const key = c.req.param("key");
       await storage.deleteApiKey(key);
-      return c.json({ message: "API key deleted" });
+      return c.json({ success: true });
     },
   );
 
@@ -133,9 +161,16 @@ export function createAuthRoutes(storage: AuthStorage) {
     describeRoute({
       tags: ["auth"],
       responses: {
-        200: { description: "API key details" },
-        401: { description: "Unauthorized" },
-        404: { description: "API key not found" },
+        200: {
+          description: "API key details",
+          content: {
+            "application/json": {
+              schema: resolver(ApiKeySchema),
+            },
+          },
+        },
+        401: ErrorResponse,
+        404: ErrorResponse,
       },
     }),
     async (c) => {
@@ -156,13 +191,17 @@ export function createAuthRoutes(storage: AuthStorage) {
     describeRoute({
       tags: ["auth"],
       responses: {
-        200: { description: "Usage statistics" },
-        400: {
-          description:
-            "Bad Request: apiKey query param is required for master key users",
+        200: {
+          description: "Usage statistics",
+          content: {
+            "application/json": {
+              schema: resolver(UsageSchema),
+            },
+          },
         },
-        401: { description: "Unauthorized" },
-        404: { description: "API key not found" },
+        400: ErrorResponse,
+        401: ErrorResponse,
+        404: ErrorResponse,
       },
     }),
     vValidator("query", v.object({ apiKey: v.optional(v.string()) })),

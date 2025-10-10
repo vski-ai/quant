@@ -4,6 +4,243 @@ export type ClientOptions = {
   baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type PostApiAuthKeysData = {
+  body?: {
+    owner: string;
+    quotas: {
+      requestsPerSecond: number;
+      requestsPerDay: number;
+      totalRequests: number;
+    };
+  };
+  path?: never;
+  query?: never;
+  url: "/api/auth/keys";
+};
+
+export type PostApiAuthKeysErrors = {
+  /**
+   * Error response
+   */
+  400: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+};
+
+export type PostApiAuthKeysError =
+  PostApiAuthKeysErrors[keyof PostApiAuthKeysErrors];
+
+export type PostApiAuthKeysResponses = {
+  /**
+   * API key created successfully
+   */
+  201: {
+    key: string;
+    owner: string;
+    quotas: {
+      requestsPerSecond: number;
+      requestsPerDay: number;
+      totalRequests: number;
+    };
+    enabled: boolean;
+  };
+};
+
+export type PostApiAuthKeysResponse =
+  PostApiAuthKeysResponses[keyof PostApiAuthKeysResponses];
+
+export type DeleteApiAuthKeysKeyData = {
+  body?: never;
+  path: {
+    key: string;
+  };
+  query?: never;
+  url: "/api/auth/keys/{key}";
+};
+
+export type DeleteApiAuthKeysKeyErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+};
+
+export type DeleteApiAuthKeysKeyError =
+  DeleteApiAuthKeysKeyErrors[keyof DeleteApiAuthKeysKeyErrors];
+
+export type DeleteApiAuthKeysKeyResponses = {
+  /**
+   * Successful operation
+   */
+  200: {
+    success: boolean;
+  };
+};
+
+export type DeleteApiAuthKeysKeyResponse =
+  DeleteApiAuthKeysKeyResponses[keyof DeleteApiAuthKeysKeyResponses];
+
+export type GetApiAuthKeysKeyData = {
+  body?: never;
+  path: {
+    key: string;
+  };
+  query?: never;
+  url: "/api/auth/keys/{key}";
+};
+
+export type GetApiAuthKeysKeyErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiAuthKeysKeyError =
+  GetApiAuthKeysKeyErrors[keyof GetApiAuthKeysKeyErrors];
+
+export type GetApiAuthKeysKeyResponses = {
+  /**
+   * API key details
+   */
+  200: {
+    key: string;
+    owner: string;
+    quotas: {
+      requestsPerSecond: number;
+      requestsPerDay: number;
+      totalRequests: number;
+    };
+    enabled: boolean;
+  };
+};
+
+export type GetApiAuthKeysKeyResponse =
+  GetApiAuthKeysKeyResponses[keyof GetApiAuthKeysKeyResponses];
+
+export type PatchApiAuthKeysKeyData = {
+  body?: {
+    owner?: string;
+    quotas?: {
+      requestsPerSecond?: number;
+      requestsPerDay?: number;
+      totalRequests?: number;
+    };
+    enabled?: boolean;
+  };
+  path: {
+    key: string;
+  };
+  query?: never;
+  url: "/api/auth/keys/{key}";
+};
+
+export type PatchApiAuthKeysKeyErrors = {
+  /**
+   * Error response
+   */
+  400: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PatchApiAuthKeysKeyError =
+  PatchApiAuthKeysKeyErrors[keyof PatchApiAuthKeysKeyErrors];
+
+export type PatchApiAuthKeysKeyResponses = {
+  /**
+   * API key updated successfully
+   */
+  200: {
+    key: string;
+    owner: string;
+    quotas: {
+      requestsPerSecond: number;
+      requestsPerDay: number;
+      totalRequests: number;
+    };
+    enabled: boolean;
+  };
+};
+
+export type PatchApiAuthKeysKeyResponse =
+  PatchApiAuthKeysKeyResponses[keyof PatchApiAuthKeysKeyResponses];
+
+export type GetApiAuthUsageData = {
+  body?: never;
+  path?: never;
+  query?: {
+    apiKey?: string;
+  };
+  url: "/api/auth/usage";
+};
+
+export type GetApiAuthUsageErrors = {
+  /**
+   * Error response
+   */
+  400: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiAuthUsageError =
+  GetApiAuthUsageErrors[keyof GetApiAuthUsageErrors];
+
+export type GetApiAuthUsageResponses = {
+  /**
+   * Usage statistics
+   */
+  200: {
+    second: number;
+    day: number;
+    total: number;
+  };
+};
+
+export type GetApiAuthUsageResponse =
+  GetApiAuthUsageResponses[keyof GetApiAuthUsageResponses];
+
 export type PostApiEventsSourceEventsData = {
   body?: {
     type: string;
@@ -41,14 +278,48 @@ export type PostApiEventsSourceEventsResponses = {
   200: unknown;
 };
 
-export type GetApiEventSourceData = {
+export type GetApiEventSourcesData = {
   body?: never;
   path?: never;
   query?: never;
-  url: "/api/event-source";
+  url: "/api/event-sources";
 };
 
-export type PostApiEventSourceData = {
+export type GetApiEventSourcesErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+};
+
+export type GetApiEventSourcesError =
+  GetApiEventSourcesErrors[keyof GetApiEventSourcesErrors];
+
+export type GetApiEventSourcesResponses = {
+  /**
+   * A list of event source definitions
+   */
+  200: Array<{
+    id?: string;
+    name: string;
+    description?: string;
+    eventTypes?: Array<{
+      name: string;
+      description?: string;
+    }>;
+    retention?: {
+      hotDays: number;
+      offloaderPlugin?: string;
+    };
+  }>;
+};
+
+export type GetApiEventSourcesResponse =
+  GetApiEventSourcesResponses[keyof GetApiEventSourcesResponses];
+
+export type PostApiEventSourcesData = {
   body?: {
     name: string;
     description?: string;
@@ -59,37 +330,195 @@ export type PostApiEventSourceData = {
   };
   path?: never;
   query?: never;
-  url: "/api/event-source";
+  url: "/api/event-sources";
 };
 
-export type GetApiEventSourceNameData = {
+export type PostApiEventSourcesResponses = {
+  /**
+   * Event source created successfully
+   */
+  201: {
+    id?: string;
+    name: string;
+    description?: string;
+    eventTypes?: Array<{
+      name: string;
+      description?: string;
+    }>;
+    retention?: {
+      hotDays: number;
+      offloaderPlugin?: string;
+    };
+  };
+};
+
+export type PostApiEventSourcesResponse =
+  PostApiEventSourcesResponses[keyof PostApiEventSourcesResponses];
+
+export type GetApiEventSourcesNameData = {
   body?: never;
   path: {
     name: string;
   };
   query?: never;
-  url: "/api/event-source/{name}";
+  url: "/api/event-sources/{name}";
 };
 
-export type GetApiEventSourceNameEventTypesData = {
+export type GetApiEventSourcesNameErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiEventSourcesNameError =
+  GetApiEventSourcesNameErrors[keyof GetApiEventSourcesNameErrors];
+
+export type GetApiEventSourcesNameResponses = {
+  /**
+   * A single event source definition
+   */
+  200: {
+    id?: string;
+    name: string;
+    description?: string;
+    eventTypes?: Array<{
+      name: string;
+      description?: string;
+    }>;
+    retention?: {
+      hotDays: number;
+      offloaderPlugin?: string;
+    };
+  };
+};
+
+export type GetApiEventSourcesNameResponse =
+  GetApiEventSourcesNameResponses[keyof GetApiEventSourcesNameResponses];
+
+export type GetApiEventSourcesNameEventTypesData = {
   body?: never;
   path: {
     name: string;
   };
   query?: never;
-  url: "/api/event-source/{name}/event-types";
+  url: "/api/event-sources/{name}/event-types";
 };
 
-export type GetApiAggregationSourceData = {
+export type GetApiEventSourcesNameEventTypesErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiEventSourcesNameEventTypesError =
+  GetApiEventSourcesNameEventTypesErrors[
+    keyof GetApiEventSourcesNameEventTypesErrors
+  ];
+
+export type GetApiEventSourcesNameEventTypesResponses = {
+  /**
+   * A list of event types for the source
+   */
+  200: Array<{
+    name: string;
+    description?: string;
+  }>;
+};
+
+export type GetApiEventSourcesNameEventTypesResponse =
+  GetApiEventSourcesNameEventTypesResponses[
+    keyof GetApiEventSourcesNameEventTypesResponses
+  ];
+
+export type GetApiAggregationSourcesData = {
   body?: never;
   path?: never;
   query: {
     reportId: string;
   };
-  url: "/api/aggregation-source";
+  url: "/api/aggregation-sources";
 };
 
-export type PostApiAggregationSourceData = {
+export type GetApiAggregationSourcesErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiAggregationSourcesError =
+  GetApiAggregationSourcesErrors[keyof GetApiAggregationSourcesErrors];
+
+export type GetApiAggregationSourcesResponses = {
+  /**
+   * A list of aggregation sources for the report
+   */
+  200: Array<{
+    _id: string;
+    reportId: string;
+    targetCollection: string;
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    aggregations: Array<{
+      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      payloadField?: string;
+      categoryField?: string;
+    }>;
+  }>;
+};
+
+export type GetApiAggregationSourcesResponse =
+  GetApiAggregationSourcesResponses[keyof GetApiAggregationSourcesResponses];
+
+export type PostApiAggregationSourcesData = {
   body?: {
     targetCollection: string;
     granularity?:
@@ -133,26 +562,155 @@ export type PostApiAggregationSourceData = {
   query: {
     reportId: string;
   };
-  url: "/api/aggregation-source";
+  url: "/api/aggregation-sources";
 };
 
-export type DeleteApiAggregationSourceSourceIdData = {
+export type PostApiAggregationSourcesErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiAggregationSourcesError =
+  PostApiAggregationSourcesErrors[keyof PostApiAggregationSourcesErrors];
+
+export type PostApiAggregationSourcesResponses = {
+  /**
+   * Aggregation source created successfully
+   */
+  201: {
+    _id: string;
+    reportId: string;
+    targetCollection: string;
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    aggregations: Array<{
+      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      payloadField?: string;
+      categoryField?: string;
+    }>;
+  };
+};
+
+export type PostApiAggregationSourcesResponse =
+  PostApiAggregationSourcesResponses[keyof PostApiAggregationSourcesResponses];
+
+export type DeleteApiAggregationSourcesSourceIdData = {
   body?: never;
   path: {
     sourceId: string;
   };
   query?: never;
-  url: "/api/aggregation-source/{sourceId}";
+  url: "/api/aggregation-sources/{sourceId}";
 };
 
-export type GetApiReportData = {
+export type DeleteApiAggregationSourcesSourceIdErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  403: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type DeleteApiAggregationSourcesSourceIdError =
+  DeleteApiAggregationSourcesSourceIdErrors[
+    keyof DeleteApiAggregationSourcesSourceIdErrors
+  ];
+
+export type DeleteApiAggregationSourcesSourceIdResponses = {
+  /**
+   * Successful operation
+   */
+  200: {
+    success: boolean;
+  };
+};
+
+export type DeleteApiAggregationSourcesSourceIdResponse =
+  DeleteApiAggregationSourcesSourceIdResponses[
+    keyof DeleteApiAggregationSourcesSourceIdResponses
+  ];
+
+export type GetApiReportsData = {
   body?: never;
   path?: never;
   query?: never;
-  url: "/api/report";
+  url: "/api/reports";
 };
 
-export type PostApiReportData = {
+export type GetApiReportsErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+};
+
+export type GetApiReportsError = GetApiReportsErrors[keyof GetApiReportsErrors];
+
+export type GetApiReportsResponses = {
+  /**
+   * A list of report definitions
+   */
+  200: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    active: boolean;
+    createdAt: unknown;
+    updatedAt: unknown;
+  }>;
+};
+
+export type GetApiReportsResponse =
+  GetApiReportsResponses[keyof GetApiReportsResponses];
+
+export type PostApiReportsData = {
   body?: {
     name: string;
     description?: string;
@@ -160,28 +718,98 @@ export type PostApiReportData = {
   };
   path?: never;
   query?: never;
-  url: "/api/report";
+  url: "/api/reports";
 };
 
-export type DeleteApiReportIdData = {
+export type PostApiReportsResponses = {
+  /**
+   * Report created successfully
+   */
+  201: {
+    id: string;
+    name: string;
+    description?: string;
+    active: boolean;
+    createdAt: unknown;
+    updatedAt: unknown;
+  };
+};
+
+export type PostApiReportsResponse =
+  PostApiReportsResponses[keyof PostApiReportsResponses];
+
+export type DeleteApiReportsIdData = {
   body?: never;
   path: {
     id: string;
   };
   query?: never;
-  url: "/api/report/{id}";
+  url: "/api/reports/{id}";
 };
 
-export type GetApiReportIdData = {
+export type DeleteApiReportsIdErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type DeleteApiReportsIdError =
+  DeleteApiReportsIdErrors[keyof DeleteApiReportsIdErrors];
+
+export type DeleteApiReportsIdResponses = {
+  /**
+   * Successful operation
+   */
+  200: {
+    success: boolean;
+  };
+};
+
+export type DeleteApiReportsIdResponse =
+  DeleteApiReportsIdResponses[keyof DeleteApiReportsIdResponses];
+
+export type GetApiReportsIdData = {
   body?: never;
   path: {
     id: string;
   };
   query?: never;
-  url: "/api/report/{id}";
+  url: "/api/reports/{id}";
 };
 
-export type PatchApiReportIdData = {
+export type GetApiReportsIdErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiReportsIdError =
+  GetApiReportsIdErrors[keyof GetApiReportsIdErrors];
+
+export type GetApiReportsIdResponses = {
+  /**
+   * A single report definition
+   */
+  200: {
+    id: string;
+    name: string;
+    description?: string;
+    active: boolean;
+    createdAt: unknown;
+    updatedAt: unknown;
+  };
+};
+
+export type GetApiReportsIdResponse =
+  GetApiReportsIdResponses[keyof GetApiReportsIdResponses];
+
+export type PatchApiReportsIdData = {
   body?: {
     name?: string;
     description?: string;
@@ -191,157 +819,34 @@ export type PatchApiReportIdData = {
     id: string;
   };
   query?: never;
-  url: "/api/report/{id}";
+  url: "/api/reports/{id}";
 };
 
-export type PostApiAuthKeysData = {
-  body?: {
-    owner: string;
-    quotas: {
-      requestsPerSecond: number;
-      requestsPerDay: number;
-      totalRequests: number;
-    };
+export type PatchApiReportsIdErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
   };
-  path?: never;
-  query?: never;
-  url: "/api/auth/keys";
 };
 
-export type PostApiAuthKeysErrors = {
-  /**
-   * Invalid request body
-   */
-  400: unknown;
-  /**
-   * Unauthorized
-   */
-  401: unknown;
-};
+export type PatchApiReportsIdError =
+  PatchApiReportsIdErrors[keyof PatchApiReportsIdErrors];
 
-export type PostApiAuthKeysResponses = {
+export type PatchApiReportsIdResponses = {
   /**
-   * API key created successfully
+   * Report updated successfully
    */
-  201: unknown;
-};
-
-export type DeleteApiAuthKeysKeyData = {
-  body?: never;
-  path: {
-    key: string;
+  200: {
+    id: string;
+    name: string;
+    description?: string;
+    active: boolean;
+    createdAt: unknown;
+    updatedAt: unknown;
   };
-  query?: never;
-  url: "/api/auth/keys/{key}";
 };
 
-export type DeleteApiAuthKeysKeyErrors = {
-  /**
-   * Unauthorized (requires master api key)
-   */
-  401: unknown;
-};
-
-export type DeleteApiAuthKeysKeyResponses = {
-  /**
-   * API key deleted successfully
-   */
-  200: unknown;
-};
-
-export type GetApiAuthKeysKeyData = {
-  body?: never;
-  path: {
-    key: string;
-  };
-  query?: never;
-  url: "/api/auth/keys/{key}";
-};
-
-export type GetApiAuthKeysKeyErrors = {
-  /**
-   * Unauthorized
-   */
-  401: unknown;
-  /**
-   * API key not found
-   */
-  404: unknown;
-};
-
-export type GetApiAuthKeysKeyResponses = {
-  /**
-   * API key details
-   */
-  200: unknown;
-};
-
-export type PatchApiAuthKeysKeyData = {
-  body?: {
-    owner?: string;
-    quotas?: {
-      requestsPerSecond?: number;
-      requestsPerDay?: number;
-      totalRequests?: number;
-    };
-    enabled?: boolean;
-  };
-  path: {
-    key: string;
-  };
-  query?: never;
-  url: "/api/auth/keys/{key}";
-};
-
-export type PatchApiAuthKeysKeyErrors = {
-  /**
-   * Invalid request body
-   */
-  400: unknown;
-  /**
-   * Unauthorized
-   */
-  401: unknown;
-  /**
-   * API key not found
-   */
-  404: unknown;
-};
-
-export type PatchApiAuthKeysKeyResponses = {
-  /**
-   * API key updated successfully
-   */
-  200: unknown;
-};
-
-export type GetApiAuthUsageData = {
-  body?: never;
-  path?: never;
-  query?: {
-    apiKey?: string;
-  };
-  url: "/api/auth/usage";
-};
-
-export type GetApiAuthUsageErrors = {
-  /**
-   * Bad Request: apiKey query param is required for master key users
-   */
-  400: unknown;
-  /**
-   * Unauthorized
-   */
-  401: unknown;
-  /**
-   * API key not found
-   */
-  404: unknown;
-};
-
-export type GetApiAuthUsageResponses = {
-  /**
-   * Usage statistics
-   */
-  200: unknown;
-};
+export type PatchApiReportsIdResponse =
+  PatchApiReportsIdResponses[keyof PatchApiReportsIdResponses];

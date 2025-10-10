@@ -4,6 +4,11 @@ export * from "@/http/client/index.ts";
 import { client } from "@/http/client/client.gen.ts";
 import * as methods from "@/http/client/index.ts";
 
+const keys = {
+  masterKey: "",
+  apiKey: "",
+};
+
 export function configure({
   baseUrl,
   apiKey,
@@ -17,13 +22,16 @@ export function configure({
     baseUrl,
   });
 
+  keys.masterKey = masterKey!;
+  keys.apiKey = apiKey!;
+
   client.interceptors.request.use((request, _options) => {
-    if (masterKey) {
-      request.headers.set("X-Master-Key", masterKey);
+    if (keys.masterKey) {
+      request.headers.set("X-Master-Key", keys.masterKey);
       return request;
     }
-    if (apiKey) {
-      request.headers.set("X-Api-Key", apiKey);
+    if (keys.apiKey) {
+      request.headers.set("X-Api-Key", keys.apiKey);
       return request;
     }
     return request;
@@ -42,5 +50,13 @@ export function configureFromEnv() {
 }
 
 export function api() {
-  return methods;
+  return {
+    ...methods,
+    setMasterKey(key: string | null) {
+      keys.masterKey = key!;
+    },
+    setApiKey(key: string | null) {
+      keys.apiKey = key!;
+    },
+  };
 }

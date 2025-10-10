@@ -28,12 +28,12 @@ export function createAuthPlugin(config: AuthConfig = {}): IHttpPlugin {
       }
 
       // Make auth storage available in the context for other routes
-      app.use("*", async (c, next) => {
+      app.use(async (c, next) => {
         c.set("authStorage", storage);
         await next();
       });
 
-      app.use("*", middleware);
+      app.use(middleware);
 
       // Register admin routes if master key is provided
       if (config.masterKey) {

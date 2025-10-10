@@ -30,6 +30,558 @@
     }
   ],
   "paths": {
+    "/api/auth/keys": {
+      "post": {
+        "operationId": "postApiAuthKeys",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "201": {
+            "description": "API key created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "owner": {
+                      "type": "string"
+                    },
+                    "quotas": {
+                      "type": "object",
+                      "properties": {
+                        "requestsPerSecond": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "requestsPerDay": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "totalRequests": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": [
+                        "requestsPerSecond",
+                        "requestsPerDay",
+                        "totalRequests"
+                      ]
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "owner",
+                    "quotas",
+                    "enabled"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "owner": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "quotas": {
+                    "type": "object",
+                    "properties": {
+                      "requestsPerSecond": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "requestsPerDay": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "totalRequests": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "requestsPerSecond",
+                      "requestsPerDay",
+                      "totalRequests"
+                    ]
+                  }
+                },
+                "required": [
+                  "owner",
+                  "quotas"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/keys/{key}": {
+      "patch": {
+        "operationId": "patchApiAuthKeys:key",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "API key updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "owner": {
+                      "type": "string"
+                    },
+                    "quotas": {
+                      "type": "object",
+                      "properties": {
+                        "requestsPerSecond": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "requestsPerDay": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "totalRequests": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": [
+                        "requestsPerSecond",
+                        "requestsPerDay",
+                        "totalRequests"
+                      ]
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "owner",
+                    "quotas",
+                    "enabled"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "owner": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "quotas": {
+                    "type": "object",
+                    "properties": {
+                      "requestsPerSecond": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "requestsPerDay": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "totalRequests": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": []
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "key",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteApiAuthKeys:key",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "key",
+            "required": true
+          }
+        ]
+      },
+      "get": {
+        "operationId": "getApiAuthKeys:key",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "API key details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "owner": {
+                      "type": "string"
+                    },
+                    "quotas": {
+                      "type": "object",
+                      "properties": {
+                        "requestsPerSecond": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "requestsPerDay": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "totalRequests": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": [
+                        "requestsPerSecond",
+                        "requestsPerDay",
+                        "totalRequests"
+                      ]
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "owner",
+                    "quotas",
+                    "enabled"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "key",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/auth/usage": {
+      "get": {
+        "operationId": "getApiAuthUsage",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "second": {
+                      "type": "number"
+                    },
+                    "day": {
+                      "type": "number"
+                    },
+                    "total": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "second",
+                    "day",
+                    "total"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "apiKey",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/api/events/{source}/events": {
       "post": {
         "operationId": "postApiEvents:sourceEvents",
@@ -100,14 +652,71 @@
         ]
       }
     },
-    "/api/event-source": {
+    "/api/event-sources": {
       "post": {
-        "operationId": "postApiEvent-source",
+        "operationId": "postApiEvent-sources",
         "tags": [
           "Event Sources"
         ],
         "summary": "Create an Event Source",
-        "responses": {},
+        "responses": {
+          "201": {
+            "description": "Event source created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "eventTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    },
+                    "retention": {
+                      "type": "object",
+                      "properties": {
+                        "hotDays": {
+                          "type": "number"
+                        },
+                        "offloaderPlugin": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "hotDays"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "requestBody": {
           "content": {
             "application/json": {
@@ -147,22 +756,193 @@
         }
       },
       "get": {
-        "operationId": "getApiEvent-source",
+        "operationId": "getApiEvent-sources",
         "tags": [
           "Event Sources"
         ],
         "summary": "List all Event Sources for the user",
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "A list of event source definitions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "eventTypes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "name"
+                          ]
+                        }
+                      },
+                      "retention": {
+                        "type": "object",
+                        "properties": {
+                          "hotDays": {
+                            "type": "number"
+                          },
+                          "offloaderPlugin": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "hotDays"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/api/event-source/{name}": {
+    "/api/event-sources/{name}": {
       "get": {
-        "operationId": "getApiEvent-source:name",
+        "operationId": "getApiEvent-sources:name",
         "tags": [
           "Event Sources"
         ],
         "summary": "Get an Event Source by name",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "A single event source definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "eventTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    },
+                    "retention": {
+                      "type": "object",
+                      "properties": {
+                        "hotDays": {
+                          "type": "number"
+                        },
+                        "offloaderPlugin": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "hotDays"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {
@@ -175,14 +955,75 @@
         ]
       }
     },
-    "/api/event-source/{name}/event-types": {
+    "/api/event-sources/{name}/event-types": {
       "get": {
-        "operationId": "getApiEvent-source:nameEvent-types",
+        "operationId": "getApiEvent-sources:nameEvent-types",
         "tags": [
           "Event Sources"
         ],
         "summary": "List Event Types for a Source",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "A list of event types for the source",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {
@@ -195,14 +1036,132 @@
         ]
       }
     },
-    "/api/aggregation-source": {
+    "/api/aggregation-sources": {
       "post": {
-        "operationId": "postApiAggregation-source",
+        "operationId": "postApiAggregation-sources",
         "tags": [
           "Aggregation Sources"
         ],
         "summary": "Add an Aggregation Source to a Report",
-        "responses": {},
+        "responses": {
+          "201": {
+            "description": "Aggregation source created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "reportId": {
+                      "type": "string"
+                    },
+                    "targetCollection": {
+                      "type": "string"
+                    },
+                    "granularity": {
+                      "enum": [
+                        "100ms",
+                        "200ms",
+                        "250ms",
+                        "500ms",
+                        "second",
+                        "minute",
+                        "5minute",
+                        "10minute",
+                        "15minute",
+                        "30minute",
+                        "hour",
+                        "2hour",
+                        "4hour",
+                        "6hour",
+                        "12hour",
+                        "day",
+                        "3day",
+                        "7day",
+                        "15day",
+                        "30day",
+                        "45day",
+                        "60day",
+                        "90day"
+                      ]
+                    },
+                    "aggregations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "COUNT",
+                              "SUM",
+                              "CATEGORY",
+                              "COMPOUND_SUM",
+                              "BOOLEAN"
+                            ]
+                          },
+                          "payloadField": {
+                            "type": "string"
+                          },
+                          "categoryField": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "reportId",
+                    "targetCollection",
+                    "granularity",
+                    "aggregations"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "in": "query",
@@ -319,12 +1278,133 @@
         }
       },
       "get": {
-        "operationId": "getApiAggregation-source",
+        "operationId": "getApiAggregation-sources",
         "tags": [
           "Aggregation Sources"
         ],
         "summary": "List Aggregation Sources for a Report",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "A list of aggregation sources for the report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "reportId": {
+                        "type": "string"
+                      },
+                      "targetCollection": {
+                        "type": "string"
+                      },
+                      "granularity": {
+                        "enum": [
+                          "100ms",
+                          "200ms",
+                          "250ms",
+                          "500ms",
+                          "second",
+                          "minute",
+                          "5minute",
+                          "10minute",
+                          "15minute",
+                          "30minute",
+                          "hour",
+                          "2hour",
+                          "4hour",
+                          "6hour",
+                          "12hour",
+                          "day",
+                          "3day",
+                          "7day",
+                          "15day",
+                          "30day",
+                          "45day",
+                          "60day",
+                          "90day"
+                        ]
+                      },
+                      "aggregations": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "enum": [
+                                "COUNT",
+                                "SUM",
+                                "CATEGORY",
+                                "COMPOUND_SUM",
+                                "BOOLEAN"
+                              ]
+                            },
+                            "payloadField": {
+                              "type": "string"
+                            },
+                            "categoryField": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "reportId",
+                      "targetCollection",
+                      "granularity",
+                      "aggregations"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "in": "query",
@@ -337,14 +1417,87 @@
         ]
       }
     },
-    "/api/aggregation-source/{sourceId}": {
+    "/api/aggregation-sources/{sourceId}": {
       "delete": {
-        "operationId": "deleteApiAggregation-source:sourceId",
+        "operationId": "deleteApiAggregation-sources:sourceId",
         "tags": [
           "Aggregation Sources"
         ],
         "summary": "Remove an Aggregation Source from a Report",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {
@@ -357,14 +1510,52 @@
         ]
       }
     },
-    "/api/report": {
+    "/api/reports": {
       "post": {
-        "operationId": "postApiReport",
+        "operationId": "postApiReports",
         "tags": [
           "Reports"
         ],
         "summary": "Create a Report Definition",
-        "responses": {},
+        "responses": {
+          "201": {
+            "description": "Report created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "active",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "requestBody": {
           "content": {
             "application/json": {
@@ -391,22 +1582,137 @@
         }
       },
       "get": {
-        "operationId": "getApiReport",
+        "operationId": "getApiReports",
         "tags": [
           "Reports"
         ],
         "summary": "List all Report Definitions for the user",
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "A list of report definitions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "active",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/api/report/{id}": {
+    "/api/reports/{id}": {
       "get": {
-        "operationId": "getApiReport:id",
+        "operationId": "getApiReports:id",
         "tags": [
           "Reports"
         ],
         "summary": "Get a Report Definition",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "A single report definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "active",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {
@@ -419,12 +1725,68 @@
         ]
       },
       "patch": {
-        "operationId": "patchApiReport:id",
+        "operationId": "patchApiReports:id",
         "tags": [
           "Reports"
         ],
         "summary": "Update a Report Definition",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Report updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "active",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "requestBody": {
           "content": {
             "application/json": {
@@ -459,12 +1821,49 @@
         ]
       },
       "delete": {
-        "operationId": "deleteApiReport:id",
+        "operationId": "deleteApiReports:id",
         "tags": [
           "Reports"
         ],
         "summary": "Delete a Report Definition",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {
@@ -473,217 +1872,6 @@
             "in": "path",
             "name": "id",
             "required": true
-          }
-        ]
-      }
-    },
-    "/api/auth/keys": {
-      "post": {
-        "operationId": "postApiAuthKeys",
-        "tags": [
-          "auth"
-        ],
-        "responses": {
-          "201": {
-            "description": "API key created successfully"
-          },
-          "400": {
-            "description": "Invalid request body"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "owner": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "quotas": {
-                    "type": "object",
-                    "properties": {
-                      "requestsPerSecond": {
-                        "type": "integer",
-                        "minimum": 1
-                      },
-                      "requestsPerDay": {
-                        "type": "integer",
-                        "minimum": 1
-                      },
-                      "totalRequests": {
-                        "type": "integer",
-                        "minimum": 1
-                      }
-                    },
-                    "required": [
-                      "requestsPerSecond",
-                      "requestsPerDay",
-                      "totalRequests"
-                    ]
-                  }
-                },
-                "required": [
-                  "owner",
-                  "quotas"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/keys/{key}": {
-      "patch": {
-        "operationId": "patchApiAuthKeys:key",
-        "tags": [
-          "auth"
-        ],
-        "responses": {
-          "200": {
-            "description": "API key updated successfully"
-          },
-          "400": {
-            "description": "Invalid request body"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "API key not found"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "owner": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "quotas": {
-                    "type": "object",
-                    "properties": {
-                      "requestsPerSecond": {
-                        "type": "integer",
-                        "minimum": 1
-                      },
-                      "requestsPerDay": {
-                        "type": "integer",
-                        "minimum": 1
-                      },
-                      "totalRequests": {
-                        "type": "integer",
-                        "minimum": 1
-                      }
-                    },
-                    "required": []
-                  },
-                  "enabled": {
-                    "type": "boolean"
-                  }
-                },
-                "required": []
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "key",
-            "required": true
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteApiAuthKeys:key",
-        "tags": [
-          "auth"
-        ],
-        "responses": {
-          "200": {
-            "description": "API key deleted successfully"
-          },
-          "401": {
-            "description": "Unauthorized (requires master api key)"
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "key",
-            "required": true
-          }
-        ]
-      },
-      "get": {
-        "operationId": "getApiAuthKeys:key",
-        "tags": [
-          "auth"
-        ],
-        "responses": {
-          "200": {
-            "description": "API key details"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "API key not found"
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "key",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/api/auth/usage": {
-      "get": {
-        "operationId": "getApiAuthUsage",
-        "tags": [
-          "auth"
-        ],
-        "responses": {
-          "200": {
-            "description": "Usage statistics"
-          },
-          "400": {
-            "description": "Bad Request: apiKey query param is required for master key users"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "API key not found"
-          }
-        },
-        "parameters": [
-          {
-            "in": "query",
-            "name": "apiKey",
-            "schema": {
-              "type": "string"
-            }
           }
         ]
       }

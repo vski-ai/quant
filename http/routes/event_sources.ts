@@ -1,14 +1,29 @@
 import { Hono } from "hono";
 import * as v from "valibot";
-import { describeRoute, validator as vValidator } from "hono-openapi";
+import { describeRoute, resolver, validator as vValidator } from "hono-openapi";
 import { HonoEnv } from "@/http/types.ts";
 import { ApiKey } from "@/http/auth/types.ts";
+import { normalizeDocs } from "@/http/utils.ts";
+import { ErrorResponse } from "@/http/schemas.ts";
 
 const eventSources = new Hono<HonoEnv & { Variables: { apiKey: ApiKey } }>();
 
 const EventTypeSchema = v.object({
   name: v.string(),
   description: v.optional(v.string()),
+});
+
+const RetentionPolicySchema = v.object({
+  hotDays: v.number(),
+  offloaderPlugin: v.optional(v.string()),
+});
+
+const EventSourceDefinitionSchema = v.object({
+  id: v.string(),
+  name: v.string(),
+  description: v.optional(v.string()),
+  eventTypes: v.optional(v.array(EventTypeSchema)),
+  retention: v.optional(RetentionPolicySchema),
 });
 
 const CreateEventSourceSchema = v.object({
@@ -19,7 +34,20 @@ const CreateEventSourceSchema = v.object({
 
 eventSources.post(
   "/",
-  describeRoute({ tags: ["Event Sources"], summary: "Create an Event Source" }),
+  describeRoute({
+    tags: ["Event Sources"],
+    summary: "Create an Event Source",
+    responses: {
+      201: {
+        description: "Event source created successfully",
+        content: {
+          "application/json": {
+            schema: resolver(EventSourceDefinitionSchema),
+          },
+        },
+      },
+    },
+  }),
   vValidator("json", CreateEventSourceSchema),
   async (c) => {
     const engine = c.get("engine");
@@ -41,6 +69,17 @@ eventSources.get(
   describeRoute({
     tags: ["Event Sources"],
     summary: "List all Event Sources for the user",
+    responses: {
+      200: {
+        description: "A list of event source definitions",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(EventSourceDefinitionSchema)),
+          },
+        },
+      },
+      401: ErrorResponse,
+    },
   }),
   async (c) => {
     const engine = c.get("engine");
@@ -49,7 +88,10 @@ eventSources.get(
 
     const ownedIds = await authStorage.getOwnedEventSourceIds(apiKey.owner);
     const allSources = await engine.listEventSources();
-    return c.json(allSources.filter((s) => ownedIds.includes(s.id)));
+    const ownedSources = allSources.filter((s) =>
+      ownedIds.includes(s._id.toString())
+    );
+    return c.json(normalizeDocs(ownedSources));
   },
 );
 
@@ -58,6 +100,18 @@ eventSources.get(
   describeRoute({
     tags: ["Event Sources"],
     summary: "Get an Event Source by name",
+    responses: {
+      200: {
+        description: "A single event source definition",
+        content: {
+          "application/json": {
+            schema: resolver(EventSourceDefinitionSchema),
+          },
+        },
+      },
+      401: ErrorResponse,
+      404: ErrorResponse,
+    },
   }),
   async (c) => {
     const engine = c.get("engine");
@@ -84,6 +138,18 @@ eventSources.get(
   describeRoute({
     tags: ["Event Sources"],
     summary: "List Event Types for a Source",
+    responses: {
+      200: {
+        description: "A list of event types for the source",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(EventTypeSchema)),
+          },
+        },
+      },
+      401: ErrorResponse,
+      404: ErrorResponse,
+    },
   }),
   async (c) => {
     const engine = c.get("engine");
