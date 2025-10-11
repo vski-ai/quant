@@ -20,6 +20,7 @@ export function withTestDatabase(conf: {
       // 3. Clean up after all tests are done.
       await engine.connection.dropDatabase();
       await engine.disconnect();
+      await new Promise((r) => setTimeout(r, 500));
     }
   });
 }

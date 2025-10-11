@@ -275,6 +275,9 @@ export interface IPlugin {
   /** Called once when the engine is initialized. Ideal for setting up resources. */
   onEngineInit?: (engine: Engine) => Promise<void>;
 
+  /** Called once when the engine is shutting down. Ideal for cleaning up resources. */
+  onEngineShutdown?: (engine: Engine) => Promise<void>;
+
   /**
    * Called before an event is recorded. Allows for modification of the payload and attributions.
    * @returns The (potentially modified) payload and attributions.
@@ -320,6 +323,24 @@ export interface IPlugin {
   }) => Promise<void>;
 
   /**
+   * Called immediately after metrics for the real-time buffer are generated from an event.
+   */
+  afterRealtimeMetricsGenerated?: (context: {
+    reportId: string;
+    event: IEventDoc<EventPayload>;
+    metrics: IMetricUpdate[];
+  }) => Promise<void>;
+
+  /**
+   * Called after the aggregator worker has successfully written a batch of metrics to MongoDB.
+   */
+  afterAggregationWritten?: (context: {
+    reportId: string;
+    sourceName: string;
+    metrics: IMetricUpdate[];
+  }) => Promise<void>;
+
+  /**
    * Called before a report is generated.
    * Allows for modification of the report query.
    * @returns The (potentially modified) query.
@@ -341,5 +362,5 @@ export interface IPlugin {
    */
   registerEngineMethods?: (
     engine: Engine,
-  ) => Record<string, (...args: any[]) => any>;
+  ) => Record<string, any>;
 }

@@ -223,21 +223,28 @@ export async function writeMetricsToMongo(
     engine.connection,
     finalTargetCollection,
   );
-  const bulkOps = finalMetrics.map((agg: { query: { timestamp: string | number | Date; }; incrementValue: any; }) => {
-    const truncatedTimestamp = new Date(agg.query.timestamp);
-    const finalQuery = { ...agg.query, timestamp: truncatedTimestamp };
-
-    return {
-      updateOne: {
-        filter: finalQuery,
-        update: {
-          $inc: { value: agg.incrementValue },
-          $setOnInsert: finalQuery,
-        },
-        upsert: true,
+  const bulkOps = finalMetrics.map(
+    (
+      agg: {
+        query: { timestamp: string | number | Date };
+        incrementValue: any;
       },
-    };
-  });
+    ) => {
+      const truncatedTimestamp = new Date(agg.query.timestamp);
+      const finalQuery = { ...agg.query, timestamp: truncatedTimestamp };
+
+      return {
+        updateOne: {
+          filter: finalQuery,
+          update: {
+            $inc: { value: agg.incrementValue },
+            $setOnInsert: finalQuery,
+          },
+          upsert: true,
+        },
+      };
+    },
+  );
 
   if (bulkOps.length > 0) {
     try {

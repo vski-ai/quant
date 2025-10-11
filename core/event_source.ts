@@ -200,13 +200,18 @@ export class EventSource implements IEventSource {
           config.granularity ?? "minute",
         );
 
+        // Add all generated metrics to the buffer
         for (const metric of metrics) {
-          // We need a target collection; using a default or derived name.
           await this.engine.aggregator.bufferService.add(
             config.targetCollection,
             metric,
           );
         }
+        // Run the hook to notify plugins about the newly generated metrics for this config.
+        await this.engine.pluginManager.executeActionHook(
+          "afterRealtimeMetricsGenerated",
+          { reportId: config.reportId.toString(), event: newEventDoc, metrics },
+        );
       }
     }
 

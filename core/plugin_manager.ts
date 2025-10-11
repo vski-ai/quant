@@ -50,14 +50,17 @@ export class PluginManager {
    * @returns The final value after all plugins have run.
    */
   public async executeWaterfallHook(
-    hookName: "beforeEventRecord" | "beforeMetricsWritten" | "beforeReportGenerated",
+    hookName:
+      | "beforeEventRecord"
+      | "beforeMetricsWritten"
+      | "beforeReportGenerated",
     ...args: any[]
   ): Promise<any> {
     let value = args[0];
     for (const plugin of this.plugins) {
       const hook = plugin[hookName];
       if (typeof hook === "function") {
-        // @ts-ignore: 
+        // @ts-ignore:
         value = await hook.call(plugin, ...(args as [any]));
       }
     }
@@ -70,7 +73,12 @@ export class PluginManager {
    * @param context The context object to pass to the hook.
    */
   public async executeActionHook(
-    hookName: "afterEventRecord" | "afterMetricsWritten" | "afterReportGenerated",
+    hookName:
+      | "afterEventRecord"
+      | "afterMetricsWritten"
+      | "afterReportGenerated"
+      | "afterRealtimeMetricsGenerated"
+      | "afterAggregationWritten",
     context: any,
   ): Promise<void> {
     for (const plugin of this.plugins) {
@@ -103,5 +111,18 @@ export class PluginManager {
       }
     }
     return results;
+  }
+
+  /**
+   * Executes the `onEngineShutdown` hook for all registered plugins.
+   * This is called by the Engine during its shutdown process.
+   */
+  public async executeShutdownHooks(): Promise<void> {
+    for (const plugin of this.plugins) {
+      if (plugin.onEngineShutdown) {
+        console.log(`Executing shutdown hook for plugin: ${plugin.name}`);
+        await plugin.onEngineShutdown(this.engine);
+      }
+    }
   }
 }

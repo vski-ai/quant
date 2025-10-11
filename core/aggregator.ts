@@ -100,12 +100,14 @@ export class Aggregator {
         (m) => m.query.aggregationType === AggregationType.BOOLEAN,
       );
 
+      // Write standard metrics
       await writeMetricsToMongo(
         this.engine,
         targetCollection,
         standardMetrics,
       );
 
+      // Write boolean metrics if any
       if (booleanMetrics.length > 0) {
         await writeBooleanMetricsToMongo(
           this.engine,
@@ -113,6 +115,16 @@ export class Aggregator {
           booleanMetrics,
         );
       }
+      // Run the hook to notify plugins that a batch of aggregations has been persisted.
+      // This should happen after all metrics for this config have been written.
+      await this.engine.pluginManager.executeActionHook(
+        "afterAggregationWritten",
+        {
+          reportId: config.reportId.toString(),
+          sourceName: targetCollection,
+          metrics,
+        },
+      );
     }
   }
 

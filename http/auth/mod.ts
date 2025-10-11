@@ -3,20 +3,20 @@ import { Hono } from "hono";
 import { createAuthStorage } from "./db/storage.ts"; // This now points to the orchestrator
 import { createAuthMiddleware } from "./middleware.ts";
 import { createReporter, ReporterConfig } from "./reporter.ts";
-import { IHttpPlugin } from "../types.ts";
+import { HonoEnv, IHttpPlugin } from "../types.ts";
 import { createAuthRoutes } from "./routes.ts";
-
+export * from "./core.plugin.ts";
 export type AuthConfig = {
   redis?: Redis;
   reporter?: ReporterConfig;
   masterKey?: string;
 };
 
-export function createAuthPlugin(config: AuthConfig = {}): IHttpPlugin {
+export function createHttpAuthPlugin(config: AuthConfig = {}): IHttpPlugin {
   return {
-    name: "Auth Plugin",
+    name: "HttpAuthPlugin",
     version: "0.0.1",
-    async register(app: Hono<any>, engine) {
+    async register(app: Hono<HonoEnv>, engine) {
       const storage = createAuthStorage(
         engine.connection,
         config.redis ?? engine.redisClient,

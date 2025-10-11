@@ -23,15 +23,25 @@ export async function createHttp(
   app.use(logger());
   app.use(cors());
   app.onError(httpErrorHandler);
-
   // Provide engine to all downstream handlers via context
   app.use(async (c, next) => {
     c.set("engine", engine);
     await next();
   });
 
-  // Register API routes first
-  app.route("/api", createApiRouter(engine, plugins));
+  // Separate plugins based on their desired namespace.
+  const rootPlugins = plugins.filter((p) => p.namespace === "root");
+  const apiPlugins = plugins.filter((p) => p.namespace !== "root");
+
+  // Register root-level plugins.
+  for (const plugin of rootPlugins) {
+    console.log(`Registering ${plugin.name} at root namespace.`);
+    await plugin.register(app, engine);
+  }
+
+  // Register all other API routes under the /api path, which IS protected by auth middleware.
+  console.log(`Registering ${apiPlugins.length} plugins under /api namespace.`);
+  app.route("/api", createApiRouter(engine, apiPlugins));
 
   // --- OpenAPI Documentation ---
   // Serve the OpenAPI specification JSON

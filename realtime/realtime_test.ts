@@ -1,66 +1,192 @@
 import { assertEquals, assertExists } from "@std/assert";
-import { CoreSubscriptionPlugin } from "./core.plugin.ts";
-import { HttpSubscriptionPlugin } from "./http.plugin.ts";
-import { withTestDatabase } from "../core/tests/utils.ts";
-import { createHttp } from "../http/create_http.ts";
-import { AggregationType, IQuery } from "@/core/types.ts";
+import { CoreRealtimePlugin } from "./core.plugin.ts";
+import { HttpRealtimePlugin } from "./http.plugin.ts";
+import { withTestApi } from "@/http/tests/utils.ts";
+import { delay } from "@std/async/delay";
 
-const dbName = "subscription_module_test_db";
+const dbName = "realtime_module_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
-    // Register the core plugin to enable the subscription manager
-    await engine.registerPlugin(new CoreSubscriptionPlugin());
+withTestApi({
+  dbName,
+  httpPlugins: [new HttpRealtimePlugin()],
+}, async (t, { engine, client, baseUrl }) => {
+  await engine.registerPlugin(new CoreRealtimePlugin());
 
-    // Create the HTTP server with the subscription plugin
-    const app = await createHttp(engine, [new HttpSubscriptionPlugin()]);
+  // --- Test Setup: Create API Keys ---
+  const { data: keyData } = await client.postApiAuthKeys({
+    body: {
+      owner: "realtime-user",
+      quotas: {
+        requestsPerDay: 1000,
+        requestsPerSecond: 10,
+        totalRequests: 10000,
+      },
+    },
+  });
+  client.setMasterKey(null);
+  client.setApiKey(keyData!.key);
+  assertExists(keyData?.key, "Failed to create a valid API key");
+  const validApiKey = keyData.key;
+  const invalidApiKey = "qnt_invalidkey12345";
 
-    await t.step("should receive real-time updates via WebSocket after subscribing", async () => {
-        const controller = new AbortController();
-        const serverPromise = Deno.serve({ port: 8001, signal: controller.signal }, app.fetch).finished;
-        await new Promise(resolve => setTimeout(resolve, 100));
+  await t.step(
+    "should authenticate and only send updates to correctly subscribed clients",
+    async () => {
+      // 1. Setup: Create two reports and an aggregation source for only the first one.
+      // Create reports via the API client to ensure they are associated with the API key owner.
+      const { data: targetReport } = await client.postApiReports({
+        body: { name: "Target Report", active: true },
+      });
+      const { data: otherReport } = await client.postApiReports({
+        body: { name: "Other Report", active: true },
+      });
+      assertExists(targetReport?.id, "Failed to create target report");
+      assertExists(otherReport?.id, "Failed to create other report");
+      const eventSource = await engine.createEventSource({
+        name: "realtime-source",
+        eventTypes: [{ name: "realtime-event" }],
+      });
+      await engine.addAggregationSource(targetReport.id.toString(), {
+        targetCollection: "aggr_realtime_events",
+        filter: {
+          sources: [{
+            name: "realtime-source",
+            id: eventSource.getDefinition().id!,
+          }],
+          events: ["realtime-event"],
+        },
+      });
 
-        const report = await engine.createReport({ name: "test-sub-report", active: true });
-        const eventSource = await engine.createEventSource({ name: "sub-source", eventTypes: [{ name: "sub-event" }] });
-        await engine.addAggregationSource(report._id.toString(), {
-            targetCollection: "aggr_sub_events",
-            filter: {
-                sources: [{ name: "sub-source", id: eventSource.getDefinition().id! }],
-                events: ["sub-event"],
-            },
-        });
+      // 2. Connect: Establish three separate WebSocket connections.
+      const wsUrl = baseUrl.replace("http", "ws") + "/realtime";
+      const wsValid = new WebSocket(wsUrl); // Subscribes to target report with valid key
+      const wsOther = new WebSocket(wsUrl); // Subscribes to other report with valid key
+      const wsInvalid = new WebSocket(wsUrl); // Attempts to subscribe with invalid key
 
-        const query: IQuery = {
-            reportId: report._id.toString(),
-            metric: { type: AggregationType.COUNT },
-            timeRange: { start: new Date(0), end: new Date() },
-            granularity: "day",
+      const validMessages: unknown[] = [];
+      const validPromise = new Promise<void>((resolve) => {
+        wsValid.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          validMessages.push(data);
+          // We expect two messages: confirmation and the data update.
+          if (validMessages.length >= 2) {
+            resolve();
+          }
         };
+      });
 
-        const wsUrl = `ws://localhost:8001/api/subscribe?q=${encodeURIComponent(JSON.stringify(query))}`;
-        const ws = new WebSocket(wsUrl);
+      const otherMessages: unknown[] = [];
+      wsOther.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        otherMessages.push(data);
+      };
 
-        let receivedMessage: any = null;
-        const messagePromise = new Promise((resolve) => {
-            ws.onmessage = (event) => {
-                receivedMessage = JSON.parse(event.data);
-                resolve(null);
-            };
-        });
+      const invalidMessages: unknown[] = [];
+      const invalidPromise = new Promise<void>((resolve) => {
+        wsInvalid.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          invalidMessages.push(data);
+          // We expect one message: the auth error.
+          if (invalidMessages.length >= 1) {
+            resolve();
+          }
+        };
+      });
 
-        await new Promise(resolve => ws.onopen = () => resolve(null));
-        await eventSource.record({ uuid: "sub-test-uuid", eventType: "sub-event", payload: {} });
+      await Promise.all([
+        new Promise<void>((resolve) => wsValid.onopen = () => resolve()),
+        new Promise<void>((resolve) => wsOther.onopen = () => resolve()),
+        new Promise<void>((resolve) => wsInvalid.onopen = () => resolve()),
+      ]);
 
-        await engine.getReport(query);
+      // 3. Subscribe: Each client subscribes.
+      const targetChannel = `report:updates:${targetReport.id.toString()}`;
+      wsValid.send(JSON.stringify({
+        action: "subscribe",
+        channel: targetChannel,
+        apiKey: validApiKey,
+      }));
 
-        await messagePromise;
+      const otherChannel = `report:updates:${otherReport.id.toString()}`;
+      wsOther.send(JSON.stringify({
+        action: "subscribe",
+        channel: otherChannel,
+        apiKey: validApiKey,
+      }));
 
-        assertExists(receivedMessage);
-        assertEquals(Array.isArray(receivedMessage), true);
-        assertEquals(receivedMessage.length, 1);
-        assertEquals(receivedMessage[0].value, 1);
+      wsInvalid.send(JSON.stringify({
+        action: "subscribe",
+        channel: targetChannel,
+        apiKey: invalidApiKey,
+      }));
 
-        ws.close();
-        controller.abort();
-        await serverPromise;
-    });
+      // 4. Trigger: Record an event that will generate metrics and trigger the broadcast
+      await eventSource.record({
+        uuid: "realtime-test-uuid-1",
+        eventType: "realtime-event",
+        payload: { value: 100 },
+      });
+
+      // Wait for all expected messages to be received.
+      await Promise.all([validPromise, invalidPromise]);
+      await delay(200); // Wait a brief moment to ensure no other messages are sent.
+
+      // 5. Assert: Check messages for the valid client (should receive update)
+      assertEquals((validMessages[0] as any).status, "success");
+      assertEquals(
+        (validMessages[0] as any).message,
+        `Subscribed to ${targetChannel}`,
+      );
+      const broadcastMessage = validMessages[1] as {
+        type: string;
+        payload: { changes: number };
+      };
+      assertExists(
+        broadcastMessage,
+        "Second message should be the broadcast data",
+      );
+      assertEquals(broadcastMessage.type, "realtime:metrics");
+      assertEquals(
+        broadcastMessage.payload.changes,
+        2,
+        "Expected 2 metric changes (COUNT and SUM)",
+      );
+
+      // 6. Assert: Check messages for the other client (should NOT receive update)
+      assertEquals(
+        otherMessages.length,
+        1,
+        "Client 2 should only receive one message",
+      );
+      assertEquals(
+        (otherMessages[0] as any).status,
+        "success",
+        "Client 2's only message should be subscription confirmation",
+      );
+      assertEquals(
+        (otherMessages[0] as any).message,
+        `Subscribed to ${otherChannel}`,
+      );
+
+      // 7. Assert: Check messages for the invalid client (should receive an error)
+      assertEquals(
+        invalidMessages.length,
+        1,
+        "Invalid client should only receive one message",
+      );
+      assertEquals(
+        (invalidMessages[0] as any).status,
+        "error",
+        "Invalid client's message should be an error",
+      );
+      assertExists(
+        (invalidMessages[0] as any).message.includes("Invalid API Key"),
+        "Error message should indicate auth failure",
+      );
+
+      wsValid.close();
+      wsOther.close();
+      wsInvalid.close();
+    },
+  );
 });

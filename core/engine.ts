@@ -117,7 +117,7 @@ export class Engine {
     await this.statsService.stop();
     await this.connection.close();
     this.redisClient.disconnect();
-    await new Promise((r) => setTimeout(r, 1000));
+    await this.pluginManager.executeShutdownHooks();
   }
 
   /**

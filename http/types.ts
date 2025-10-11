@@ -15,5 +15,6 @@ export type HonoEnv = {
 export interface IHttpPlugin {
   name: string;
   version: string;
+  namespace?: "root" | "api";
   register(app: Hono<HonoEnv>, engine: Engine): Promise<void>;
 }
