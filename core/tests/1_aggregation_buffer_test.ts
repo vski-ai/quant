@@ -8,7 +8,7 @@ const dbName = "aggregation_buffer_test_db";
 withTestDatabase({
   dbName,
   bufferAgeMs: 1000 * 60 * 60 * 24 * 360 * 10,
-}, async (t, engine) => {
+}, async (t, engine, teardown) => {
   await t.step(
     "should correctly aggregate data from multiple sources into a single report",
     async () => {
@@ -293,4 +293,5 @@ withTestDatabase({
       await engine.aggregator.stop();
     },
   );
+  await teardown();
 });

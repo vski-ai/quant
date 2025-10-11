@@ -6,7 +6,7 @@ const dbName = "redis_granularity_test_db";
 
 withTestDatabase(
   { dbName, bufferAgeMs: 60 * 1000 * 60 * 24 * 360 * 10 },
-  async (t, engine) => {
+  async (t, engine, down) => {
     // --- SETUP ---
     const source = await engine.createEventSource({
       name: "RedisGranularitySource",
@@ -116,5 +116,6 @@ withTestDatabase(
         );
       },
     );
+    await down();
   },
 );

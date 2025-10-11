@@ -47,6 +47,10 @@ real-time data buffering.
   - **Configuration**: Collections for `Report`, `AggregationSource`,
     `EventSourceDefinition`, and `EventType` store the system's configuration.
 
+- **MongoDB (Cache)**:
+  - `report_cache`: A dedicated collection for caching the results of expensive
+    `getReport` and `getDataset` queries.
+
 - **Redis**:
   - **Job Queue**: The `ReliableQueue` uses Redis Lists for the main queue and
     processing list, and a Sorted Set for delayed jobs.
@@ -89,6 +93,10 @@ real-time data buffering.
      - The query is sent to MongoDB.
      - The system identifies all relevant aggregation collections, including
        handling time partitions (`getPartitionedCollectionNames`).
+     - If caching is enabled, the system first checks the `report_cache`
+       collection for a valid entry. If found, the data is returned directly,
+       bypassing the expensive database query. If not found, the query proceeds,
+       and the result is stored in the cache for future requests.
      - MongoDB's aggregation pipeline is used to match, group, and sum the data
        according to the query's time range, granularity, and filters.
      - Results from multiple collections (if applicable) are merged.
@@ -178,6 +186,100 @@ real-time data buffering.
   process relevant events.
 
 ---
+
+## 5. Caching Layer
+
+The engine includes a sophisticated, optional caching layer to improve
+performance for `getReport` and `getDataset` queries. It uses a dedicated
+MongoDB collection (`report_cache`) to store query results.
+
+### Configuration
+
+Caching is configured via the `cache` object in the `EngineConfig`:
+
+```typescript
+export interface EngineConfig {
+  // ...
+  cache?: {
+    enabled: boolean; // Master switch to enable/disable caching.
+    ttlSeconds: number; // Time-to-live for cache entries in seconds.
+    controlled?: boolean; // Enables "controlled" caching mode.
+    partialHits?: boolean; // Enables "partial cache hits" mode.
+  };
+}
+```
+
+### Caching Strategies
+
+1. **Standard Caching** (`enabled: true`):
+   - This is the default mode when caching is enabled.
+   - The result of every unique query is stored as a single document in the
+     cache. The cache key is a hash of the entire query object.
+
+2. **Controlled Caching** (`controlled: true`):
+   - In this mode, caching is opt-in on a per-query basis.
+   - To cache a specific query, the consumer must pass `cache: true` in the
+     query object. Queries without this flag will bypass the cache.
+
+3. **Partial Hits Caching** (`partialHits: true`):
+   - An advanced optimization strategy. The system can use smaller, previously
+     cached time-range "chunks" to assemble a response for a larger query.
+   - **Example**: If "Day 1" and "Day 3" are cached, a query for "Day 1 to Day
+     5" will use the cached data for Day 1 and 3, and only query the database
+     for the missing "gaps" (Day 2, 4, and 5).
+   - This mode stores data differently, creating many small documents instead of
+     one large one.
+
+### Usage and Invalidation
+
+- **Opting-in (Controlled Mode)**:
+  ```typescript
+  engine.getReport({ ..., cache: true });
+  ```
+
+- **Manual Invalidation**: To force a cache miss and regenerate a report, use
+  the `rebuildCache` flag. This works in all caching modes.
+  ```typescript
+  engine.getReport({ ..., rebuildCache: true });
+  ```
+
+- **Automatic Expiration**: The system uses a combination of an
+  application-level TTL check and a MongoDB TTL index to expire stale documents.
+  An entry is considered stale if `Date.now() - entry.createdAt > ttlSeconds`.
+
+### Important Considerations & "Gotchas"
+
+- **Partial Hits Invalidation**: This is the most critical behavior to
+  understand. There is **no mechanism to invalidate a single chunk** of a
+  partially cached report.
+  - If you use `rebuildCache: true` on a query (e.g., "last 7 days"), the system
+    re-fetches the _entire_ 7-day range and saves it as a _new, single chunk_.
+    It does not invalidate or replace the smaller, older chunks that might have
+    existed within that range.
+  - This mode is best for data that is largely immutable. For data that is
+    frequently reprocessed or back-filled, the "Standard" or "Controlled" modes
+    are more predictable.
+
+- **Cache Key Generation**: The cache key is a hash of the query object. Any
+  minor difference between two query objects (e.g., a 1ms difference in a
+  timestamp) will result in a different key and a cache miss.
+
+- **Storage**: The `partialHits` strategy will naturally create more documents
+  in the `report_cache` collection than the standard strategy. Setting an
+  appropriate `ttlSeconds` is crucial for managing storage space.
+
+### Cache Schema (`report_cache` collection)
+
+- `_id`: `ObjectId` (auto-generated for partial hits) or `String` (hash for
+  standard cache).
+- `cacheKey`: `String` (indexed, sparse). Used by standard caching as the
+  primary lookup key.
+- `baseKey`: `String` (indexed). A hash of the query _without_ the time range.
+  Used by partial hits caching to find all chunks for a given report type.
+- `timeRange`: `{ start: Date, end: Date }`. The specific time window this cache
+  entry covers.
+- `data`: `Mixed`. The cached report or dataset array.
+- `createdAt`: `Date`. Used for TTL calculation.
 
 ## 5. Plugin System
 

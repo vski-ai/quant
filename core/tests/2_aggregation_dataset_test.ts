@@ -6,7 +6,7 @@ const dbName = "dataset_query_test_db";
 
 withTestDatabase({
   dbName,
-}, async (t, engine) => {
+}, async (t, engine, teardown) => {
   // --- 1. SETUP ---
   const source = await engine.createEventSource({
     name: "DatasetSource",
@@ -135,4 +135,5 @@ withTestDatabase({
       "Compound metrics for requested field should be included",
     );
   });
+  await teardown();
 });

@@ -5,7 +5,7 @@ import { withTestDatabase } from "./utils.ts";
 
 const dbName = "delayed_events_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, teardown) => {
   // --- SETUP ---
   const source: IEventSource = await engine.createEventSource({
     name: "DelayedEventSource",
@@ -134,5 +134,5 @@ withTestDatabase({ dbName }, async (t, engine) => {
     },
   );
 
-  await engine.aggregator?.stop();
+  await teardown();
 });

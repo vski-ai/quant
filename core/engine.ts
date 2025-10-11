@@ -33,12 +33,19 @@ import { tracer } from "./telemetry.ts";
 import { IKVStore, RedisKVStore } from "./db/RedisKVStore.ts";
 import { LifecycleManager } from "./lifecycle_manager.ts";
 import { IEngineStats, IStatsService, StatsService } from "./stats.ts";
+import { getReportCacheModel, IReportCacheDoc } from "./db/ReportCache.ts";
 
 export interface EngineConfig {
   mongoUri: string;
   redisClient?: Redis;
   redisUri?: string;
   bufferAgeMs?: number;
+  cache?: {
+    enabled: boolean;
+    ttlSeconds: number;
+    controlled?: boolean;
+    partialHits?: boolean;
+  };
 }
 
 export class Engine {
@@ -58,11 +65,12 @@ export class Engine {
     typeof getEventSourceDefinitionModel
   >;
   private eventTypeModel: ReturnType<typeof getEventTypeModel>;
+  private reportCacheModel: Model<IReportCacheDoc>;
   private aggregationSourceModel: ReturnType<typeof getAggregationSourceModel>;
 
   private offloaders = new Map<string, IDataOffloader>();
 
-  constructor(config: EngineConfig) {
+  constructor(public config: EngineConfig) {
     this.connection = createConnection(config.mongoUri);
     this.redisClient = config.redisUri
       ? new Redis(config.redisUri, {
@@ -75,6 +83,10 @@ export class Engine {
     );
     this.eventTypeModel = getEventTypeModel(this.connection);
     this.aggregationSourceModel = getAggregationSourceModel(this.connection);
+    this.reportCacheModel = getReportCacheModel(
+      this.connection,
+      config.cache?.ttlSeconds,
+    );
     this.aggregator = new Aggregator(
       this,
       config.bufferAgeMs,
@@ -109,6 +121,10 @@ export class Engine {
 
   get AggregationSourceModel() {
     return this.aggregationSourceModel;
+  }
+
+  get ReportCacheModel() {
+    return this.reportCacheModel;
   }
 
   public async disconnect(): Promise<void> {

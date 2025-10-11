@@ -48,7 +48,7 @@ Deno.test("Partitioning utility functions", () => {
   assertEquals(names.includes("test_aggr_2787625"), true);
 });
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, down) => {
   // --- SETUP ---
   const source = await engine.createEventSource({
     name: "PartitionTestSource",
@@ -156,4 +156,6 @@ withTestDatabase({ dbName }, async (t, engine) => {
       );
     },
   );
+
+  await down();
 });

@@ -4,7 +4,7 @@ import { withTestDatabase } from "./utils.ts";
 
 const dbName = "aggregation_module_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, teardown) => {
   await t.step(
     "should correctly aggregate data from multiple sources into a single report",
     async () => {
@@ -248,4 +248,5 @@ withTestDatabase({ dbName }, async (t, engine) => {
       await engine.aggregator.stop();
     },
   );
+  await teardown();
 });

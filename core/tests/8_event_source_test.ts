@@ -5,7 +5,7 @@ import { withTestDatabase } from "./utils.ts";
 const dbName = "event_module_test_db";
 
 // Run the test suite using the wrapper.
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, down) => {
   await t.step(
     "should create a new event source without any event types",
     async () => {
@@ -178,4 +178,6 @@ withTestDatabase({ dbName }, async (t, engine) => {
       );
     },
   );
+
+  await down();
 });

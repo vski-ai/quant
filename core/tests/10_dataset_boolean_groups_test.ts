@@ -4,7 +4,7 @@ import { IDatasetDataPoint, IDatasetQuery } from "../types.ts";
 
 const dbName = "dataset_boolean_groups_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, down) => {
   // --- 1. SETUP ---
   const source = await engine.createEventSource({
     name: "BooleanGroupSource",
@@ -153,4 +153,5 @@ withTestDatabase({ dbName }, async (t, engine) => {
       );
     },
   );
+  await down();
 });

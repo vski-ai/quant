@@ -201,6 +201,8 @@ export interface IQuery {
     end: Date;
   };
   granularity: Granularity;
+  rebuildCache?: boolean;
+  cache?: boolean;
 }
 
 /**
@@ -217,6 +219,8 @@ export interface IDatasetQuery {
     end: Date;
   };
   granularity: Granularity;
+  rebuildCache?: boolean;
+  cache?: boolean;
 }
 
 /** Represents a single row in a dataset report, potentially containing multiple metrics for a single timestamp. */

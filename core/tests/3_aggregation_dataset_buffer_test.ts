@@ -4,7 +4,7 @@ import { withTestDatabase } from "./utils.ts";
 
 const dbName = "dataset_buf_query_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, teardown) => {
   // --- 1. SETUP ---
   const source = await engine.createEventSource({
     name: "DatasetSource",
@@ -138,4 +138,6 @@ withTestDatabase({ dbName }, async (t, engine) => {
       "Compound metrics for requested field should be included",
     );
   });
+
+  await teardown();
 });

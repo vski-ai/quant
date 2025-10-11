@@ -107,7 +107,7 @@ class CustomMethodPlugin implements IPlugin {
 
 const dbName = "plugin_manager_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, down) => {
   const trackerPlugin = new TestTrackerPlugin();
   await engine.registerPlugin(trackerPlugin);
 
@@ -180,4 +180,6 @@ withTestDatabase({ dbName }, async (t, engine) => {
       assertEquals(result, "Hello, world!");
     },
   );
+
+  await down();
 });

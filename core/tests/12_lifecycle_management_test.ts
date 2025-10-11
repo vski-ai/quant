@@ -29,7 +29,7 @@ class TestOffloader implements IDataOffloader {
   }
 }
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, down) => {
   // --- 1. SETUP ---
   const testOffloader = new TestOffloader();
   engine.registerOffloader(testOffloader);
@@ -252,4 +252,6 @@ withTestDatabase({ dbName }, async (t, engine) => {
       );
     },
   );
+
+  await down();
 });

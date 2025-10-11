@@ -4,7 +4,7 @@ import { withTestDatabase } from "./utils.ts";
 
 const dbName = "granularity_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, down) => {
   // --- SETUP ---
   const source = await engine.createEventSource({
     name: "GranularityTestSource",
@@ -106,5 +106,5 @@ withTestDatabase({ dbName }, async (t, engine) => {
     );
   });
 
-  await engine.aggregator.stop();
+  await down();
 });

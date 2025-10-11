@@ -4,7 +4,7 @@ import { withTestDatabase } from "./utils.ts";
 
 const dbName = "reporting_service_test_db";
 
-withTestDatabase({ dbName }, async (t, engine) => {
+withTestDatabase({ dbName }, async (t, engine, down) => {
   await t.step("should manage and query a report end-to-end", async () => {
     // --- 1. Setup Phase (using the service) ---
 
@@ -115,4 +115,5 @@ withTestDatabase({ dbName }, async (t, engine) => {
 
     await engine.aggregator.stop();
   });
+  await down();
 });

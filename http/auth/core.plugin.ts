@@ -1,5 +1,5 @@
 import { Engine, IPlugin } from "@/core/mod.ts";
-import { AuthStorage, createAuthStorage } from "./db/storage.ts";
+import { createAuthStorage } from "./db/storage.ts";
 
 declare module "@/core/mod.ts" {
   interface Engine {
