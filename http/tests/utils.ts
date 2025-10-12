@@ -1,7 +1,7 @@
 import { Engine } from "@/core/mod.ts";
 import { getTestDb } from "@/core/tests/utils.ts";
 import { createHttp } from "@/http/create_http.ts";
-import { api as apiClient, configure } from "@/http/client.ts";
+import { client as apiClient } from "@/http/client.ts";
 import { CoreAuthPlugin, createHttpAuthPlugin } from "@/http/auth/mod.ts";
 
 export function withTestApi(
@@ -45,24 +45,25 @@ export function withTestApi(
       // 3. Start server on a free port
       ac = new AbortController();
       let baseUrl: string = "";
+      const client = apiClient();
       const serverPromise = Deno.serve({
         port: 0, // Use a random available port
         signal: ac.signal,
         onListen: ({ hostname, port }) => {
           // 4. Configure API client to talk to the test server
           baseUrl = `http://${hostname}:${port}`;
-          configure({
-            baseUrl,
-            masterKey, // Use master key for admin/setup tasks in tests
-          });
         },
       }, app.fetch);
 
       // Wait a moment for the server to be ready and client configured.
       await new Promise((r) => setTimeout(r, 100));
 
+      client.configure({
+        baseUrl,
+        masterKey, // Use master key for admin/setup tasks in tests
+      });
       // 5. Execute the provided test function
-      await fn(t, { engine, client: apiClient(), baseUrl });
+      await fn(t, { engine, client, baseUrl });
 
       // 6. Teardown
       ac.abort();

@@ -13,6 +13,12 @@
         "name": "X-API-Key",
         "in": "header"
       },
+      "apiKeyQuery": {
+        "description": "API Key",
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "query"
+      },
       "masterApiKey": {
         "description": "API Key",
         "type": "apiKey",
@@ -570,16 +576,7 @@
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "in": "query",
-            "name": "apiKey",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
+        }
       }
     },
     "/api/events/{source}/events": {

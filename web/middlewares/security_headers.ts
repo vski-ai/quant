@@ -1,5 +1,5 @@
 // Copyright 2023-2025 the Deno authors. All rights reserved. MIT license.
-import type { FreshContext } from "$fresh/server.ts";
+import type { FreshContext } from "fresh";
 
 export default async (_req: Request, ctx: FreshContext): Promise<Response> => {
   if (ctx.destination !== "route" || ctx.url.pathname.startsWith("/api")) {

@@ -11,14 +11,44 @@
       overflow-x-hidden bg-base-200 border-r border-base-300 aside-open:left-0
       aside-open:dense:left-0 transition-[left] ease-in-out duration-200;
   }
+  .main-aside-menu {
+    @apply menu menu-lg bg-base-200 rounded-box w-full dense:!w-16;
+    li {
+      @apply dense:max-w-14 dense:w-14 dense:text-[0px] mt-2;
+      a {
+        @apply dense:w-14 dense:max-w-14 h-10 dense:text-[0px];
+        svg {
+          @apply mt-[2px];
+        }
+      }
+    }
+  }
   .main-outlet {
-    @apply p-4 min-w-[320px] min-h-screen sm:aside-open:ml-64
+    @apply p-0 min-w-[320px] min-h-screen sm:aside-open:ml-64
       sm:dense:aside-open:ml-18 flex-1 transition-all ease-in-out duration-200;
   }
   .main-aside-bottom {
     @apply absolute bottom-0 w-full p-3 flex justify-center items-center
       dense:flex-col gap-3;
   }
+  .chart {
+    svg {
+      @apply !w-full !h-full;
+    }
+  }
+  .scr {
+    @apply after:content-[""] after:z-50 after:fixed after:bottom-0 after:left-0
+      after:w-screen after:h-screen after:bg-gradient-to-t
+      after:from-[#ffff8016] after:to-transparent after:pointer-events-none;
+  }
+  a[aria-current="page"] {
+    @apply menu-active;
+  }
+
+  /* Color all ancestor links of the current page
+  a[aria-current="true"] {
+    color: peachpuff;
+  } */
 }
 
 @custom-variant aside-open {

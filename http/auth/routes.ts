@@ -204,23 +204,9 @@ export function createAuthRoutes(storage: AuthStorage) {
         404: ErrorResponse,
       },
     }),
-    vValidator("query", v.object({ apiKey: v.optional(v.string()) })),
     async (c) => {
-      const isMaster = c.get("isMaster");
-      let apiKeyToQuery: string | undefined;
-
-      if (isMaster) {
-        apiKeyToQuery = c.req.query("apiKey");
-        if (!apiKeyToQuery) {
-          return c.json({
-            error:
-              "apiKey query parameter is required when using the master key",
-          }, 400);
-        }
-      } else {
-        const apiKeyData = c.get("apiKey");
-        apiKeyToQuery = apiKeyData?.key;
-      }
+      const apiKeyData = c.get("apiKey");
+      const apiKeyToQuery = apiKeyData?.key;
 
       if (!apiKeyToQuery) {
         // This case should ideally not be hit if middleware is correct

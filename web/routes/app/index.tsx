@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { Head } from "fresh/runtime";
-import { define } from "@/utils.ts";
+import { define } from "@/root.ts";
 import Counter from "@/islands/Counter.tsx";
 
 export default define.page(function Home(ctx) {

@@ -1,8 +1,7 @@
-import { define } from "../utils.ts";
+import { define } from "@/root.ts";
 import { LogsIcon, MenuIcon } from "lucide-react";
 
 export default define.layout(function App({ Component, state }) {
-  console.log(state);
   return (
     <html>
       <head>

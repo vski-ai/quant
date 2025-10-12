@@ -1,5 +1,8 @@
-import { define } from "@/utils.ts";
+import { define } from "@/root.ts";
 import { RouteConfig } from "fresh";
+import UserIcon from "lucide-react/dist/esm/icons/user.js";
+import FolderKeyIcon from "lucide-react/dist/esm/icons/folder-key.js";
+import LayoutDashboardIcon from "lucide-react/dist/esm/icons/layout-dashboard.js";
 import { AsideSwitch } from "@/islands/navbar/AsideSwitch.tsx";
 import { AsideFold } from "@/islands/navbar/AsideFold.tsx";
 import { ThemeSwitch } from "@/islands/navbar/ThemeSwitch.tsx";
@@ -8,28 +11,54 @@ export const config: RouteConfig = {
   skipInheritedLayouts: true,
 };
 
-export default define.layout(function ({ Component, state }) {
-  console.log(1, state);
+export default define.layout(function ({ Component, state, url }) {
   return (
     <html>
       {
         /* <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 
       </head> */
       }
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
       <body
+        class="scr"
         data-theme={state.uiTheme || "dark"}
         data-dense={state.uiDense || "0"}
         data-aside={state.uiAside || "1"}
       >
         <nav class="main-navbar">
           <AsideSwitch />
+          <div class="flex-1" />
         </nav>
         <main className="flex w-full bg-base-300">
           <aside className="main-aside">
+            <div class="h-12"></div>
+            <ul className="main-aside-menu">
+              <li>
+                <a href="/app" class="aria-[current=page]:active">
+                  <LayoutDashboardIcon />
+                  Dashboard
+                </a>
+              </li>
+              <li>
+                <a href="/app/keys" class="aria-[current=page]:active">
+                  <FolderKeyIcon />
+                  API Keys
+                </a>
+              </li>
+            </ul>
             <div className="main-aside-bottom">
+              <a
+                href="/app/profile"
+                class="btn btn-ghost btn-circle"
+                aria-label="Profile"
+              >
+                <UserIcon style={{ width: "24px", height: "24px" }} />
+              </a>
               <AsideFold />
               <ThemeSwitch theme={state.uiTheme} />
             </div>

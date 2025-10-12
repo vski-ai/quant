@@ -1,5 +1,7 @@
 import { Redis } from "ioredis";
 import { Hono } from "hono";
+import * as v from "valibot";
+import { validator as vValidator } from "hono-openapi";
 import { createAuthStorage } from "./db/storage.ts"; // This now points to the orchestrator
 import { createAuthMiddleware } from "./middleware.ts";
 import { createReporter, ReporterConfig } from "./reporter.ts";
@@ -33,7 +35,9 @@ export function createHttpAuthPlugin(config: AuthConfig = {}): IHttpPlugin {
         await next();
       });
 
-      app.use(middleware);
+      app.use(
+        middleware,
+      );
 
       // Register admin routes if master key is provided
       if (config.masterKey) {

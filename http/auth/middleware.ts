@@ -15,7 +15,7 @@ export function createAuthMiddleware(
     }
 
     // Fallback to standard API key authentication
-    const apiKey = c.req.header("X-API-Key");
+    const apiKey = c.req.header("X-API-Key") ?? c.req.query("api_key");
 
     if (!apiKey) {
       return c.json({ error: "API key is required" }, 401);

@@ -41,7 +41,8 @@ export async function createHttp(
 
   // Register all other API routes under the /api path, which IS protected by auth middleware.
   console.log(`Registering ${apiPlugins.length} plugins under /api namespace.`);
-  app.route("/api", createApiRouter(engine, apiPlugins));
+  const apiRouter = createApiRouter(engine, apiPlugins);
+  app.route("/api", apiRouter);
 
   // --- OpenAPI Documentation ---
   // Serve the OpenAPI specification JSON
@@ -59,6 +60,12 @@ export async function createHttp(
             type: "apiKey",
             name: "X-API-Key",
             in: "header",
+          },
+          apiKeyQuery: {
+            description: "API Key",
+            type: "apiKey",
+            name: "api_key",
+            in: "query",
           },
           masterApiKey: {
             description: "API Key",
@@ -80,6 +87,7 @@ export async function createHttp(
   };
 
   const spec = await generateSpecs(app, doc);
+
   await Deno.writeTextFile(
     [import.meta.dirname, "openapi.json"].join("/"),
     JSON.stringify(spec, null, 2),
@@ -87,7 +95,7 @@ export async function createHttp(
 
   app.get(
     "/openapi.json",
-    openAPIRouteHandler(app, doc),
+    (c) => c.json(spec),
   );
 
   // Serve the Swagger UI

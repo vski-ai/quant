@@ -197,9 +197,7 @@ export type PatchApiAuthKeysKeyResponse =
 export type GetApiAuthUsageData = {
   body?: never;
   path?: never;
-  query?: {
-    apiKey?: string;
-  };
+  query?: never;
   url: "/api/auth/usage";
 };
 
