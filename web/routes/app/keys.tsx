@@ -26,7 +26,7 @@ const MOCK_KEYS = [
   {
     id: "3",
     name: "Old Integration (Inactive)",
-    key: "$$$sk_live_xxxxxxxxxxxxxxxxxxxx9012",
+    key: "$$$sk_test_xxxxxxxxxxxxxxxxxxxx9012",
     status: "inactive",
     created: "2023-11-20",
     usage: 8192,
