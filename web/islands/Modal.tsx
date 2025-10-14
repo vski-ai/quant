@@ -85,7 +85,7 @@ export default function ModalDialog(
         {trigger}
       </a>
       <div class="modal modal-open">
-        <div class="modal-box">
+        <div class="modal-box aside-open:ml-64 dense:aside-open:ml-12">
           <button
             onClick={handleClose}
             type="button"

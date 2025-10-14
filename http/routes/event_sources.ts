@@ -64,7 +64,10 @@ eventSources.post(
     const apiKey = c.get("apiKey");
     const definition = c.req.valid("json");
 
-    const owners = [...new Set([...(definition.owners || []), apiKey.owner])];
+    const owners = [
+      ...new Set([...(definition.owners || []), 
+      apiKey?.owner
+    ])].filter(Boolean);
 
     const newSource = await engine.createEventSource({ ...definition, owners });
 

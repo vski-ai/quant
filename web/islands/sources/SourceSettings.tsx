@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { GetApiEventSourcesIdResponse } from "@/quant/http/client/types.gen.ts";
+import { GetApiEventSourcesIdResponse } from "@/quant/http/client.ts";
 import ConfirmDialog from "@/islands/ConfirmDialog.tsx";
 
 type EventSource = GetApiEventSourcesIdResponse;
@@ -23,7 +23,8 @@ export default function SourceSettings({ source }: SourceSettingsProps) {
       const { error } = await res.json();
       alert(error);
     } else {
-      alert("Source updated successfully!");
+      globalThis.location.hash = "";
+      globalThis.location.reload();
     }
   };
 

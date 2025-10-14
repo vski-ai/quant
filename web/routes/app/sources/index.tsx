@@ -1,13 +1,14 @@
 import { define } from "@/root.ts";
 import quant from "@/db/quant.ts";
 import { isAdmin, isAdminOn } from "@/db/rbac.ts";
-import { GetApiEventSourcesResponse } from "@/quant/http/client/types.gen.ts";
+import { GetApiEventSourcesResponse } from "@/quant/http/client.ts";
 
 import AdminToggle from "@/components/AdminToggle.tsx";
-import EmptyState from "@/components/EmptyState.tsx";
 import Modal from "@/islands/Modal.tsx";
 
 import BookTextIcon from "lucide-react/dist/esm/icons/book-text.js";
+import { AddSourceForm } from "@/islands/sources/AddSourceForm.tsx";
+import { SourcesList } from "@/islands/sources/SourcesList.tsx";
 
 type EventSource = GetApiEventSourcesResponse[200];
 
@@ -31,9 +32,16 @@ export const handler = define.handlers({
     const form = await ctx.req.formData();
     const name = form.get("name") as string;
     const description = form.get("description") as string;
-
+    const { user } = ctx.state;
+    if (!user) {
+      return Response.json({ message: "Unauthorized" }, { status: 401 });
+    }
     const { data: source, error } = await quant.postApiEventSources({
-      body: { name, description },
+      body: {
+        name,
+        description,
+        owners: [user._id.toString()],
+      },
     });
 
     if (error) {
@@ -66,63 +74,11 @@ export default define.page((props) => {
             triggerClass="btn btn-primary"
             trigger="Create New Source"
           >
-            <form method="POST" class="space-y-4 max-w-lg">
-              <div class="form-control">
-                <input
-                  autoComplete="off"
-                  type="text"
-                  name="name"
-                  placeholder="My Awesome Source"
-                  class="input input-bordered w-full"
-                  required
-                />
-              </div>
-              <div class="form-control">
-                <textarea
-                  name="description"
-                  class="textarea textarea-bordered w-full"
-                  placeholder="An optional description for your source"
-                >
-                </textarea>
-              </div>
-              <div class="form-control mt-6">
-                <button type="submit" class="btn btn-primary">
-                  Create Source
-                </button>
-              </div>
-            </form>
+            <AddSourceForm data={sources} />
           </Modal>
         </div>
       </div>
-      {sources.length === 0
-        ? (
-          <EmptyState
-            title="No event sources"
-            message="Get started by creating a new event source."
-            action={{ text: "Create New Source", href: "#create-new-source" }}
-            docs={{ text: "View Docs", href: "/app/user-docs/sources.md" }}
-          />
-        )
-        : (
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sources.map((source) => (
-              <div key={source.id} class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                  <h2 class="card-title">{source.name}</h2>
-                  <p>{source.description}</p>
-                  <div class="card-actions justify-end">
-                    <a
-                      href={`/app/sources/${source.id}`}
-                      class="btn btn-sm btn-primary"
-                    >
-                      View
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      <SourcesList data={sources} />
     </div>
   );
 });

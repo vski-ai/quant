@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { GetApiEventSourcesIdEventsResponse } from "@/quant/http/client/types.gen.ts";
+import { GetApiEventSourcesIdEventsResponse } from "@/quant/http/client.ts";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw.js";
 
 type Event = GetApiEventSourcesIdEventsResponse[200];
