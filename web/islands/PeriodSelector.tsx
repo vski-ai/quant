@@ -51,7 +51,7 @@ export default function PeriodSelector({ period }: PeriodSelectorProps) {
 
   return (
     <select
-      class="select select-bordered w-64"
+      class="select select-sm select-bordered w-32"
       value={period}
       onChange={handleChange}
     >

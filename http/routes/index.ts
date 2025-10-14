@@ -6,12 +6,12 @@ import eventSources from "./event_sources.ts";
 import aggregationSources from "./aggregation_sources.ts";
 import { Engine } from "@/core/mod.ts";
 
-export function createApiRouter(engine: Engine, plugins: IHttpPlugin[]) {
+export async function createApiRouter(engine: Engine, plugins: IHttpPlugin[]) {
   const app = new Hono<HonoEnv>();
 
   // Register HTTP plugins first to ensure middleware is applied before routes
   for (const plugin of plugins) {
-    plugin.register(app as any, engine);
+    await plugin.register(app as any, engine);
     console.log(`[HTTP] Registered plugin: ${plugin.name}@${plugin.version}`);
   }
 

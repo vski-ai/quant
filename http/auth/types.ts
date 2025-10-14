@@ -1,5 +1,7 @@
 export type ApiKey = {
+  _id?: string;
   key: string;
+  name?: string;
   owner: string;
   quotas: Quota;
   enabled: boolean;

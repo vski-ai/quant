@@ -1,6 +1,7 @@
 import { assertEquals, assertExists } from "@std/assert";
 import { CoreRealtimePlugin } from "./core.plugin.ts";
 import { HttpRealtimePlugin } from "./http.plugin.ts";
+import { AccountRealtimePlugin } from "./account.plugin.ts";
 import { withTestApi } from "@/http/tests/utils.ts";
 import { delay } from "@std/async/delay";
 
@@ -8,9 +9,12 @@ const dbName = "realtime_module_test_db";
 
 withTestApi({
   dbName,
-  httpPlugins: [new HttpRealtimePlugin()],
+  httpPlugins: [
+    new HttpRealtimePlugin(),
+    new AccountRealtimePlugin("test-master-key"),
+  ],
 }, async (t, { engine, client, baseUrl }) => {
-  await engine.registerPlugin(new CoreRealtimePlugin());
+  await engine.registerPlugin(new CoreRealtimePlugin("test-master-key"));
 
   // --- Test Setup: Create API Keys ---
   const { data: keyData } = await client.postApiAuthKeys({
@@ -183,10 +187,81 @@ withTestApi({
         (invalidMessages[0] as any).message.includes("Invalid API Key"),
         "Error message should indicate auth failure",
       );
+    },
+  );
 
-      wsValid.close();
-      wsOther.close();
-      wsInvalid.close();
+  await t.step(
+    "should count account events and broadcast only when threshold is reached",
+    async () => {
+      const wsUrl = baseUrl.replace("http", "ws") + "/realtime/account";
+      const ws = new WebSocket(wsUrl);
+      const messages: unknown[] = [];
+      const messagePromise = new Promise<void>((resolve) => {
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          messages.push(data);
+          if (messages.length >= 2) { // Expect confirmation + broadcast
+            resolve();
+          }
+        };
+      });
+
+      await new Promise<void>((resolve) => ws.onopen = () => resolve());
+
+      const owner = "realtime-user";
+      const channel = `account:events:${owner}`;
+      ws.send(JSON.stringify({
+        action: "subscribe",
+        channel: channel,
+        masterKey: "test-master-key",
+      }));
+
+      const authEventSource = await engine.findOrCreateEventSource({
+        name: "quant_internal_auth",
+      });
+
+      // Trigger 9 events, just under the threshold of 10
+      for (let i = 0; i < 9; i++) {
+        await authEventSource.record({
+          uuid: `test-uuid-${i}`,
+          eventType: "api_request",
+          payload: { owner },
+          attributions: [{ type: "owner", value: owner }],
+        });
+      }
+
+      await delay(200); // Wait to ensure no message is sent
+      assertEquals(
+        messages.length,
+        2,
+        "Should only have subscription confirmation message and broadcast",
+      );
+
+      // Trigger the 10th event to cross the threshold
+      for (let i = 10; i < 20; i++) {
+        await authEventSource.record({
+          uuid: `test-uuid-${i}`,
+          eventType: "api_request",
+          payload: { owner },
+          attributions: [{ type: "owner", value: owner }],
+        });
+      }
+
+      await delay(200);
+      await messagePromise;
+      assertEquals(
+        messages.length,
+        3,
+        "Should have received the broadcast message",
+      );
+      const broadcastMessage = messages[1] as {
+        type: string;
+        payload: { count: number };
+      };
+      assertEquals(broadcastMessage.type, "account_events_update");
+      assertEquals(broadcastMessage.payload.count, 10);
+
+      ws.close();
     },
   );
 });

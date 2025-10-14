@@ -17,7 +17,7 @@ export default function ErrorsChart(
   { data, color, width = 1000, height = 120 }: ChartProps,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
-
+  console.log(123, data);
   useEffect(() => {
     if (containerRef.current) {
       // Clear the placeholder before rendering the chart
@@ -32,7 +32,7 @@ export default function ErrorsChart(
             x: "date",
             y: "value",
             fill: color ?? "var(--color-error)",
-            interval: "day",
+            interval: "minute",
           }),
         ],
       });

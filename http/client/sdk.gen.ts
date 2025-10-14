@@ -10,18 +10,21 @@ import type {
   DeleteApiAggregationSourcesSourceIdData,
   DeleteApiAggregationSourcesSourceIdErrors,
   DeleteApiAggregationSourcesSourceIdResponses,
-  DeleteApiAuthKeysKeyData,
-  DeleteApiAuthKeysKeyErrors,
-  DeleteApiAuthKeysKeyResponses,
+  DeleteApiAuthKeysIdData,
+  DeleteApiAuthKeysIdErrors,
+  DeleteApiAuthKeysIdResponses,
   DeleteApiReportsIdData,
   DeleteApiReportsIdErrors,
   DeleteApiReportsIdResponses,
   GetApiAggregationSourcesData,
   GetApiAggregationSourcesErrors,
   GetApiAggregationSourcesResponses,
-  GetApiAuthKeysKeyData,
-  GetApiAuthKeysKeyErrors,
-  GetApiAuthKeysKeyResponses,
+  GetApiAuthKeysData,
+  GetApiAuthKeysErrors,
+  GetApiAuthKeysIdData,
+  GetApiAuthKeysIdErrors,
+  GetApiAuthKeysIdResponses,
+  GetApiAuthKeysResponses,
   GetApiAuthUsageData,
   GetApiAuthUsageErrors,
   GetApiAuthUsageResponses,
@@ -40,9 +43,9 @@ import type {
   GetApiReportsIdErrors,
   GetApiReportsIdResponses,
   GetApiReportsResponses,
-  PatchApiAuthKeysKeyData,
-  PatchApiAuthKeysKeyErrors,
-  PatchApiAuthKeysKeyResponses,
+  PatchApiAuthKeysIdData,
+  PatchApiAuthKeysIdErrors,
+  PatchApiAuthKeysIdResponses,
   PatchApiReportsIdData,
   PatchApiReportsIdErrors,
   PatchApiReportsIdResponses,
@@ -52,6 +55,12 @@ import type {
   PostApiAuthKeysData,
   PostApiAuthKeysErrors,
   PostApiAuthKeysResponses,
+  PostApiAuthUsageDatasetData,
+  PostApiAuthUsageDatasetErrors,
+  PostApiAuthUsageDatasetResponses,
+  PostApiAuthUsageReportData,
+  PostApiAuthUsageReportErrors,
+  PostApiAuthUsageReportResponses,
   PostApiEventSourcesData,
   PostApiEventSourcesResponses,
   PostApiEventsSourceEventsData,
@@ -84,6 +93,29 @@ export type Options<
   meta?: Record<string, unknown>;
 };
 
+export const getApiAuthKeys = <ThrowOnError extends boolean = false>(
+  options?: Options<GetApiAuthKeysData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetApiAuthKeysResponses,
+    GetApiAuthKeysErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/auth/keys",
+    ...options,
+  });
+};
+
 export const postApiAuthKeys = <ThrowOnError extends boolean = false>(
   options?: Options<PostApiAuthKeysData, ThrowOnError>,
 ) => {
@@ -111,12 +143,12 @@ export const postApiAuthKeys = <ThrowOnError extends boolean = false>(
   });
 };
 
-export const deleteApiAuthKeysKey = <ThrowOnError extends boolean = false>(
-  options: Options<DeleteApiAuthKeysKeyData, ThrowOnError>,
+export const deleteApiAuthKeysId = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteApiAuthKeysIdData, ThrowOnError>,
 ) => {
   return (options.client ?? client).delete<
-    DeleteApiAuthKeysKeyResponses,
-    DeleteApiAuthKeysKeyErrors,
+    DeleteApiAuthKeysIdResponses,
+    DeleteApiAuthKeysIdErrors,
     ThrowOnError
   >({
     security: [
@@ -129,17 +161,17 @@ export const deleteApiAuthKeysKey = <ThrowOnError extends boolean = false>(
         type: "apiKey",
       },
     ],
-    url: "/api/auth/keys/{key}",
+    url: "/api/auth/keys/{id}",
     ...options,
   });
 };
 
-export const getApiAuthKeysKey = <ThrowOnError extends boolean = false>(
-  options: Options<GetApiAuthKeysKeyData, ThrowOnError>,
+export const getApiAuthKeysId = <ThrowOnError extends boolean = false>(
+  options: Options<GetApiAuthKeysIdData, ThrowOnError>,
 ) => {
   return (options.client ?? client).get<
-    GetApiAuthKeysKeyResponses,
-    GetApiAuthKeysKeyErrors,
+    GetApiAuthKeysIdResponses,
+    GetApiAuthKeysIdErrors,
     ThrowOnError
   >({
     security: [
@@ -152,17 +184,17 @@ export const getApiAuthKeysKey = <ThrowOnError extends boolean = false>(
         type: "apiKey",
       },
     ],
-    url: "/api/auth/keys/{key}",
+    url: "/api/auth/keys/{id}",
     ...options,
   });
 };
 
-export const patchApiAuthKeysKey = <ThrowOnError extends boolean = false>(
-  options: Options<PatchApiAuthKeysKeyData, ThrowOnError>,
+export const patchApiAuthKeysId = <ThrowOnError extends boolean = false>(
+  options: Options<PatchApiAuthKeysIdData, ThrowOnError>,
 ) => {
   return (options.client ?? client).patch<
-    PatchApiAuthKeysKeyResponses,
-    PatchApiAuthKeysKeyErrors,
+    PatchApiAuthKeysIdResponses,
+    PatchApiAuthKeysIdErrors,
     ThrowOnError
   >({
     security: [
@@ -175,7 +207,7 @@ export const patchApiAuthKeysKey = <ThrowOnError extends boolean = false>(
         type: "apiKey",
       },
     ],
-    url: "/api/auth/keys/{key}",
+    url: "/api/auth/keys/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -204,6 +236,60 @@ export const getApiAuthUsage = <ThrowOnError extends boolean = false>(
     ],
     url: "/api/auth/usage",
     ...options,
+  });
+};
+
+export const postApiAuthUsageReport = <ThrowOnError extends boolean = false>(
+  options?: Options<PostApiAuthUsageReportData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    PostApiAuthUsageReportResponses,
+    PostApiAuthUsageReportErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/auth/usage/report",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+};
+
+export const postApiAuthUsageDataset = <ThrowOnError extends boolean = false>(
+  options?: Options<PostApiAuthUsageDatasetData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    PostApiAuthUsageDatasetResponses,
+    PostApiAuthUsageDatasetErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/auth/usage/dataset",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
   });
 };
 

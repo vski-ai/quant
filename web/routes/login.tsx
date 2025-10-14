@@ -1,32 +1,10 @@
 import { PageProps } from "fresh";
-import { setCookie } from "@std/http";
 import { Head } from "fresh/runtime";
 import { define } from "@/root.ts";
 
-export const handler = define.handlers({
-  async POST(ctx) {
-    const form = await ctx.req.formData();
-    const email = form.get("email")?.toString();
-
-    // Mocked login: any user is valid
-    const headers = new Headers();
-    setCookie(headers, {
-      name: "q_session",
-      value: email || "user", // Use email as session identifier
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      path: "/",
-      httpOnly: true,
-    });
-
-    headers.set("location", "/app");
-    return new Response(null, {
-      status: 303, // See Other
-      headers,
-    });
-  },
-});
-
 export default define.page(function LoginPage(props: PageProps) {
+  const message = props.url.searchParams.get("message");
+
   return (
     <>
       <Head>
@@ -45,7 +23,8 @@ export default define.page(function LoginPage(props: PageProps) {
             <h2 class="card-title text-2xl font-bold text-center block">
               Sign in to your account
             </h2>
-            <form method="POST">
+            {message && <p class="text-center text-green-500">{message}</p>}
+            <form method="POST" action="/api/auth/login">
               <input
                 type="email"
                 name="email"
@@ -64,6 +43,14 @@ export default define.page(function LoginPage(props: PageProps) {
                 Login
               </button>
             </form>
+            <div class="divider">OR</div>
+            <a href="/auth/github" class="btn btn-outline w-full">
+              Login with GitHub
+            </a>
+            <p class="text-center text-sm mt-4">
+              Don't have an account?{" "}
+              <a href="/register" class="link">Register</a>
+            </p>
           </div>
         </div>
       </div>

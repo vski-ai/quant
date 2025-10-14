@@ -143,5 +143,6 @@ export function createAggregateModel(
     connection.model<IAggregateDoc>(
       collectionName,
       AggregateSchema,
+      collectionName,
     );
 }

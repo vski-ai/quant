@@ -34,13 +34,13 @@ export async function queryMongo(
     timestamp: { $gte: timeRange.start, $lte: timeRange.end },
   };
 
-  if ((filter?.sources as any).length) {
+  if ((filter?.sources as any)?.length) {
     matchStage.sourceId = {
       $in: (filter?.sources as any).map((s: { id: 1 }) => s.id),
     };
   }
 
-  if (filter?.events.length) {
+  if (filter?.events?.length) {
     matchStage.eventType = { $in: filter.events };
   }
 

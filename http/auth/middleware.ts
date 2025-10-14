@@ -1,42 +1,78 @@
 import { MiddlewareHandler } from "hono";
 import { AuthStorage } from "./db/storage.ts";
+import { IEventSource } from "@/core/mod.ts";
+import { ApiKey } from "./types.ts";
 
 export function createAuthMiddleware(
   storage: AuthStorage,
+  authEventSource: IEventSource,
   masterKey?: string,
 ): MiddlewareHandler {
   return async (c, next) => {
+    const recordUsage = (
+      statusCode: number,
+      apiKeyData?: ApiKey | null,
+    ) => {
+      const status = statusCode >= 200 && statusCode < 400
+        ? "success"
+        : "error";
+      authEventSource.record({
+        uuid: crypto.randomUUID(),
+        eventType: "api_request",
+        payload: {
+          status,
+          statusCode: statusCode.toString(),
+          path: c.req.path,
+          method: c.req.method,
+          owner: apiKeyData?.owner ?? "anonymous",
+        },
+        // We can tie usage back to the key owner
+        attributions: apiKeyData
+          ? [{ type: "owner", value: apiKeyData.owner }]
+          : [],
+      }).catch((err) => {
+        console.error("Failed to record API usage:", err);
+      });
+    };
+
     // Check for master key first to bypass API key checks
     const providedMasterKey = c.req.header("X-Master-Key");
     if (masterKey && providedMasterKey === masterKey) {
       c.set("isMaster", true);
       await next();
+      recordUsage(c.res.status);
       return;
     }
 
     // Fallback to standard API key authentication
     const apiKey = c.req.header("X-API-Key") ?? c.req.query("api_key");
-
     if (!apiKey) {
+      recordUsage(401);
       return c.json({ error: "API key is required" }, 401);
     }
 
     const apiKeyData = await storage.getApiKey(apiKey);
+    if (!apiKeyData) {
+      recordUsage(401, { owner: "unknown" } as ApiKey);
+      return c.json({ error: "Invalid API key" }, 401);
+    }
 
-    if (!apiKeyData || !apiKeyData.enabled) {
+    if (!apiKeyData.enabled) {
+      recordUsage(401, apiKeyData);
       return c.json({ error: "Invalid API key" }, 401);
     }
 
     const { quotas } = apiKeyData;
-
     // Rate limiting
     const requestsInSecond = await storage.incrementUsage(apiKey, "second");
     if (requestsInSecond > quotas.requestsPerSecond) {
+      recordUsage(429, apiKeyData);
       return c.json({ error: "Rate limit exceeded" }, 429);
     }
 
     const requestsInDay = await storage.incrementUsage(apiKey, "day");
     if (requestsInDay > quotas.requestsPerDay) {
+      recordUsage(429, apiKeyData);
       return c.json({ error: "Daily quota exceeded" }, 429);
     }
 
@@ -44,12 +80,14 @@ export function createAuthMiddleware(
     if (apiKeyData.quotas.totalRequests > 0) {
       const totalRequests = await storage.incrementUsage(apiKey, "total");
       if (totalRequests > quotas.totalRequests) {
+        recordUsage(403, apiKeyData);
         return c.json({ error: "Total requests quota exceeded" }, 403);
       }
     }
 
     c.set("apiKey", apiKeyData);
-
     await next();
+    // Record successful usage after the request has been handled
+    recordUsage(c.res.status, apiKeyData);
   };
 }

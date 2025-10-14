@@ -2,15 +2,9 @@ import { useComputed, useSignal } from "@preact/signals";
 import PlusIcon from "lucide-react/dist/esm/icons/plus.js";
 import Trash2Icon from "lucide-react/dist/esm/icons/trash-2.js";
 import AddApiKey from "./AddApiKey.tsx";
-
-interface ApiKey {
-  id: string;
-  name: string;
-  key: string;
-  status: "active" | "inactive" | string;
-  created: string;
-  usage: number;
-}
+import ConfirmDialog from "../ConfirmDialog.tsx";
+import { ApiKey } from "@/quant/http/auth/types.ts";
+import { obfuscate } from "@/shared/obfuscate.ts";
 
 interface ApiKeysTableProps {
   keys: ApiKey[];
@@ -57,25 +51,72 @@ function editDistance(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
+const keySort = (a: ApiKey, b: ApiKey) => {
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+};
+
 export default function ApiKeysTable({ keys }: ApiKeysTableProps) {
   const searchQuery = useSignal("");
   const addApiKey = useSignal(false);
+  const keysSignal = useSignal(keys.sort(keySort));
+  const showConfirmDialog = useSignal(false);
+  const keyToDelete = useSignal<string | null>(null);
 
   const filteredKeys = useComputed(() => {
     const query = searchQuery.value.trim().toLowerCase();
-    if (!query) return keys;
+    if (!query) return keysSignal.value;
 
-    return keys
+    return keysSignal.value.sort(keySort)
       .map((key) => ({
         ...key,
-        score: similarity(key.name, query),
+        score: similarity(key.name ?? "", query),
       }))
       .filter((key) => key.score > 0.2)
       .sort((a, b) => b.score - a.score);
   });
 
+  const handleDelete = (id: string) => {
+    keyToDelete.value = id;
+    showConfirmDialog.value = true;
+  };
+
+  const onConfirmDelete = async () => {
+    if (keyToDelete.value) {
+      await fetch("/app/api/keys", {
+        method: "DELETE",
+        body: JSON.stringify({ id: keyToDelete.value }),
+      });
+      keysSignal.value = keysSignal.value.filter((k) =>
+        k._id !== keyToDelete.value
+      );
+      keyToDelete.value = null;
+    }
+  };
+
+  const handleToggle = async (id: string, enabled: boolean) => {
+    await fetch("/app/api/keys", {
+      method: "PATCH",
+      body: JSON.stringify({ id, enabled }),
+    });
+    keysSignal.value = keysSignal.value.map((k) =>
+      k._id === id ? { ...k, enabled } : k
+    );
+  };
+
+  const onKeyCreated = (newKey: ApiKey | null) => {
+    if (!newKey) return;
+    newKey.key = obfuscate(newKey.key);
+    keysSignal.value = [newKey, ...keysSignal.value];
+    addApiKey.value = false;
+  };
+
   return (
     <section class="relative card card-lg p-3 m-1 bg-base-100 min-h-[calc(100vh-400px)]">
+      <ConfirmDialog
+        show={showConfirmDialog}
+        message="Are you sure you want to delete this key?"
+        onConfirm={onConfirmDelete}
+      />
       <div class="flex justify-between items-center mb-6">
         <input
           type="search"
@@ -98,8 +139,15 @@ export default function ApiKeysTable({ keys }: ApiKeysTableProps) {
         </div>
       </div>
       {addApiKey.value
-        ? <AddApiKey onClose={() => addApiKey.value = false} />
-        : <></>}
+        ? (
+          <AddApiKey
+            onClose={(data) => {
+              addApiKey.value = false;
+              onKeyCreated(data);
+            }}
+          />
+        )
+        : null}
       <div class="overflow-x-auto bg-base-100 rounded-box">
         <table class="table">
           {/* Table head remains the same */}
@@ -109,19 +157,18 @@ export default function ApiKeysTable({ keys }: ApiKeysTableProps) {
               <th>Key</th>
               <th>Status</th>
               <th>Created</th>
-              <th class="text-right">Usage (last 30d)</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {filteredKeys.value.map((apiKey) => (
-              <tr key={apiKey.id} class="hover">
+              <tr key={apiKey.key} class="hover">
                 <td class="font-medium">{apiKey.name}</td>
                 <td>
                   <code class="font-mono">{apiKey.key}</code>
                 </td>
                 <td>
-                  {apiKey.status === "active"
+                  {apiKey.enabled
                     ? <span class="badge badge-success badge-sm">Active</span>
                     : (
                       <span class="badge badge-warning badge-sm">
@@ -129,23 +176,24 @@ export default function ApiKeysTable({ keys }: ApiKeysTableProps) {
                       </span>
                     )}
                 </td>
-                <td>{new Date(apiKey.created).toLocaleDateString()}</td>
-                <td class="text-right font-mono">
-                  {apiKey.usage.toLocaleString()}
-                </td>
+                <td>{new Date(apiKey.createdAt).toLocaleDateString()}</td>
                 <td>
                   <div class="flex items-center justify-end gap-2">
                     <input
                       type="checkbox"
                       class="toggle toggle-sm toggle-success"
-                      checked={apiKey.status === "active"}
-                      aria-label={apiKey.status === "active"
+                      checked={apiKey.enabled}
+                      onChange={() =>
+                        handleToggle(apiKey._id!, !apiKey.enabled)}
+                      aria-label={apiKey.enabled
                         ? "Deactivate key"
                         : "Activate key"}
                     />
                     <a
                       class="btn btn-ghost btn-xs btn-square"
                       aria-label="Delete key"
+                      onClick={() =>
+                        handleDelete(apiKey._id!)}
                     >
                       <Trash2Icon style={{ width: "16px", height: "16px" }} />
                     </a>
@@ -156,7 +204,7 @@ export default function ApiKeysTable({ keys }: ApiKeysTableProps) {
           </tbody>
         </table>
       </div>
-      <p class="text-sm text-base-content/60 mt-12 flex items-center justify-center">
+      <p class="text-sm text-base-content/60 my-12 flex items-center justify-center">
         API keys provide access to your account. Keep them secure and do not
         share them publicly.
       </p>

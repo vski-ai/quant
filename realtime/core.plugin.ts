@@ -1,6 +1,8 @@
 import {
   Engine,
+  EventPayload,
   IEvent,
+  IEventDoc,
   IMetricUpdate,
   IPlugin,
   IQuery,
@@ -23,6 +25,11 @@ export class CoreRealtimePlugin implements IPlugin {
   name = "CoreRealtimePlugin";
   version = "1.0.0";
   private engine!: Engine;
+  private masterKey: string;
+
+  constructor(masterKey: string) {
+    this.masterKey = masterKey;
+  }
   /**
    * Called when the engine initializes. This is where we instantiate the RealtimeManager
    * and attach it to the engine instance.
@@ -31,7 +38,7 @@ export class CoreRealtimePlugin implements IPlugin {
   public async onEngineInit(engine: Engine) {
     // The RealtimeManager will handle subscriptions, authentication, and broadcasting.
     // It uses Redis to allow multiple engine instances to share subscription state and broadcast events.
-    engine.realtimeManager = new RealtimeManager(engine);
+    engine.realtimeManager = new RealtimeManager(engine, this.masterKey);
     this.engine = engine;
     console.log(
       "[CoreRealtimePlugin] RealtimeManager initialized and attached to engine.",
@@ -59,10 +66,37 @@ export class CoreRealtimePlugin implements IPlugin {
     // For now, we are focusing on event-driven updates, so this can be a no-op.
   }
 
+  private ownerEventCounts = new Map<string, number>();
+  private readonly EVENT_THRESHOLD = 10;
+
+  /**
+   * Called after an event has been successfully saved to the raw event log.
+   */
+  public async afterEventRecord(
+    context: { eventDoc: IEventDoc<EventPayload> },
+  ) {
+    const ownerAttribution = context.eventDoc.attributions?.find(
+      (attr) => attr.type === "owner",
+    );
+
+    if (ownerAttribution) {
+      const owner = ownerAttribution.value;
+      const currentCount = (this.ownerEventCounts.get(owner) || 0) + 1;
+
+      if (currentCount >= this.EVENT_THRESHOLD) {
+        await this.engine.realtimeManager.broadcast(`account:events:${owner}`, {
+          type: "account_events_update",
+          payload: { count: currentCount },
+        });
+        this.ownerEventCounts.set(owner, 0);
+      } else {
+        this.ownerEventCounts.set(owner, currentCount);
+      }
+    }
+  }
+
   /**
    * Called immediately after metrics for the real-time buffer are generated from an event.
-   * This is the most important hook for live, low-latency updates.
-   * @param context The context containing the original event and the generated metrics.
    */
   public async afterRealtimeMetricsGenerated(
     context: { reportId: string; metrics: IMetricUpdate[] },

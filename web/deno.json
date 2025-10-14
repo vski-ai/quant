@@ -4,7 +4,7 @@
     "check": "deno fmt --check . && deno lint . && deno check",
     "dev": "vite",
     "build": "vite build",
-    "start": "deno serve -A _fresh/server.js",
+    "start": "deno serve --env-file=.env -A _fresh/server.js",
     "update": "deno run -A -r jsr:@fresh/update .",
     "refresh": "deno install --no-lock --allow-scripts --reload"
   },
@@ -13,6 +13,8 @@
   "imports": {
     "@/": "./",
     "@/quant/": "../",
+    "deno_mongo": "https://deno.land/x/mongo@v0.34.0/mod.ts",
+    "@deno/kv-oauth": "jsr:@deno/kv-oauth@^0.11.0",
     "@observablehq/plot": "npm:@observablehq/plot@^0.6.17",
     "@std/http": "jsr:@std/http@^1.0.21",
     "daisyui": "npm:daisyui@^5.1.24",
@@ -21,6 +23,7 @@
     "preact": "npm:preact@^10.27.2",
     "@preact/signals": "npm:@preact/signals@^2.3.2",
     "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.4",
+    "valibot": "npm:valibot@^1.1.0",
     "vite": "npm:vite@^7.1.3",
     "tailwindcss": "npm:tailwindcss@^4.1.10",
     "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.12"

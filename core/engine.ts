@@ -188,8 +188,16 @@ export class Engine {
   }
 
   public createEventSource(
-    definition: IEventSourceDefinition,
+    definition: Partial<IEventSourceDefinition>,
   ): Promise<IEventSource> {
+    return EventSource.create(this, definition);
+  }
+
+  public findOrCreateEventSource(
+    definition: Partial<IEventSourceDefinition>,
+  ): Promise<IEventSource> {
+    // EventSource.create already uses findOneAndUpdate with upsert,
+    // so it behaves as a "find or create".
     return EventSource.create(this, definition);
   }
 
@@ -197,6 +205,16 @@ export class Engine {
     const report = new this.ReportModel(reportData);
     await report.save();
     return report;
+  }
+
+  public async findOrCreateReport(
+    definition: IReport,
+  ): Promise<IReportDoc> {
+    return await this.ReportModel.findOneAndUpdate(
+      { name: definition.name },
+      { $setOnInsert: definition },
+      { new: true, upsert: true, runValidators: true },
+    );
   }
 
   public getReportDefinition(
@@ -249,6 +267,25 @@ export class Engine {
     });
     await aggregationSource.save();
     return aggregationSource;
+  }
+
+  public async findOrCreateAggregationSource(
+    reportId: string,
+    definition: Omit<IAggregationSource, "reportId" | "_id">,
+  ): Promise<IAggregationSource> {
+    await this.invalidateActiveAggregationSourcesCache();
+    const doc = await this.AggregationSourceModel.findOneAndUpdate(
+      {
+        reportId: new Types.ObjectId(reportId),
+        targetCollection: definition.targetCollection,
+      },
+      {
+        $setOnInsert: { ...definition, reportId: new Types.ObjectId(reportId) },
+      },
+      { new: true, upsert: true, runValidators: true },
+    );
+    // The return type of findOneAndUpdate is a Mongoose document, which matches IAggregationSource
+    return doc;
   }
 
   public getAllActiveAggregationSources(): Promise<IAggregationSource[]> {

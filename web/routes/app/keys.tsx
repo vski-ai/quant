@@ -2,59 +2,84 @@ import { define } from "@/root.ts";
 import { Head } from "fresh/runtime";
 import { StatsCard } from "@/components/StatsCard.tsx";
 import PeriodSelector from "@/islands/PeriodSelector.tsx";
+import GranularitySelector from "@/islands/GranularitySelector.tsx";
 import LineChart from "@/islands/LineChart.tsx";
 import BarChart from "@/islands/BarChart.tsx";
 import ApiKeysTable from "@/islands/keys/ApiKeysTable.tsx";
+import api from "@/db/quant.ts";
+import { obfuscate } from "@/shared/obfuscate.ts";
+import { ApiKey } from "@/quant/http/auth/types.ts";
+import { AggregationType, Granularity } from "@/quant/core/types.ts";
+import ReatimeLogger from "@/islands/RealtimeLogger.tsx";
 
-const MOCK_KEYS = [
-  {
-    id: "1",
-    name: "My First App",
-    key: "sk_live_xxxxxxxxxxxxxxxxxxxx1234",
-    status: "active",
-    created: "2024-05-01",
-    usage: 1024,
-  },
-  {
-    id: "2",
-    name: "Staging Environment",
-    key: "sk_test_xxxxxxxxxxxxxxxxxxxx5678",
-    status: "active",
-    created: "2024-04-15",
-    usage: 512,
-  },
-  {
-    id: "3",
-    name: "Old Integration (Inactive)",
-    key: "$$$sk_test_xxxxxxxxxxxxxxxxxxxx9012",
-    status: "inactive",
-    created: "2023-11-20",
-    usage: 8192,
-  },
-];
-
-const generateDailyData = (days: number, max: number) => {
-  const data = [];
-  const today = new Date();
-  for (let i = 0; i < days; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (days - 1 - i));
-    data.push({
-      date, // Pass date as string
-      value: Math.floor(Math.random() * max),
+export const handler = define.handlers({
+  async GET(ctx) {
+    const owner = ctx.state.user?._id.toString();
+    const { data: keys } = await api.getApiAuthKeys({
+      query: {
+        owner,
+      },
     });
-  }
-  return data;
-};
+    // @ts-ignore:
+    keys?.forEach((record: ApiKey) => {
+      record.key = obfuscate(record.key);
+    });
 
-const requestsData = generateDailyData(30, 1500);
-const errorsData = generateDailyData(30, 50);
+    const period = ctx.state.period || "1d";
+    const granularity = ctx.state.granularity || "hour";
+    const now = new Date();
+    const [magnitude, unit] = [parseInt(period.slice(0, -1)), period.slice(-1)];
+    const start = new Date(
+      now.getTime() - magnitude * (unit === "h" ? 3600000 : 86400000),
+    );
 
-export default define.page(function ApiKeysPage(ctx) {
-  console.log(ctx);
+    const timeRange = { start: start.toISOString(), end: now.toISOString() };
+
+    const { data: requestsReport } = await api.postApiAuthUsageReport({
+      body: {
+        owner,
+        timeRange,
+        granularity: granularity as Granularity,
+      },
+    });
+
+    const { data: errorsReport } = await api.postApiAuthUsageReport({
+      body: {
+        owner,
+        timeRange,
+        granularity: granularity as Granularity,
+        metric: { type: AggregationType.CATEGORY, field: "status" },
+      },
+    });
+
+    const requestsData = requestsReport?.map((d) => ({
+      date: new Date(d.timestamp),
+      value: d.value,
+    }));
+    const errorsData = errorsReport?.filter((d) => d.category === "error")
+      .map((d) => ({ date: new Date(d.timestamp), value: d.value }));
+
+    const totalRequests = requestsData?.reduce((acc, d) => acc + d.value, 0);
+    const totalErrors = errorsData?.reduce((acc, d) => acc + d.value, 0);
+
+    return {
+      data: {
+        keys,
+        requestsData,
+        errorsData,
+        totalRequests,
+        totalErrors,
+      },
+    };
+  },
+});
+
+export default define.page((ctx) => {
+  const { keys, requestsData, errorsData, totalRequests, totalErrors } = ctx
+    .data as any;
+
   const period = ctx.state.period || "1d";
-  // NOTE: In a real app, you would parse the period and pass the correct
-  // date range to your data fetching logic. For now, we'll just display it.
+  const granularity = ctx.state.granularity || "hour";
   const periodLabel = period.endsWith("h")
     ? `${period.slice(0, -1)} hours`
     : `${period.slice(0, -1)} days`;
@@ -65,12 +90,13 @@ export default define.page(function ApiKeysPage(ctx) {
         <title>API Keys</title>
       </Head>
 
-      <div class="flex justify-between">
+      <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold mb-8">
           API Keys
         </h1>
-        <div>
+        <div class="flex gap-2">
           <PeriodSelector period={period} />
+          <GranularitySelector granularity={granularity} />
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -78,8 +104,8 @@ export default define.page(function ApiKeysPage(ctx) {
           periodLabel={periodLabel}
           counters={[
             {
-              label: "rps",
-              value: "1K+",
+              label: "requests",
+              value: totalRequests.toLocaleString(),
               class: "badge-success",
             },
           ]}
@@ -91,7 +117,7 @@ export default define.page(function ApiKeysPage(ctx) {
           counters={[
             {
               label: "errors",
-              value: "10K+",
+              value: totalErrors.toLocaleString(),
               class: "badge-error",
             },
           ]}
@@ -100,7 +126,8 @@ export default define.page(function ApiKeysPage(ctx) {
         </StatsCard>
       </div>
 
-      <ApiKeysTable keys={MOCK_KEYS} />
+      <ApiKeysTable keys={keys} />
+      <ReatimeLogger />
     </div>
   );
 });

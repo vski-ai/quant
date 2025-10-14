@@ -31,7 +31,12 @@ export function createAuthStorage(connection: Connection, redis?: Redis) {
       await redisStorage.createApiKey(key);
     },
 
-    async updateApiKey(key: string, data: Partial<ApiKey>): Promise<void> {
+    async updateApiKey(id: string, data: Partial<ApiKey>): Promise<void> {
+      const keyData = await mongoStorage.getApiKeyById(id);
+      if (!keyData) {
+        throw new Error("Failed to delete api key");
+      }
+      const key = keyData.key;
       const updatedKey = await mongoStorage.updateApiKey(key, data);
       if (!updatedKey) {
         throw new ApiKeyNotFoundError(key);
@@ -39,9 +44,17 @@ export function createAuthStorage(connection: Connection, redis?: Redis) {
       await redisStorage.createApiKey(updatedKey);
     },
 
-    async deleteApiKey(key: string): Promise<void> {
-      await mongoStorage.deleteApiKey(key);
-      await redisStorage.deleteApiKey(key);
+    async deleteApiKey(id: string): Promise<void> {
+      const keyData = await mongoStorage.getApiKeyById(id);
+      if (!keyData) {
+        throw new Error("Failed to delete api key");
+      }
+      await mongoStorage.deleteApiKey(keyData.key);
+      await redisStorage.deleteApiKey(keyData.key);
+    },
+
+    async listApiKeys(filter: { owner?: string }): Promise<ApiKey[]> {
+      return await mongoStorage.listApiKeys(filter);
     },
 
     async isReportOwner(owner: string, reportId: string): Promise<boolean> {

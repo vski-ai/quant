@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno serve --env-file=.env -A --watch main.ts",
+    "dev": "deno serve --env-file=.env --port=9090 -A --watch main.ts",
     "test": "deno test -A --env-file=.env",
     "gen:client": "cd http && deno run -A npm:@hey-api/openapi-ts && deno fmt"
   },

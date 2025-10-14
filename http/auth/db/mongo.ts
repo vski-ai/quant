@@ -11,6 +11,7 @@ const QuotaSchema = new Schema({
 const ApiKeySchema = new Schema<ApiKey>({
   key: { type: String, required: true, unique: true, index: true },
   owner: { type: String, required: true, index: true },
+  name: { type: String },
   quotas: { type: QuotaSchema, required: true },
   enabled: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
@@ -50,6 +51,9 @@ export function createMongoAuthStorage(connection: Connection) {
   );
 
   return {
+    async getApiKeyById(id: string) {
+      return await ApiKeyModel.findOne({ _id: id }).lean();
+    },
     async getApiKey(key: string): Promise<ApiKey | null> {
       return await ApiKeyModel.findOne({ key }).lean();
     },
@@ -82,6 +86,9 @@ export function createMongoAuthStorage(connection: Connection) {
         { $setOnInsert: { owner, entityType, entityId } },
         { upsert: true },
       );
+    },
+    async listApiKeys(filter: { owner?: string }): Promise<ApiKey[]> {
+      return await ApiKeyModel.find(filter).lean();
     },
     async disassociateEntity(
       owner: string,

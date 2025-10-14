@@ -42,7 +42,7 @@ export class EventSource implements IEventSource {
 
   public static async create(
     engine: Engine,
-    definition: IEventSourceDefinition,
+    definition: Partial<IEventSourceDefinition>,
   ): Promise<EventSource> {
     const EventSourceDefinitionModel = getEventSourceDefinitionModel(
       engine.connection,
@@ -70,7 +70,7 @@ export class EventSource implements IEventSource {
 
   public getDefinition(): IEventSourceDefinition {
     return {
-      id: this.definitionDoc._id.toString(),
+      id: this.definitionDoc._id.toString()!,
       name: this.definitionDoc.name,
       description: this.definitionDoc.description,
       retention: (this.definitionDoc as any).retention,
@@ -106,119 +106,167 @@ export class EventSource implements IEventSource {
     return types.map(this.toEventTypeObject);
   }
 
-  public async record<T extends EventPayload>({
-    uuid,
-    eventType,
-    payload,
-    attributions,
-    timestamp,
-  }: IEventTransfer<T>): Promise<IEvent<T>> {
-    const eventTypeDoc = await this.engine.getEventTypeByName(
-      this.definitionDoc._id,
-      eventType,
-    );
+  // Overload signatures
+  public record<T extends EventPayload>(
+    event: IEventTransfer<T>,
+  ): Promise<IEvent<T>>;
+  public record<T extends EventPayload>(
+    events: IEventTransfer<T>[],
+  ): Promise<IEvent<T>[]>;
 
-    if (!eventTypeDoc) {
-      throw new Error(
-        `Event type "${eventType}" is not defined for source "${this.definitionDoc.name}". Please define it first.`,
-      );
+  public async record<T extends EventPayload>(
+    eventOrEvents: IEventTransfer<T> | IEventTransfer<T>[],
+  ): Promise<IEvent<T> | IEvent<T>[]> {
+    const wasSingle = !Array.isArray(eventOrEvents);
+    const events = wasSingle ? [eventOrEvents] : eventOrEvents;
+
+    if (events.length === 0) {
+      return wasSingle
+        ? Promise.reject("No event provided")
+        : Promise.resolve([]);
     }
 
-    // --- Plugin Hook: beforeEventRecord ---
-    const modified = await this.engine.pluginManager.executeWaterfallHook(
-      "beforeEventRecord",
-      {
-        payload,
-        eventType,
-        attributions,
-      },
+    // --- 1. Idempotency Check (in bulk) ---
+    const uuids = events.map((e) => e.uuid);
+    const existingEvents = await this.eventModel.find({ uuid: { $in: uuids } });
+    const existingUuids = new Set(existingEvents.map((e) => e.uuid));
+    const newEventsInput = events.filter((e) => !existingUuids.has(e.uuid));
+
+    // We cannot resolve eventType for existing events easily without a bulk fetch,
+    // which adds complexity. For idempotency, returning the existing doc is enough,
+    // and the caller already has the eventType. Let's return a partial object
+    // and let the full object be constructed for new events.
+    const results: Partial<IEvent<T>>[] = existingEvents.map((doc) =>
+      this.toEventObject(doc)
     );
 
-    // --- Idempotency Check ---
-    // First, try to find an event with the same UUID to prevent duplicates.
-    const existingEvent = await this.eventModel.findOne({ uuid });
-    if (existingEvent) {
-      // If found, return the existing event's data.
-      return {
-        id: existingEvent._id.toString(),
-        uuid: existingEvent.uuid,
-        eventType: eventType, // Assuming eventType matches, or we could fetch it.
-        timestamp: existingEvent.timestamp,
-        payload: existingEvent.payload as T,
-        attributions: existingEvent.attributions?.map((a: IAttribution) => ({
-          type: a.type,
-          value: a.value,
-        })),
-      };
+    if (newEventsInput.length === 0) {
+      // @ts-ignore:
+      return wasSingle ? results[0] : results;
     }
 
-    const newEventDoc = new this.eventModel({
-      uuid,
-      sourceId: this.definitionDoc._id,
-      eventTypeId: eventTypeDoc._id,
-      payload: modified.payload,
-      attributions: modified.attributions,
-      timestamp: timestamp ?? new Date(),
-    });
-    // Save the event to the database FIRST to get the permanent, server-side _id.
-    // This prevents race conditions where a temporary client-side ID might be used.
-    await newEventDoc.save();
+    // --- 2. Prepare new event documents ---
+    const docsToInsert: any[] = [];
+    const eventTypeDocs = new Map<string, IEventTypeDoc>();
 
-    // --- Plugin Hook: afterEventRecord ---
-    await this.engine.pluginManager.executeActionHook("afterEventRecord", {
-      eventDoc: newEventDoc,
-    });
-
-    // For recent events, generate metrics and push them to the real-time buffer immediately.
-
-    // Enqueue the event for durable processing by the aggregator.
-    await this.engine.aggregator.queueEventForProcessing(
-      newEventDoc._id.toString(),
-      this.eventModel.collection.name,
-    );
-
-    if (
-      this.engine.aggregator.bufferService &&
-      newEventDoc.timestamp.getTime() >
-        Date.now() - this.engine.aggregator.bufferService.bufferAgeMs
-    ) {
-      // This is a simplified, in-place metric generation for the buffer.
-      // It assumes a single, default aggregation source for real-time purposes.
-      // Fetch all active aggregation sources to find matches for this event.
-      const allActiveSources = await this.engine
-        .getAllActiveAggregationSources();
-      const configs = allActiveSources.filter((config) =>
-        config.filter?.sources.some(
-          (source: { id: string }) =>
-            source.id === newEventDoc.sourceId.toString(),
-        )
+    for (const event of newEventsInput) {
+      const eventTypeDoc = await this.engine.getEventTypeByName(
+        this.definitionDoc._id,
+        event.eventType,
       );
-      for (const config of configs) {
-        const metrics = await getMetricsFromEvent(
-          newEventDoc,
-          this.engine,
-          config.granularity ?? "minute",
-        );
-
-        // Add all generated metrics to the buffer
-        for (const metric of metrics) {
-          await this.engine.aggregator.bufferService.add(
-            config.targetCollection,
-            metric,
-          );
-        }
-        // Run the hook to notify plugins about the newly generated metrics for this config.
-        await this.engine.pluginManager.executeActionHook(
-          "afterRealtimeMetricsGenerated",
-          { reportId: config.reportId.toString(), event: newEventDoc, metrics },
+      if (!eventTypeDoc) {
+        throw new Error(
+          `Event type "${event.eventType}" is not defined for source "${this.definitionDoc.name}".`,
         );
       }
+      eventTypeDocs.set(eventTypeDoc._id.toString(), eventTypeDoc);
+
+      // --- Plugin Hook: beforeEventRecord ---
+      const modified = await this.engine.pluginManager.executeWaterfallHook(
+        "beforeEventRecord",
+        {
+          payload: event.payload,
+          eventType: event.eventType,
+          attributions: event.attributions,
+        },
+      );
+
+      docsToInsert.push({
+        uuid: event.uuid,
+        sourceId: this.definitionDoc._id,
+        eventTypeId: eventTypeDoc._id,
+        payload: modified.payload,
+        attributions: modified.attributions,
+        timestamp: event.timestamp ?? new Date(),
+      });
     }
 
+    // --- 3. Insert new documents into DB ---
+    const insertedDocs = await this.eventModel.insertMany(docsToInsert);
+
+    // Create a map from eventTypeId to eventType name for quick lookups.
+    const eventTypeIdToNameMap = new Map<string, string>();
+    for (const doc of eventTypeDocs.values()) {
+      eventTypeIdToNameMap.set(doc._id.toString(), doc.name);
+    }
+
+    // --- 4. Post-processing for newly inserted docs ---
+    for (const newEventDoc of insertedDocs) {
+      // --- Plugin Hook: afterEventRecord ---
+      await this.engine.pluginManager.executeActionHook("afterEventRecord", {
+        eventDoc: newEventDoc,
+      });
+
+      // Enqueue for durable processing
+      await this.engine.aggregator.queueEventForProcessing(
+        newEventDoc._id.toString(),
+        this.eventModel.collection.name,
+      );
+
+      // Handle real-time buffer
+      await this.processRealtime(newEventDoc as any);
+
+      results.push(
+        this.toEventObject(newEventDoc as any, eventTypeIdToNameMap),
+      );
+    }
+    // @ts-ignore:
+    return wasSingle
+      // @ts-ignore:
+      ? results.find((e) =>
+        e.uuid === (eventOrEvents as IEventTransfer<T>).uuid
+      )!
+      : results as any;
+  }
+
+  private async processRealtime(newEventDoc: IEventDoc<any>) {
+    if (
+      !this.engine.aggregator.bufferService ||
+      newEventDoc.timestamp.getTime() <
+        Date.now() - this.engine.aggregator.bufferService.bufferAgeMs
+    ) {
+      return;
+    }
+
+    const allActiveSources = await this.engine.getAllActiveAggregationSources();
+    const configs = allActiveSources.filter((config) =>
+      config.filter?.sources.some(
+        (source: { id: string }) =>
+          source.id === newEventDoc.sourceId.toString(),
+      )
+    );
+
+    for (const config of configs) {
+      const metrics = await getMetricsFromEvent(
+        newEventDoc,
+        this.engine,
+        config.granularity ?? "minute",
+      );
+
+      for (const metric of metrics) {
+        await this.engine.aggregator.bufferService.add(
+          config.targetCollection,
+          metric,
+        );
+      }
+
+      await this.engine.pluginManager.executeActionHook(
+        "afterRealtimeMetricsGenerated",
+        { reportId: config.reportId.toString(), event: newEventDoc, metrics },
+      );
+    }
+  }
+
+  private toEventObject<T extends EventPayload>(
+    newEventDoc: IEventDoc<T>,
+    typeMap?: Map<string, string>,
+  ): Partial<IEvent<T>> {
+    const eventTypeName = typeMap?.get(newEventDoc.eventTypeId.toString()) ??
+      "";
     return {
       id: newEventDoc._id.toString(),
       uuid: newEventDoc.uuid,
-      eventType: eventType,
+      eventType: eventTypeName,
       timestamp: newEventDoc.timestamp,
       payload: newEventDoc.payload as T,
       attributions: newEventDoc.attributions?.map((a: IAttribution) => ({

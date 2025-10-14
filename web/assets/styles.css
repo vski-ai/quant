@@ -39,7 +39,7 @@
   .scr {
     @apply after:content-[""] after:z-50 after:fixed after:bottom-0 after:left-0
       after:w-screen after:h-screen after:bg-gradient-to-t
-      after:from-[#ffff8016] after:to-transparent after:pointer-events-none;
+      after:from-[#02400037] after:to-transparent after:pointer-events-none;
   }
   a[aria-current="page"] {
     @apply menu-active;

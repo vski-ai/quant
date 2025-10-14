@@ -1,8 +1,8 @@
-export * from "@/http/client/client.gen.ts";
-export * from "@/http/client/index.ts";
+export * from "./client/client.gen.ts";
+export * from "./client/index.ts";
 
-import { createClient, createConfig } from "@/http/client/client/index.ts";
-import * as methods from "@/http/client/index.ts";
+import { createClient, createConfig } from "./client/client/index.ts";
+import * as methods from "./client/index.ts";
 
 export function client() {
   const keys = {

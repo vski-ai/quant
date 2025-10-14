@@ -9,7 +9,7 @@ withTestDatabase({ dbName }, async (t, engine, down) => {
   await t.step(
     "should create a new event source without any event types",
     async () => {
-      const sourceDef: IEventSourceDefinition = {
+      const sourceDef: Partial<IEventSourceDefinition> = {
         name: "TestSource1",
         description: "A test source for basic creation.",
       };
@@ -24,7 +24,7 @@ withTestDatabase({ dbName }, async (t, engine, down) => {
   await t.step(
     "should retrieve an existing event source instead of creating a new one",
     async () => {
-      const sourceDef: IEventSourceDefinition = {
+      const sourceDef: Partial<IEventSourceDefinition> = {
         name: "TestSource1",
         description: "A different description that should be ignored.",
       };
@@ -42,7 +42,7 @@ withTestDatabase({ dbName }, async (t, engine, down) => {
   await t.step(
     "should create a new event source with pre-defined event types",
     async () => {
-      const sourceDef: IEventSourceDefinition = {
+      const sourceDef: Partial<IEventSourceDefinition> = {
         name: "TestSource2",
         description: "A source created with initial types.",
         eventTypes: [
@@ -174,7 +174,7 @@ withTestDatabase({ dbName }, async (t, engine, down) => {
           });
         },
         Error, // Expected error type
-        'Event type "non_existent_event" is not defined for source "ErrorSource". Please define it first.',
+        'Event type "non_existent_event" is not defined for source "ErrorSource".',
       );
     },
   );

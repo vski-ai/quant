@@ -72,7 +72,7 @@ export interface IEventTransfer<T extends EventPayload> {
  * An Event Source is a logical grouping of events, like 'Stripe' or 'InternalApp'.
  */
 export interface IEventSourceDefinition {
-  id?: string;
+  id: string;
   name: string;
   description?: string;
   eventTypes?: IEventType[];
@@ -111,7 +111,18 @@ export interface IEventSource {
    * @param attributions Optional array of attributions to link this event.
    * @returns A promise that resolves to the recorded event.
    */
-  record<T extends EventPayload>(evt: IEventTransfer<T>): Promise<IEvent<T>>;
+  record<T extends EventPayload>(event: IEventTransfer<T>): Promise<IEvent<T>>;
+  /**
+   * Records a batch of new events for this source. This is optimized for performance.
+   * @param events An array of event transfers to record.
+   * @returns A promise that resolves to an array of the recorded events.
+   */
+  record<T extends EventPayload>(
+    events: IEventTransfer<T>[],
+  ): Promise<Partial<IEvent<T>>[]>;
+  record<T extends EventPayload>(
+    eventOrEvents: IEventTransfer<T> | IEventTransfer<T>[],
+  ): Promise<Partial<IEvent<T>> | Partial<IEvent<T>>[]>;
 }
 
 /**

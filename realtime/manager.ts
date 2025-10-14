@@ -25,7 +25,7 @@ export class RealtimeManager {
   // Manages local connections for this specific instance.
   private subscriptions = new Map<string, Set<RealtimeConnection>>();
 
-  constructor(engine: Engine) {
+  constructor(engine: Engine, private masterKey: string) {
     // It's best practice to use separate Redis clients for regular commands and for Pub/Sub.
     this.engine = engine;
     const redis = engine.redisClient;
@@ -47,25 +47,27 @@ export class RealtimeManager {
     connection: RealtimeConnection,
     apiKey: string,
   ) {
-    const reportId = this.getReportIdFromChannel(channel);
-    if (!reportId) {
-      throw new Error(
-        "Invalid channel format. Expected 'report:updates:<reportId>'.",
-      );
-    }
+    if (apiKey !== this.masterKey) {
+      const reportId = this.getReportIdFromChannel(channel);
+      if (!reportId) {
+        throw new Error(
+          "Invalid channel format. Expected 'report:updates:<reportId>'.",
+        );
+      }
 
-    // Use the auth service provided by the auth plugin on the engine.
-    // We assume the auth plugin adds `engine.auth.validate(...)`.
-    const authResult = await this.engine.auth.validate(apiKey, { reportId });
+      // Use the auth service provided by the auth plugin on the engine.
+      // We assume the auth plugin adds `engine.auth.validate(...)`.
+      const authResult = await this.engine.auth.validate(apiKey, { reportId });
 
-    if (!authResult.valid) {
-      // Log the specific reason for internal diagnostics but send a generic error to the client.
-      console.warn(
-        `[RealtimeManager] Auth failed for channel ${channel}: ${authResult.reason}`,
-      );
-      throw new Error(
-        "Invalid API Key or insufficient permissions for this report.",
-      );
+      if (!authResult.valid) {
+        // Log the specific reason for internal diagnostics but send a generic error to the client.
+        console.warn(
+          `[RealtimeManager] Auth failed for channel ${channel}: ${authResult.reason}`,
+        );
+        throw new Error(
+          "Invalid API Key or insufficient permissions for this report.",
+        );
+      }
     }
 
     console.log(

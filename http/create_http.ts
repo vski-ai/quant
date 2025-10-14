@@ -1,11 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import {
-  GenerateSpecOptions,
-  generateSpecs,
-  openAPIRouteHandler,
-} from "hono-openapi";
+import { GenerateSpecOptions, generateSpecs } from "hono-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
 
 import { createApiRouter } from "./routes/index.ts";
@@ -41,7 +37,7 @@ export async function createHttp(
 
   // Register all other API routes under the /api path, which IS protected by auth middleware.
   console.log(`Registering ${apiPlugins.length} plugins under /api namespace.`);
-  const apiRouter = createApiRouter(engine, apiPlugins);
+  const apiRouter = await createApiRouter(engine, apiPlugins);
   app.route("/api", apiRouter);
 
   // --- OpenAPI Documentation ---

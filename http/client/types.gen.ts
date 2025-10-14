@@ -4,9 +4,51 @@ export type ClientOptions = {
   baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type GetApiAuthKeysData = {
+  body?: never;
+  path?: never;
+  query?: {
+    owner?: string;
+  };
+  url: "/api/auth/keys";
+};
+
+export type GetApiAuthKeysErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+};
+
+export type GetApiAuthKeysError =
+  GetApiAuthKeysErrors[keyof GetApiAuthKeysErrors];
+
+export type GetApiAuthKeysResponses = {
+  /**
+   * A list of API keys
+   */
+  200: Array<{
+    key: string;
+    owner: string;
+    name?: string;
+    quotas: {
+      requestsPerSecond: number;
+      requestsPerDay: number;
+      totalRequests: number;
+    };
+    enabled: boolean;
+  }>;
+};
+
+export type GetApiAuthKeysResponse =
+  GetApiAuthKeysResponses[keyof GetApiAuthKeysResponses];
+
 export type PostApiAuthKeysData = {
   body?: {
     owner: string;
+    name?: string;
     quotas: {
       requestsPerSecond: number;
       requestsPerDay: number;
@@ -43,6 +85,7 @@ export type PostApiAuthKeysResponses = {
   201: {
     key: string;
     owner: string;
+    name?: string;
     quotas: {
       requestsPerSecond: number;
       requestsPerDay: number;
@@ -55,16 +98,16 @@ export type PostApiAuthKeysResponses = {
 export type PostApiAuthKeysResponse =
   PostApiAuthKeysResponses[keyof PostApiAuthKeysResponses];
 
-export type DeleteApiAuthKeysKeyData = {
+export type DeleteApiAuthKeysIdData = {
   body?: never;
   path: {
-    key: string;
+    id: string;
   };
   query?: never;
-  url: "/api/auth/keys/{key}";
+  url: "/api/auth/keys/{id}";
 };
 
-export type DeleteApiAuthKeysKeyErrors = {
+export type DeleteApiAuthKeysIdErrors = {
   /**
    * Error response
    */
@@ -73,10 +116,10 @@ export type DeleteApiAuthKeysKeyErrors = {
   };
 };
 
-export type DeleteApiAuthKeysKeyError =
-  DeleteApiAuthKeysKeyErrors[keyof DeleteApiAuthKeysKeyErrors];
+export type DeleteApiAuthKeysIdError =
+  DeleteApiAuthKeysIdErrors[keyof DeleteApiAuthKeysIdErrors];
 
-export type DeleteApiAuthKeysKeyResponses = {
+export type DeleteApiAuthKeysIdResponses = {
   /**
    * Successful operation
    */
@@ -85,19 +128,19 @@ export type DeleteApiAuthKeysKeyResponses = {
   };
 };
 
-export type DeleteApiAuthKeysKeyResponse =
-  DeleteApiAuthKeysKeyResponses[keyof DeleteApiAuthKeysKeyResponses];
+export type DeleteApiAuthKeysIdResponse =
+  DeleteApiAuthKeysIdResponses[keyof DeleteApiAuthKeysIdResponses];
 
-export type GetApiAuthKeysKeyData = {
+export type GetApiAuthKeysIdData = {
   body?: never;
   path: {
-    key: string;
+    id: string;
   };
   query?: never;
-  url: "/api/auth/keys/{key}";
+  url: "/api/auth/keys/{id}";
 };
 
-export type GetApiAuthKeysKeyErrors = {
+export type GetApiAuthKeysIdErrors = {
   /**
    * Error response
    */
@@ -112,16 +155,17 @@ export type GetApiAuthKeysKeyErrors = {
   };
 };
 
-export type GetApiAuthKeysKeyError =
-  GetApiAuthKeysKeyErrors[keyof GetApiAuthKeysKeyErrors];
+export type GetApiAuthKeysIdError =
+  GetApiAuthKeysIdErrors[keyof GetApiAuthKeysIdErrors];
 
-export type GetApiAuthKeysKeyResponses = {
+export type GetApiAuthKeysIdResponses = {
   /**
    * API key details
    */
   200: {
     key: string;
     owner: string;
+    name?: string;
     quotas: {
       requestsPerSecond: number;
       requestsPerDay: number;
@@ -131,12 +175,13 @@ export type GetApiAuthKeysKeyResponses = {
   };
 };
 
-export type GetApiAuthKeysKeyResponse =
-  GetApiAuthKeysKeyResponses[keyof GetApiAuthKeysKeyResponses];
+export type GetApiAuthKeysIdResponse =
+  GetApiAuthKeysIdResponses[keyof GetApiAuthKeysIdResponses];
 
-export type PatchApiAuthKeysKeyData = {
+export type PatchApiAuthKeysIdData = {
   body?: {
     owner?: string;
+    name?: string;
     quotas?: {
       requestsPerSecond?: number;
       requestsPerDay?: number;
@@ -145,13 +190,13 @@ export type PatchApiAuthKeysKeyData = {
     enabled?: boolean;
   };
   path: {
-    key: string;
+    id: string;
   };
   query?: never;
-  url: "/api/auth/keys/{key}";
+  url: "/api/auth/keys/{id}";
 };
 
-export type PatchApiAuthKeysKeyErrors = {
+export type PatchApiAuthKeysIdErrors = {
   /**
    * Error response
    */
@@ -172,16 +217,17 @@ export type PatchApiAuthKeysKeyErrors = {
   };
 };
 
-export type PatchApiAuthKeysKeyError =
-  PatchApiAuthKeysKeyErrors[keyof PatchApiAuthKeysKeyErrors];
+export type PatchApiAuthKeysIdError =
+  PatchApiAuthKeysIdErrors[keyof PatchApiAuthKeysIdErrors];
 
-export type PatchApiAuthKeysKeyResponses = {
+export type PatchApiAuthKeysIdResponses = {
   /**
    * API key updated successfully
    */
   200: {
     key: string;
     owner: string;
+    name?: string;
     quotas: {
       requestsPerSecond: number;
       requestsPerDay: number;
@@ -191,8 +237,8 @@ export type PatchApiAuthKeysKeyResponses = {
   };
 };
 
-export type PatchApiAuthKeysKeyResponse =
-  PatchApiAuthKeysKeyResponses[keyof PatchApiAuthKeysKeyResponses];
+export type PatchApiAuthKeysIdResponse =
+  PatchApiAuthKeysIdResponses[keyof PatchApiAuthKeysIdResponses];
 
 export type GetApiAuthUsageData = {
   body?: never;
@@ -238,6 +284,92 @@ export type GetApiAuthUsageResponses = {
 
 export type GetApiAuthUsageResponse =
   GetApiAuthUsageResponses[keyof GetApiAuthUsageResponses];
+
+export type PostApiAuthUsageReportData = {
+  body?: {
+    metric?: {
+      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      field?: string;
+    };
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity: string;
+    owner?: string;
+  };
+  path?: never;
+  query?: {
+    realtime?: string;
+  };
+  url: "/api/auth/usage/report";
+};
+
+export type PostApiAuthUsageReportErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+};
+
+export type PostApiAuthUsageReportError =
+  PostApiAuthUsageReportErrors[keyof PostApiAuthUsageReportErrors];
+
+export type PostApiAuthUsageReportResponses = {
+  /**
+   * Usage report data
+   */
+  200: Array<{
+    timestamp: string;
+    value: number;
+    category?: string;
+  }>;
+};
+
+export type PostApiAuthUsageReportResponse =
+  PostApiAuthUsageReportResponses[keyof PostApiAuthUsageReportResponses];
+
+export type PostApiAuthUsageDatasetData = {
+  body?: {
+    metrics?: Array<string>;
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity: string;
+  };
+  path?: never;
+  query?: {
+    realtime?: string;
+  };
+  url: "/api/auth/usage/dataset";
+};
+
+export type PostApiAuthUsageDatasetErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+};
+
+export type PostApiAuthUsageDatasetError =
+  PostApiAuthUsageDatasetErrors[keyof PostApiAuthUsageDatasetErrors];
+
+export type PostApiAuthUsageDatasetResponses = {
+  /**
+   * Usage dataset data
+   */
+  200: Array<{
+    timestamp: string;
+  }>;
+};
+
+export type PostApiAuthUsageDatasetResponse =
+  PostApiAuthUsageDatasetResponses[keyof PostApiAuthUsageDatasetResponses];
 
 export type PostApiEventsSourceEventsData = {
   body?: {

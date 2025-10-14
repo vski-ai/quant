@@ -3,6 +3,7 @@ import { RouteConfig } from "fresh";
 import UserIcon from "lucide-react/dist/esm/icons/user.js";
 import FolderKeyIcon from "lucide-react/dist/esm/icons/folder-key.js";
 import LayoutDashboardIcon from "lucide-react/dist/esm/icons/layout-dashboard.js";
+import ShieldIcon from "lucide-react/dist/esm/icons/shield.js";
 import { AsideSwitch } from "@/islands/navbar/AsideSwitch.tsx";
 import { AsideFold } from "@/islands/navbar/AsideFold.tsx";
 import { ThemeSwitch } from "@/islands/navbar/ThemeSwitch.tsx";
@@ -12,6 +13,8 @@ export const config: RouteConfig = {
 };
 
 export default define.layout(function ({ Component, state, url }) {
+  const isAdmin = state.user?.roles.includes("admin");
+
   return (
     <html>
       {
@@ -50,6 +53,14 @@ export default define.layout(function ({ Component, state, url }) {
                   API Keys
                 </a>
               </li>
+              {isAdmin && (
+                <li>
+                  <a href="/app/admin" class="aria-[current=page]:active">
+                    <ShieldIcon />
+                    Admin
+                  </a>
+                </li>
+              )}
             </ul>
             <div className="main-aside-bottom">
               <a

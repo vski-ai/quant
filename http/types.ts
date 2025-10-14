@@ -6,6 +6,7 @@ export type HonoEnv = {
   Variables: {
     engine: Engine;
     authStorage: AuthStorage;
+    authReportId: string;
   };
 };
 
