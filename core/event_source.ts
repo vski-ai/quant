@@ -73,6 +73,7 @@ export class EventSource implements IEventSource {
       id: this.definitionDoc._id.toString()!,
       name: this.definitionDoc.name,
       description: this.definitionDoc.description,
+      owners: this.definitionDoc.owners,
       retention: (this.definitionDoc as any).retention,
     };
   }

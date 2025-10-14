@@ -13,6 +13,9 @@ import type {
   DeleteApiAuthKeysIdData,
   DeleteApiAuthKeysIdErrors,
   DeleteApiAuthKeysIdResponses,
+  DeleteApiEventSourcesIdData,
+  DeleteApiEventSourcesIdErrors,
+  DeleteApiEventSourcesIdResponses,
   DeleteApiReportsIdData,
   DeleteApiReportsIdErrors,
   DeleteApiReportsIdResponses,
@@ -30,12 +33,12 @@ import type {
   GetApiAuthUsageResponses,
   GetApiEventSourcesData,
   GetApiEventSourcesErrors,
-  GetApiEventSourcesNameData,
-  GetApiEventSourcesNameErrors,
-  GetApiEventSourcesNameEventTypesData,
-  GetApiEventSourcesNameEventTypesErrors,
-  GetApiEventSourcesNameEventTypesResponses,
-  GetApiEventSourcesNameResponses,
+  GetApiEventSourcesIdData,
+  GetApiEventSourcesIdErrors,
+  GetApiEventSourcesIdEventsData,
+  GetApiEventSourcesIdEventsErrors,
+  GetApiEventSourcesIdEventsResponses,
+  GetApiEventSourcesIdResponses,
   GetApiEventSourcesResponses,
   GetApiReportsData,
   GetApiReportsErrors,
@@ -46,6 +49,9 @@ import type {
   PatchApiAuthKeysIdData,
   PatchApiAuthKeysIdErrors,
   PatchApiAuthKeysIdResponses,
+  PatchApiEventSourcesIdData,
+  PatchApiEventSourcesIdErrors,
+  PatchApiEventSourcesIdResponses,
   PatchApiReportsIdData,
   PatchApiReportsIdErrors,
   PatchApiReportsIdResponses,
@@ -377,14 +383,14 @@ export const postApiEventSources = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Get an Event Source by name
+ * Delete an Event Source
  */
-export const getApiEventSourcesName = <ThrowOnError extends boolean = false>(
-  options: Options<GetApiEventSourcesNameData, ThrowOnError>,
+export const deleteApiEventSourcesId = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteApiEventSourcesIdData, ThrowOnError>,
 ) => {
-  return (options.client ?? client).get<
-    GetApiEventSourcesNameResponses,
-    GetApiEventSourcesNameErrors,
+  return (options.client ?? client).delete<
+    DeleteApiEventSourcesIdResponses,
+    DeleteApiEventSourcesIdErrors,
     ThrowOnError
   >({
     security: [
@@ -397,20 +403,20 @@ export const getApiEventSourcesName = <ThrowOnError extends boolean = false>(
         type: "apiKey",
       },
     ],
-    url: "/api/event-sources/{name}",
+    url: "/api/event-sources/{id}",
     ...options,
   });
 };
 
 /**
- * List Event Types for a Source
+ * Get an Event Source by ID
  */
-export const getApiEventSourcesNameEventTypes = <
-  ThrowOnError extends boolean = false,
->(options: Options<GetApiEventSourcesNameEventTypesData, ThrowOnError>) => {
+export const getApiEventSourcesId = <ThrowOnError extends boolean = false>(
+  options: Options<GetApiEventSourcesIdData, ThrowOnError>,
+) => {
   return (options.client ?? client).get<
-    GetApiEventSourcesNameEventTypesResponses,
-    GetApiEventSourcesNameEventTypesErrors,
+    GetApiEventSourcesIdResponses,
+    GetApiEventSourcesIdErrors,
     ThrowOnError
   >({
     security: [
@@ -423,7 +429,63 @@ export const getApiEventSourcesNameEventTypes = <
         type: "apiKey",
       },
     ],
-    url: "/api/event-sources/{name}/event-types",
+    url: "/api/event-sources/{id}",
+    ...options,
+  });
+};
+
+/**
+ * Update an Event Source
+ */
+export const patchApiEventSourcesId = <ThrowOnError extends boolean = false>(
+  options: Options<PatchApiEventSourcesIdData, ThrowOnError>,
+) => {
+  return (options.client ?? client).patch<
+    PatchApiEventSourcesIdResponses,
+    PatchApiEventSourcesIdErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/event-sources/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Get recent events for an Event Source
+ */
+export const getApiEventSourcesIdEvents = <
+  ThrowOnError extends boolean = false,
+>(options: Options<GetApiEventSourcesIdEventsData, ThrowOnError>) => {
+  return (options.client ?? client).get<
+    GetApiEventSourcesIdEventsResponses,
+    GetApiEventSourcesIdEventsErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/event-sources/{id}/events",
     ...options,
   });
 };

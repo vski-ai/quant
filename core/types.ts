@@ -75,6 +75,7 @@ export interface IEventSourceDefinition {
   id: string;
   name: string;
   description?: string;
+  owners?: string[];
   eventTypes?: IEventType[];
   retention?: IRetentionPolicy;
 }

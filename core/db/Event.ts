@@ -9,6 +9,7 @@ export const EventSourceDefinitionSchema = new Schema({
   name: { type: String, required: true, unique: true, index: true },
   description: { type: String },
   retention: { type: Schema.Types.Mixed },
+  owners: { type: [String] },
   // eventTypes are now managed separately in their own collection
 }, { timestamps: true });
 
@@ -77,6 +78,7 @@ export interface IEventSourceDefinitionDoc extends Document {
   _id: Types.ObjectId;
   name: string;
   description?: string;
+  owners?: string[];
 }
 
 export interface IEventTypeDoc extends Document {
@@ -143,4 +145,26 @@ export function getEventModel<T extends EventPayload>(
       createEventSchema(),
       collectionName,
     );
+}
+
+/**
+ * Retrieves the most recent events for a given event source.
+ * @param connection The Mongoose connection.
+ * @param sourceName The sanitized name of the event source.
+ * @param limit The maximum number of events to return.
+ * @returns A promise that resolves to an array of event documents.
+ */
+export async function getRecentEvents<T extends EventPayload>(
+  connection: Connection,
+  sourceName: string,
+  limit: number,
+): Promise<IEventDoc<T>[]> {
+  const eventModel = getEventModel<T>(
+    connection,
+    `events_${sourceName.toLowerCase()}`,
+  );
+  return await eventModel.find()
+    .sort({ timestamp: -1 })
+    .limit(limit)
+    .lean() as IEventDoc<T>[];
 }

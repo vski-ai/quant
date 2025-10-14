@@ -1001,6 +1001,12 @@
                     "description": {
                       "type": "string"
                     },
+                    "owners": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "eventTypes": {
                       "type": "array",
                       "items": {
@@ -1054,6 +1060,12 @@
                   "description": {
                     "type": "string"
                   },
+                  "owners": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
                   "eventTypes": {
                     "type": "array",
                     "items": {
@@ -1104,6 +1116,12 @@
                       },
                       "description": {
                         "type": "string"
+                      },
+                      "owners": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
                       },
                       "eventTypes": {
                         "type": "array",
@@ -1164,16 +1182,25 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "owners",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
-    "/api/event-sources/{name}": {
+    "/api/event-sources/{id}": {
       "get": {
-        "operationId": "getApiEvent-sources:name",
+        "operationId": "getApiEvent-sources:id",
         "tags": [
           "Event Sources"
         ],
-        "summary": "Get an Event Source by name",
+        "summary": "Get an Event Source by ID",
         "responses": {
           "200": {
             "description": "A single event source definition",
@@ -1190,6 +1217,12 @@
                     },
                     "description": {
                       "type": "string"
+                    },
+                    "owners": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "eventTypes": {
                       "type": "array",
@@ -1274,40 +1307,173 @@
               "type": "string"
             },
             "in": "path",
-            "name": "name",
+            "name": "id",
             "required": true
           }
         ]
-      }
-    },
-    "/api/event-sources/{name}/event-types": {
-      "get": {
-        "operationId": "getApiEvent-sources:nameEvent-types",
+      },
+      "patch": {
+        "operationId": "patchApiEvent-sources:id",
         "tags": [
           "Event Sources"
         ],
-        "summary": "List Event Types for a Source",
+        "summary": "Update an Event Source",
         "responses": {
           "200": {
-            "description": "A list of event types for the source",
+            "description": "Event source updated successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "owners": {
+                      "type": "array",
+                      "items": {
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "name"
-                    ]
+                    "eventTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    },
+                    "retention": {
+                      "type": "object",
+                      "properties": {
+                        "hotDays": {
+                          "type": "number"
+                        },
+                        "offloaderPlugin": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "hotDays"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "owners": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteApiEvent-sources:id",
+        "tags": [
+          "Event Sources"
+        ],
+        "summary": "Delete an Event Source",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
                 }
               }
             }
@@ -1355,7 +1521,82 @@
               "type": "string"
             },
             "in": "path",
-            "name": "name",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/event-sources/{id}/events": {
+      "get": {
+        "operationId": "getApiEvent-sources:idEvents",
+        "tags": [
+          "Event Sources"
+        ],
+        "summary": "Get recent events for an Event Source",
+        "responses": {
+          "200": {
+            "description": "A list of recent events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
             "required": true
           }
         ]

@@ -17,8 +17,8 @@ export default define.layout(function App({ Component, state }) {
           />
         </nav>
         <main className="flex w-full bg-base-300">
+          <Component />
         </main>
-        <Component />
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import {
   createEventModel,
   getEventSourceDefinitionModel,
   getEventTypeModel,
+  getRecentEvents,
   IEventSourceDefinitionDoc,
   IEventTypeDoc,
 } from "./db/Event.ts";
@@ -352,6 +353,52 @@ export class Engine {
       return [];
     }
     return this.EventTypeModel.find({ sourceId: source._id }).lean();
+  }
+
+  public async getRecentEvents(sourceId: string, limit = 20) {
+    const source = await this.getEventSourceDefinitionById(sourceId);
+    if (!source) {
+      return [];
+    }
+    return getRecentEvents(this.connection, source.name, limit);
+  }
+
+  public async updateEventSource(
+    id: string,
+    updates: Partial<IEventSourceDefinition>,
+  ): Promise<IEventSourceDefinitionDoc | null> {
+    const updated = await this.eventSourceDefinitionModel.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true },
+    ).lean();
+
+    if (updated) {
+      await this.eventSourceDefCache.set(`id:${id}`, updated);
+    }
+    return updated;
+  }
+
+  public async deleteEventSource(id: string): Promise<void> {
+    const source = await this.eventSourceDefinitionModel.findById(id).lean();
+    if (!source) {
+      return;
+    }
+
+    await this.eventTypeModel.deleteMany({ sourceId: source._id });
+
+    const collectionName = `events_${source.name.toLowerCase()}`;
+    try {
+      await this.connection.dropCollection(collectionName);
+    } catch (error) {
+      if (!(error as any).message.includes("ns not found")) {
+        throw error;
+      }
+    }
+
+    await this.eventSourceDefinitionModel.findByIdAndDelete(id);
+
+    await this.eventSourceDefCache.del(`id:${id}`);
   }
 
   public getReport(

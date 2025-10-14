@@ -412,7 +412,9 @@ export type PostApiEventsSourceEventsResponses = {
 export type GetApiEventSourcesData = {
   body?: never;
   path?: never;
-  query?: never;
+  query?: {
+    owners?: string;
+  };
   url: "/api/event-sources";
 };
 
@@ -436,6 +438,7 @@ export type GetApiEventSourcesResponses = {
     id: string;
     name: string;
     description?: string;
+    owners?: Array<string>;
     eventTypes?: Array<{
       name: string;
       description?: string;
@@ -454,6 +457,7 @@ export type PostApiEventSourcesData = {
   body?: {
     name: string;
     description?: string;
+    owners?: Array<string>;
     eventTypes?: Array<{
       name: string;
       description?: string;
@@ -472,6 +476,7 @@ export type PostApiEventSourcesResponses = {
     id: string;
     name: string;
     description?: string;
+    owners?: Array<string>;
     eventTypes?: Array<{
       name: string;
       description?: string;
@@ -486,16 +491,16 @@ export type PostApiEventSourcesResponses = {
 export type PostApiEventSourcesResponse =
   PostApiEventSourcesResponses[keyof PostApiEventSourcesResponses];
 
-export type GetApiEventSourcesNameData = {
+export type DeleteApiEventSourcesIdData = {
   body?: never;
   path: {
-    name: string;
+    id: string;
   };
   query?: never;
-  url: "/api/event-sources/{name}";
+  url: "/api/event-sources/{id}";
 };
 
-export type GetApiEventSourcesNameErrors = {
+export type DeleteApiEventSourcesIdErrors = {
   /**
    * Error response
    */
@@ -510,10 +515,49 @@ export type GetApiEventSourcesNameErrors = {
   };
 };
 
-export type GetApiEventSourcesNameError =
-  GetApiEventSourcesNameErrors[keyof GetApiEventSourcesNameErrors];
+export type DeleteApiEventSourcesIdError =
+  DeleteApiEventSourcesIdErrors[keyof DeleteApiEventSourcesIdErrors];
 
-export type GetApiEventSourcesNameResponses = {
+export type DeleteApiEventSourcesIdResponses = {
+  /**
+   * Successful operation
+   */
+  200: {
+    success: boolean;
+  };
+};
+
+export type DeleteApiEventSourcesIdResponse =
+  DeleteApiEventSourcesIdResponses[keyof DeleteApiEventSourcesIdResponses];
+
+export type GetApiEventSourcesIdData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/event-sources/{id}";
+};
+
+export type GetApiEventSourcesIdErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiEventSourcesIdError =
+  GetApiEventSourcesIdErrors[keyof GetApiEventSourcesIdErrors];
+
+export type GetApiEventSourcesIdResponses = {
   /**
    * A single event source definition
    */
@@ -521,6 +565,7 @@ export type GetApiEventSourcesNameResponses = {
     id: string;
     name: string;
     description?: string;
+    owners?: Array<string>;
     eventTypes?: Array<{
       name: string;
       description?: string;
@@ -532,19 +577,23 @@ export type GetApiEventSourcesNameResponses = {
   };
 };
 
-export type GetApiEventSourcesNameResponse =
-  GetApiEventSourcesNameResponses[keyof GetApiEventSourcesNameResponses];
+export type GetApiEventSourcesIdResponse =
+  GetApiEventSourcesIdResponses[keyof GetApiEventSourcesIdResponses];
 
-export type GetApiEventSourcesNameEventTypesData = {
-  body?: never;
+export type PatchApiEventSourcesIdData = {
+  body?: {
+    name?: string;
+    description?: string;
+    owners?: Array<string>;
+  };
   path: {
-    name: string;
+    id: string;
   };
   query?: never;
-  url: "/api/event-sources/{name}/event-types";
+  url: "/api/event-sources/{id}";
 };
 
-export type GetApiEventSourcesNameEventTypesErrors = {
+export type PatchApiEventSourcesIdErrors = {
   /**
    * Error response
    */
@@ -559,24 +608,71 @@ export type GetApiEventSourcesNameEventTypesErrors = {
   };
 };
 
-export type GetApiEventSourcesNameEventTypesError =
-  GetApiEventSourcesNameEventTypesErrors[
-    keyof GetApiEventSourcesNameEventTypesErrors
-  ];
+export type PatchApiEventSourcesIdError =
+  PatchApiEventSourcesIdErrors[keyof PatchApiEventSourcesIdErrors];
 
-export type GetApiEventSourcesNameEventTypesResponses = {
+export type PatchApiEventSourcesIdResponses = {
   /**
-   * A list of event types for the source
+   * Event source updated successfully
    */
-  200: Array<{
+  200: {
+    id: string;
     name: string;
     description?: string;
-  }>;
+    owners?: Array<string>;
+    eventTypes?: Array<{
+      name: string;
+      description?: string;
+    }>;
+    retention?: {
+      hotDays: number;
+      offloaderPlugin?: string;
+    };
+  };
 };
 
-export type GetApiEventSourcesNameEventTypesResponse =
-  GetApiEventSourcesNameEventTypesResponses[
-    keyof GetApiEventSourcesNameEventTypesResponses
+export type PatchApiEventSourcesIdResponse =
+  PatchApiEventSourcesIdResponses[keyof PatchApiEventSourcesIdResponses];
+
+export type GetApiEventSourcesIdEventsData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: {
+    limit?: string;
+  };
+  url: "/api/event-sources/{id}/events";
+};
+
+export type GetApiEventSourcesIdEventsErrors = {
+  /**
+   * Error response
+   */
+  401: {
+    error: string;
+  };
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type GetApiEventSourcesIdEventsError =
+  GetApiEventSourcesIdEventsErrors[keyof GetApiEventSourcesIdEventsErrors];
+
+export type GetApiEventSourcesIdEventsResponses = {
+  /**
+   * A list of recent events
+   */
+  200: Array<unknown>;
+};
+
+export type GetApiEventSourcesIdEventsResponse =
+  GetApiEventSourcesIdEventsResponses[
+    keyof GetApiEventSourcesIdEventsResponses
   ];
 
 export type GetApiAggregationSourcesData = {

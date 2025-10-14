@@ -28,8 +28,8 @@ export default function ConfirmDialog(
         <h3 class="font-bold text-lg">Confirmation</h3>
         <p class="py-4">{message}</p>
         <div class="modal-action">
-          <button class="btn" onClick={handleClose}>Cancel</button>
-          <button class="btn btn-error" onClick={handleConfirm}>Confirm</button>
+          <a class="btn" onClick={handleClose}>Cancel</a>
+          <a class="btn btn-error" onClick={handleConfirm}>Confirm</a>
         </div>
       </div>
     </div>

@@ -10,7 +10,6 @@ import api from "@/db/quant.ts";
 import { obfuscate } from "@/shared/obfuscate.ts";
 import { ApiKey } from "@/quant/http/auth/types.ts";
 import { AggregationType, Granularity } from "@/quant/core/types.ts";
-import ReatimeLogger from "@/islands/RealtimeLogger.tsx";
 
 export const handler = define.handlers({
   async GET(ctx) {
@@ -85,13 +84,13 @@ export default define.page((ctx) => {
     : `${period.slice(0, -1)} days`;
 
   return (
-    <div class="p-4 md:p-8">
+    <div class="dashboard-page">
       <Head>
         <title>API Keys</title>
       </Head>
 
-      <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold mb-8">
+      <div class="flex justify-between items-center mb-12">
+        <h1 class="text-2xl font-bold">
           API Keys
         </h1>
         <div class="flex gap-2">
@@ -99,6 +98,7 @@ export default define.page((ctx) => {
           <GranularitySelector granularity={granularity} />
         </div>
       </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         <StatsCard
           periodLabel={periodLabel}
@@ -127,7 +127,6 @@ export default define.page((ctx) => {
       </div>
 
       <ApiKeysTable keys={keys} />
-      <ReatimeLogger />
     </div>
   );
 });

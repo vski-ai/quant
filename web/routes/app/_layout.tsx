@@ -1,19 +1,22 @@
 import { define } from "@/root.ts";
 import { RouteConfig } from "fresh";
+import { AsideSwitch } from "@/islands/navbar/AsideSwitch.tsx";
+import { AsideFold } from "@/islands/navbar/AsideFold.tsx";
+import { ThemeSwitch } from "@/islands/navbar/ThemeSwitch.tsx";
+import { Roles } from "@/db/models.ts";
+
 import UserIcon from "lucide-react/dist/esm/icons/user.js";
 import FolderKeyIcon from "lucide-react/dist/esm/icons/folder-key.js";
 import LayoutDashboardIcon from "lucide-react/dist/esm/icons/layout-dashboard.js";
 import ShieldIcon from "lucide-react/dist/esm/icons/shield.js";
-import { AsideSwitch } from "@/islands/navbar/AsideSwitch.tsx";
-import { AsideFold } from "@/islands/navbar/AsideFold.tsx";
-import { ThemeSwitch } from "@/islands/navbar/ThemeSwitch.tsx";
+import PlugZapIcon from "lucide-react/dist/esm/icons/plug-zap.js";
 
 export const config: RouteConfig = {
   skipInheritedLayouts: true,
 };
 
 export default define.layout(function ({ Component, state, url }) {
-  const isAdmin = state.user?.roles.includes("admin");
+  const isAdmin = state.user?.roles.includes(Roles.admin);
 
   return (
     <html>
@@ -45,6 +48,12 @@ export default define.layout(function ({ Component, state, url }) {
                 <a href="/app" class="aria-[current=page]:active">
                   <LayoutDashboardIcon />
                   Dashboard
+                </a>
+              </li>
+              <li>
+                <a href="/app/sources" class="aria-[current=page]:active">
+                  <PlugZapIcon />
+                  Event Sources
                 </a>
               </li>
               <li>

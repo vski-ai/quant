@@ -7,7 +7,7 @@ export default define.page(function Home(ctx) {
   const count = useSignal(3);
 
   return (
-    <div class="px-4 py-8 mx-auto fresh-gradient ">
+    <div class="dashboard-page fresh-gradient ">
       <Head>
         <title>App</title>
       </Head>
