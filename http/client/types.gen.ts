@@ -739,6 +739,13 @@ export type GetApiAggregationSourcesResponses = {
       payloadField?: string;
       categoryField?: string;
     }>;
+    filter?: {
+      sources: Array<{
+        id: string;
+        name: string;
+      }>;
+      events: Array<string>;
+    };
   }>;
 };
 
@@ -847,6 +854,13 @@ export type PostApiAggregationSourcesResponses = {
       payloadField?: string;
       categoryField?: string;
     }>;
+    filter?: {
+      sources: Array<{
+        id: string;
+        name: string;
+      }>;
+      events: Array<string>;
+    };
   };
 };
 
@@ -905,7 +919,9 @@ export type DeleteApiAggregationSourcesSourceIdResponse =
 export type GetApiReportsData = {
   body?: never;
   path?: never;
-  query?: never;
+  query?: {
+    owners?: string;
+  };
   url: "/api/reports";
 };
 
@@ -944,7 +960,9 @@ export type PostApiReportsData = {
     active?: boolean;
   };
   path?: never;
-  query?: never;
+  query?: {
+    owner?: string;
+  };
   url: "/api/reports";
 };
 
@@ -1028,7 +1046,7 @@ export type PostApiReportsIdDataResponses = {
    * Report data
    */
   200: Array<{
-    time: string;
+    timestamp: string;
     value: number;
     category?: string;
   }>;

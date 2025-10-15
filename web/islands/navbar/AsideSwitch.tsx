@@ -6,7 +6,7 @@ export function AsideSwitch() {
   return (
     <a
       role="button"
-      className="btn btn-ghost"
+      className="btn btn-circle ml-2 border border-primary text-primary"
       onClick={() => {
         document.body.dataset.aside = document.body.dataset.aside === "1"
           ? "0"

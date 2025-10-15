@@ -10,6 +10,7 @@ import FolderKeyIcon from "lucide-react/dist/esm/icons/folder-key.js";
 import LayoutDashboardIcon from "lucide-react/dist/esm/icons/layout-dashboard.js";
 import ShieldIcon from "lucide-react/dist/esm/icons/shield.js";
 import PlugZapIcon from "lucide-react/dist/esm/icons/plug-zap.js";
+import ChartIcon from "lucide-react/dist/esm/icons/chart-column-increasing.js";
 
 export const config: RouteConfig = {
   skipInheritedLayouts: true,
@@ -51,10 +52,18 @@ export default define.layout(function ({ Component, state, url }) {
                 </a>
               </li>
               <li>
-                <a href="/app/sources" class="aria-[current=page]:active">
-                  <PlugZapIcon />
-                  Event Sources
+                <a href="/app/reports" class="aria-[current=page]:active">
+                  <ChartIcon />
+                  Reports
                 </a>
+                <ul class="dense:ml-0 dense:pl-0">
+                  <li>
+                    <a href="/app/sources" class="aria-[current=page]:active">
+                      <PlugZapIcon />
+                      Event Sources
+                    </a>
+                  </li>
+                </ul>
               </li>
               <li>
                 <a href="/app/keys" class="aria-[current=page]:active">

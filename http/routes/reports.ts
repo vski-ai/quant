@@ -7,7 +7,9 @@ import { normalizeDoc, normalizeDocs } from "@/http/utils.ts";
 import { ErrorResponse, SuccessResponse } from "@/http/schemas.ts";
 import { AggregationType, granularity } from "@/core/types.ts";
 
-const reports = new Hono<HonoEnv & { Variables: { apiKey: ApiKey } }>();
+const reports = new Hono<
+  HonoEnv & { Variables: { apiKey: ApiKey; isMaster: boolean } }
+>();
 
 const ReportDefinitionSchema = v.object({
   id: v.string(),
@@ -54,7 +56,7 @@ const DatasetQuerySchema = v.object({
 });
 
 const ReportDataPointSchema = v.object({
-  time: v.string(),
+  timestamp: v.string(),
   value: v.number(),
   category: v.optional(v.string()),
 });
@@ -78,13 +80,26 @@ reports.post(
     },
   }),
   vValidator("json", ReportSchema),
+  vValidator("query", v.object({ owner: v.optional(v.string()) })),
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const definition = c.req.valid("json");
+    const { owner: ownerQuery } = c.req.valid("query");
+
     const newReport = await engine.createReport(definition);
-    await authStorage.associateReport(apiKey.owner, newReport._id.toString());
+
+    let owner = apiKey?.owner;
+    if (isMaster && ownerQuery) {
+      owner = ownerQuery;
+    }
+
+    if (owner) {
+      await authStorage.associateReport(owner, newReport._id.toString());
+    }
+
     return c.json(normalizeDoc(newReport), 201);
   },
 );
@@ -106,12 +121,24 @@ reports.get(
       401: ErrorResponse,
     },
   }),
+  vValidator("query", v.object({ owners: v.optional(v.string()) })),
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
+    const { owners: ownersQuery } = c.req.valid("query");
 
-    const ownedIds = await authStorage.getOwnedReportIds(apiKey.owner);
+    let ownedIds: string[] = [];
+    if (isMaster && ownersQuery) {
+      ownedIds = await authStorage.getOwnedReportIds(ownersQuery);
+    } else if (isMaster) {
+      const reports = await engine.listReportDefinitions();
+      return c.json(normalizeDocs(reports));
+    } else if (apiKey) {
+      ownedIds = await authStorage.getOwnedReportIds(apiKey.owner);
+    }
+
     const ownedReports = await engine.listReportDefinitions(ownedIds);
     return c.json(normalizeDocs(ownedReports));
   },
@@ -138,11 +165,14 @@ reports.post(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { id } = c.req.param();
     const query = c.req.valid("json");
 
-    if (!await authStorage.isReportOwner(apiKey.owner, id)) {
+    if (
+      !isMaster && apiKey && !await authStorage.isReportOwner(apiKey.owner, id)
+    ) {
       return c.json({ error: "Not Found" }, 404);
     }
 
@@ -180,11 +210,14 @@ reports.post(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { id } = c.req.param();
     const query = c.req.valid("json");
 
-    if (!await authStorage.isReportOwner(apiKey.owner, id)) {
+    if (
+      !isMaster && apiKey && !await authStorage.isReportOwner(apiKey.owner, id)
+    ) {
       return c.json({ error: "Not Found" }, 404);
     }
 
@@ -221,16 +254,24 @@ reports.get(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { id } = c.req.param();
 
-    if (!await authStorage.isReportOwner(apiKey.owner, id)) {
+    const report = await engine.getReportDefinition(id);
+
+    if (!report) {
       return c.json({ error: "Not Found" }, 404);
     }
-    const report = await engine.getReportDefinition(id);
-    return report
-      ? c.json(normalizeDoc(report))
-      : c.json({ error: "Not Found" }, 404);
+
+    if (!isMaster && apiKey) {
+      const isOwner = await authStorage.isReportOwner(apiKey.owner, id);
+      if (!isOwner) {
+        return c.json({ error: "Not Found" }, 404);
+      }
+    }
+
+    return c.json(normalizeDoc(report));
   },
 );
 
@@ -255,11 +296,14 @@ reports.patch(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { id } = c.req.param();
     const updates = c.req.valid("json");
 
-    if (!await authStorage.isReportOwner(apiKey.owner, id)) {
+    if (
+      !isMaster && apiKey && !await authStorage.isReportOwner(apiKey.owner, id)
+    ) {
       return c.json({ error: "Not Found" }, 404);
     }
 
@@ -281,15 +325,20 @@ reports.delete(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { id } = c.req.param();
 
-    if (!await authStorage.isReportOwner(apiKey.owner, id)) {
+    if (
+      !isMaster && apiKey && !await authStorage.isReportOwner(apiKey.owner, id)
+    ) {
       return c.json({ error: "Not Found" }, 404);
     }
 
     await engine.deleteReport(id);
-    await authStorage.disassociateReport(apiKey.owner, id);
+    if (apiKey) {
+      await authStorage.disassociateReport(apiKey.owner, id);
+    }
     return c.json({ success: true }, 200);
   },
 );

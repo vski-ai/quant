@@ -1,6 +1,6 @@
 import { define } from "@/root.ts";
 import quant from "@/db/quant.ts";
-import { GetApiEventSourcesIdResponse } from "@/quant/http/client/types.gen.ts";
+import { GetApiEventSourcesIdResponse } from "@/quant/http/client.ts";
 import LiveEventFeed from "@/islands/sources/LiveEventFeed.tsx";
 import SourceSettings from "@/islands/sources/SourceSettings.tsx";
 

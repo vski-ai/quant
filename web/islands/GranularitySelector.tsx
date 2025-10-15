@@ -2,19 +2,19 @@ import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 
 const GRANULARITIES = [
-  { value: "second", label: "1sec. span" },
-  { value: "minute", label: "1min. span" },
-  { value: "5minute", label: "5min. span" },
-  { value: "10minute", label: "10min. span" },
-  { value: "15minute", label: "15min. span" },
-  { value: "30minute", label: "30min. span" },
-  { value: "hour", label: "1h span" },
-  { value: "2hour", label: "2h span" },
-  { value: "4hour", label: "4h span" },
-  { value: "6hour", label: "6h span" },
-  { value: "12hour", label: "12h span" },
-  { value: "day", label: "1d span" },
-  { value: "3day", label: "3d span" },
+  { value: "second", label: "Each 1 sec" },
+  { value: "minute", label: "Each 1 min" },
+  { value: "5minute", label: "Each 5min" },
+  { value: "10minute", label: "Each 10min" },
+  { value: "15minute", label: "Each 15min" },
+  { value: "30minute", label: "Each 30min" },
+  { value: "hour", label: "Each 1h" },
+  { value: "2hour", label: "Each 2h" },
+  { value: "4hour", label: "Each 4h" },
+  { value: "6hour", label: "Each 6h" },
+  { value: "12hour", label: "Each 12h" },
+  { value: "day", label: "Each 1d" },
+  { value: "3day", label: "Each 3d" },
 ];
 
 interface GranularitySelectorProps {

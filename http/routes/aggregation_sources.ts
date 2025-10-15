@@ -8,7 +8,7 @@ import { AggregationType, granularity } from "@/core/types.ts";
 import { ErrorResponse, SuccessResponse } from "@/http/schemas.ts";
 
 const aggregationSources = new Hono<
-  HonoEnv & { Variables: { apiKey: ApiKey } }
+  HonoEnv & { Variables: { apiKey: ApiKey; isMaster: boolean } }
 >();
 
 const AggregationDefinitionSchema = v.object({
@@ -23,6 +23,12 @@ const FullAggregationSourceSchema = v.object({
   targetCollection: v.string(),
   granularity: v.picklist(granularity),
   aggregations: v.optional(v.array(AggregationDefinitionSchema)),
+  filter: v.optional(
+    v.object({
+      sources: v.array(v.object({ id: v.string(), name: v.string() })),
+      events: v.array(v.string()),
+    }),
+  ),
 });
 
 const AggregationSourceSchema = v.object({
@@ -60,11 +66,12 @@ aggregationSources.post(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { reportId } = c.req.valid("query");
     const sourceData = c.req.valid("json");
 
-    if (!await authStorage.isReportOwner(apiKey.owner, reportId)) {
+    if (!isMaster && !await authStorage.isReportOwner(apiKey.owner, reportId)) {
       return c.json({ error: "Report not found" }, 404);
     }
 
@@ -95,10 +102,11 @@ aggregationSources.get(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { reportId } = c.req.valid("query");
 
-    if (!await authStorage.isReportOwner(apiKey.owner, reportId)) {
+    if (!isMaster && !await authStorage.isReportOwner(apiKey.owner, reportId)) {
       return c.json({ error: "Report not found" }, 404);
     }
 
@@ -122,6 +130,7 @@ aggregationSources.delete(
   async (c) => {
     const engine = c.get("engine");
     const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
     const authStorage = c.get("authStorage");
     const { sourceId } = c.req.param();
 
@@ -133,6 +142,7 @@ aggregationSources.delete(
     }
 
     if (
+      !isMaster &&
       !await authStorage.isReportOwner(
         apiKey.owner,
         aggSource.reportId.toString(),

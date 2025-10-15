@@ -6,7 +6,7 @@ export default (
   isAdmin
     ? (
       <a
-        class={["btn", adminOn && "btn-error"].filter(Boolean).join(
+        class={["btn", adminOn && "text-error"].filter(Boolean).join(
           " ",
         )}
         href={adminOn ? "?admin=0" : "?admin=1"}
