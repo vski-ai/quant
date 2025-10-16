@@ -28,9 +28,8 @@ export async function queryMongo(
   model: Model<any>,
   filter?: IAggregationSourceFilter,
 ): Promise<IReportDataPoint[]> {
-  const { metric, attribution, timeRange, granularity } = query;
+  const { metric, attribution, timeRange, granularity, groupBy } = query;
   const matchStage: Record<string, any> = {
-    aggregationType: metric.type,
     timestamp: { $gte: timeRange.start, $lte: timeRange.end },
   };
 
@@ -44,13 +43,19 @@ export async function queryMongo(
     matchStage.eventType = { $in: filter.events };
   }
 
-  if (metric.type === AggregationType.COUNT) {
-    // For COUNT, we only match documents that represent the
-    // event count itself, not field-based aggregations.
-    matchStage.payloadField = null;
-  } else if (metric.field) {
+  if (groupBy && groupBy.length > 0) {
+    matchStage.aggregationType = AggregationType.COMPOUND_SUM;
     matchStage.payloadField = metric.field;
+    matchStage.compoundCategoryKey = groupBy[0];
+  } else {
+    matchStage.aggregationType = metric.type;
+    if (metric.type === AggregationType.COUNT) {
+      matchStage.payloadField = null;
+    } else if (metric.field) {
+      matchStage.payloadField = metric.field;
+    }
   }
+
   if (attribution) {
     matchStage.attributionType = attribution.type;
     matchStage.attributionValue = attribution.value;
@@ -91,7 +96,9 @@ export async function queryMongo(
     _id: { time: timeGroupExpression },
     value: { $sum: "$value" },
   };
-  if (metric.type === AggregationType.CATEGORY) {
+  if (
+    metric.type === AggregationType.CATEGORY || (groupBy && groupBy.length > 0)
+  ) {
     groupStage._id.category = "$payloadCategory";
   }
 
@@ -100,7 +107,9 @@ export async function queryMongo(
     timestamp: "$_id.time",
     value: 1,
   };
-  if (metric.type === AggregationType.CATEGORY) {
+  if (
+    metric.type === AggregationType.CATEGORY || (groupBy && groupBy.length > 0)
+  ) {
     projectStage.category = "$_id.category";
   }
 

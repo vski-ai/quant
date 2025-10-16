@@ -8,12 +8,17 @@ export default define.layout(({ params: { id }, url, Component, state }) => {
   const { report, period, granularity } = state;
   const basePath = `/app/reports/${id}`;
   const activeTab = url.pathname.split("/").pop();
-
   return (
     <div class="dashboard-page">
       <div class="mb-4">
         <div class="flex justify-between items-center">
-          <div class="breadcrumbs font-bold">
+          <div
+            class="breadcrumbs font-bold"
+            style={{
+              paddingBlock: "unset",
+              overflow: "unset",
+            }}
+          >
             <ul>
               <li>
                 <a href="/app">
@@ -25,35 +30,36 @@ export default define.layout(({ params: { id }, url, Component, state }) => {
                   Reports
                 </a>
               </li>
-              <li>
-                <a>
+              <li class="dropdown dropdown-bottom dropdown-end hover:decoration-0">
+                <a type="button" tabIndex={0}>
                   {report?.name}
                 </a>
+                <div class="dropdown-content mt-2 menu card bg-base-100 hover:decoration-0 grid">
+                  <a
+                    class={`p-2 ${activeTab === "metrics" ? "active" : ""}`}
+                    href={`${basePath}/metrics`}
+                  >
+                    Metrics
+                  </a>
+                  <a
+                    class={`p-2 ${
+                      activeTab === "aggregations" ? "active" : ""
+                    }`}
+                    href={`${basePath}/aggregations`}
+                  >
+                    Aggregations
+                  </a>
+                  <a
+                    class={`p-2  ${activeTab === "settings" ? "active" : ""}`}
+                    href={`${basePath}/settings`}
+                  >
+                    Settings
+                  </a>
+                </div>
               </li>
             </ul>
           </div>
           <div role="tablist" class="tabs tabs-boxed">
-            <a
-              role="tab"
-              class={`tab ${activeTab === "metrics" ? "tab-active" : ""}`}
-              href={`${basePath}/metrics`}
-            >
-              Metrics
-            </a>
-            <a
-              role="tab"
-              class={`tab ${activeTab === "aggregations" ? "tab-active" : ""}`}
-              href={`${basePath}/aggregations`}
-            >
-              Aggregations
-            </a>
-            <a
-              role="tab"
-              class={`tab ${activeTab === "settings" ? "tab-active" : ""}`}
-              href={`${basePath}/settings`}
-            >
-              Settings
-            </a>
           </div>
           <div class="flex justify-end gap-2">
             <PeriodSelector period={period!} />

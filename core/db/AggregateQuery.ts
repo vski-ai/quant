@@ -54,16 +54,28 @@ export async function getMetricsFromEvent(
       ...(eventDoc.attributions || []),
     ];
 
-    const numericalFields: Map<string, number> = new Map();
-    const categoricalFields: Map<string, string> = new Map();
+    const numericalFields = new Map<string, number>();
+    const categoricalFields = new Map<string, string>();
+    const booleanFields = new Map<string, boolean>();
+
+    for (const [field, value] of Object.entries(eventDoc.payload)) {
+      if (typeof value === "number") {
+        numericalFields.set(field, value);
+      } else if (typeof value === "string") {
+        categoricalFields.set(field, value);
+      } else if (typeof value === "boolean") {
+        categoricalFields.set(field, String(value)); // Also treat booleans as categories for compound metrics
+        booleanFields.set(field, value);
+      }
+    }
 
     const truncatedTimestamp = truncateDate(
       eventDoc.timestamp,
       storageGranularity,
-    ); // storage granularity
+    );
 
     for (const attr of attributionsToProcess) {
-      // a) Base COUNT metric
+      // Base COUNT metric
       metrics.push({
         query: buildAggregateQuery(
           eventDoc.sourceId.toString(),
@@ -72,61 +84,61 @@ export async function getMetricsFromEvent(
           attr,
           storageGranularity,
           AggregationType.COUNT,
-          null,
         ),
         incrementValue: 1,
       });
 
-      // b) Automatically discovered payload metrics
-      for (const [field, value] of Object.entries(eventDoc.payload)) {
-        // Simple SUM and CATEGORY metrics
-        if (typeof value === "number") {
-          metrics.push({
-            query: buildAggregateQuery(
-              eventDoc.sourceId.toString(),
-              eventTypeDoc.name,
-              truncatedTimestamp,
-              attr,
-              storageGranularity,
-              AggregationType.SUM,
-              field,
-            ),
-            incrementValue: value,
-          });
-          numericalFields.set(field, value);
-        } else if (typeof value === "string" || typeof value === "boolean") {
-          metrics.push({
-            query: buildAggregateQuery(
-              eventDoc.sourceId.toString(),
-              eventTypeDoc.name,
-              truncatedTimestamp,
-              attr,
-              storageGranularity,
-              AggregationType.CATEGORY,
-              field,
-              String(value),
-            ),
-            incrementValue: 1,
-          });
-          categoricalFields.set(field, String(value));
-        }
-        if (typeof value === "boolean") {
-          metrics.push({
-            query: buildAggregateQuery(
-              eventDoc.sourceId.toString(),
-              eventTypeDoc.name,
-              eventDoc.timestamp, // Use original timestamp for booleans
-              attr,
-              storageGranularity, // Still needed for context
-              AggregationType.BOOLEAN,
-              field,
-            ),
-            incrementValue: value ? 1 : 0, // Store boolean as 1 or 0
-          });
-        }
+      // SUM metrics
+      for (const [field, value] of numericalFields.entries()) {
+        metrics.push({
+          query: buildAggregateQuery(
+            eventDoc.sourceId.toString(),
+            eventTypeDoc.name,
+            truncatedTimestamp,
+            attr,
+            storageGranularity,
+            AggregationType.SUM,
+            field,
+          ),
+          incrementValue: value,
+        });
       }
-      // c) Compound SUM metrics (numerical broken down by categorical)
-      for (const [numField, numValue] of numericalFields) {
+
+      // CATEGORY metrics
+      for (const [field, value] of categoricalFields.entries()) {
+        metrics.push({
+          query: buildAggregateQuery(
+            eventDoc.sourceId.toString(),
+            eventTypeDoc.name,
+            truncatedTimestamp,
+            attr,
+            storageGranularity,
+            AggregationType.CATEGORY,
+            field,
+            value,
+          ),
+          incrementValue: 1,
+        });
+      }
+
+      // BOOLEAN metrics
+      for (const [field, value] of booleanFields.entries()) {
+        metrics.push({
+          query: buildAggregateQuery(
+            eventDoc.sourceId.toString(),
+            eventTypeDoc.name,
+            eventDoc.timestamp, // Use original timestamp for booleans
+            attr,
+            storageGranularity,
+            AggregationType.BOOLEAN,
+            field,
+          ),
+          incrementValue: value ? 1 : 0,
+        });
+      }
+
+      // COMPOUND_SUM metrics
+      for (const [numField, numValue] of numericalFields.entries()) {
         for (const [catField, catValue] of categoricalFields.entries()) {
           metrics.push({
             query: buildAggregateQuery(
@@ -136,12 +148,9 @@ export async function getMetricsFromEvent(
               attr,
               storageGranularity,
               AggregationType.COMPOUND_SUM,
-              numField, // The field being summed (e.g., 'amount')
-              catValue, // The category value (e.g., 'USD')
-              {
-                // Store the category key in a new field
-                compoundCategoryKey: catField, // (e.g., 'currency')
-              },
+              numField,
+              catValue,
+              { compoundCategoryKey: catField },
             ),
             incrementValue: numValue,
           });

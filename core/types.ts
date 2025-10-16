@@ -215,6 +215,7 @@ export interface IQuery {
   granularity: Granularity;
   rebuildCache?: boolean;
   cache?: boolean;
+  groupBy?: string[];
 }
 
 /**

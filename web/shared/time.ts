@@ -17,6 +17,10 @@ export const getMilliseconds = (unit: string) => {
 };
 
 export const calculateTimeRange = (period: string) => {
+  if (period.startsWith("custom:")) {
+    const [start, end] = period.replace("custom:", "").split("_");
+    return { start, end };
+  }
   const now = new Date();
   const magnitude = getMagnitude(period);
   const unit = getUnit(period);

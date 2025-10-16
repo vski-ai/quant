@@ -198,6 +198,30 @@ export class Aggregator {
     console.log("Aggregator service stopped.");
   }
 
+  public async flush() {
+    let job = await this.queue.fetchJob();
+    while (job) {
+      try {
+        const { eventId, collectionName } = JSON.parse(job.payload);
+        const model = getEventModel(
+          this.engine.connection,
+          collectionName,
+        );
+        const eventDoc = await model.findById(eventId).lean();
+        if (eventDoc) {
+          await this.processEvent(eventDoc as any);
+          await this.queue.acknowledgeJob(job);
+        } else {
+          throw new Error(`Event ${eventId} not found in DB.`);
+        }
+      } catch (error) {
+        console.error("Aggregator flush error:", error);
+        await this.queue.failJob(job);
+      }
+      job = await this.queue.fetchJob();
+    }
+  }
+
   public async reprocessEventsForReport(
     timeRange: ITimeRange,
     aggregationSources: IAggregationSource[],

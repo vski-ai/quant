@@ -8,6 +8,7 @@ import {
 import { IAggregationSourceFilter } from "./Aggregation.ts";
 import { truncateDate } from "../utils.ts";
 import { TOTAL_ATTRIBUTION } from "../constants.ts";
+import { IGroupsAggregationQuery } from "./GroupsAggregationQuery.ts";
 
 /**
  * Queries the Redis buffer to provide a real-time report, including data
@@ -23,7 +24,7 @@ import { TOTAL_ATTRIBUTION } from "../constants.ts";
 export async function queryRedisBuffer(
   redis: Redis,
   prefix: string,
-  query: IQuery | IDatasetQuery,
+  query: IQuery | IDatasetQuery | IGroupsAggregationQuery,
   collection?: string,
   filter?: IAggregationSourceFilter,
 ): Promise<
@@ -113,7 +114,11 @@ export async function queryRedisBuffer(
               aggType === AggregationType.BOOLEAN ||
               ((aggType === AggregationType.SUM ||
                 aggType === AggregationType.COMPOUND_SUM) &&
-                metrics.includes(payloadField));
+                metrics.includes(payloadField)) ||
+              (aggType === AggregationType.CATEGORY &&
+                (query as IGroupsAggregationQuery).groupBy?.includes(
+                  payloadField,
+                ));
           }
         }
         // If it's a dataset query with no metrics filter, typeMatch and fieldMatch remain true.

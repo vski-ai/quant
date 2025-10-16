@@ -40,6 +40,7 @@ const ReportQuerySchema = v.object({
     type: v.string(),
     value: v.string(),
   })),
+  groupBy: v.optional(v.array(v.string())),
 });
 
 const DatasetQuerySchema = v.object({
@@ -53,6 +54,7 @@ const DatasetQuerySchema = v.object({
     type: v.string(),
     value: v.string(),
   })),
+  groupBy: v.optional(v.array(v.string())),
 });
 
 const ReportDataPointSchema = v.object({
@@ -231,6 +233,141 @@ reports.post(
     });
 
     return c.json(datasetData);
+  },
+);
+
+reports.post(
+  "/:id/realtime/data",
+  describeRoute({
+    tags: ["Reports"],
+    summary: "Query a Report's data in realtime",
+    responses: {
+      200: {
+        description: "Report data",
+        content: {
+          "application/json": {
+            schema: resolver(ReportDataSchema),
+          },
+        },
+      },
+      404: ErrorResponse,
+    },
+  }),
+  vValidator("json", ReportQuerySchema),
+  async (c) => {
+    const engine = c.get("engine");
+    const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
+    const authStorage = c.get("authStorage");
+    const { id } = c.req.param();
+    const query = c.req.valid("json");
+
+    if (
+      !isMaster && apiKey && !await authStorage.isReportOwner(apiKey.owner, id)
+    ) {
+      return c.json({ error: "Not Found" }, 404);
+    }
+
+    const reportData = await engine.getRealtimeReport({
+      reportId: id,
+      ...query as any,
+      timeRange: {
+        start: new Date(query.timeRange.start),
+        end: new Date(query.timeRange.end),
+      },
+    });
+
+    return c.json(reportData);
+  },
+);
+
+reports.post(
+  "/:id/realtime/dataset",
+  describeRoute({
+    tags: ["Reports"],
+    summary: "Query a Report's dataset in realtime",
+    responses: {
+      200: {
+        description: "Dataset data",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(v.record(v.string(), v.any()))),
+          },
+        },
+      },
+      404: ErrorResponse,
+    },
+  }),
+  vValidator("json", DatasetQuerySchema),
+  async (c) => {
+    const engine = c.get("engine");
+    const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
+    const authStorage = c.get("authStorage");
+    const { id } = c.req.param();
+    const query = c.req.valid("json");
+
+    if (
+      !isMaster && apiKey && !await authStorage.isReportOwner(apiKey.owner, id)
+    ) {
+      return c.json({ error: "Not Found" }, 404);
+    }
+
+    const datasetData = await engine.getRealtimeDataset({
+      reportId: id,
+      ...query as any,
+      timeRange: {
+        start: new Date(query.timeRange.start),
+        end: new Date(query.timeRange.end),
+      },
+    });
+
+    return c.json(datasetData);
+  },
+);
+
+reports.post(
+  "/:id/realtime/groups",
+  describeRoute({
+    tags: ["Reports"],
+    summary: "Query a Report's groups in realtime",
+    responses: {
+      200: {
+        description: "Groups data",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(v.record(v.string(), v.any()))),
+          },
+        },
+      },
+      404: ErrorResponse,
+    },
+  }),
+  vValidator("json", DatasetQuerySchema),
+  async (c) => {
+    const engine = c.get("engine");
+    const apiKey = c.get("apiKey");
+    const isMaster = c.get("isMaster");
+    const authStorage = c.get("authStorage");
+    const { id } = c.req.param();
+    const query = c.req.valid("json");
+
+    if (
+      !isMaster && apiKey && !await authStorage.isReportOwner(apiKey.owner, id)
+    ) {
+      return c.json({ error: "Not Found" }, 404);
+    }
+
+    const groupsData = await engine.getRealtimeGroupsAggregation({
+      reportId: id,
+      ...query as any,
+      timeRange: {
+        start: new Date(query.timeRange.start),
+        end: new Date(query.timeRange.end),
+      },
+    });
+
+    return c.json(groupsData);
   },
 );
 

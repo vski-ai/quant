@@ -12,6 +12,7 @@ import { queryRedisBuffer } from "./RedisQuery.ts";
 import { REDIS_NULL_VALUE } from "../constants.ts";
 import { meter } from "../telemetry.ts";
 import { truncateDate } from "../utils.ts";
+import { IGroupsAggregationQuery } from "./GroupsAggregationQuery.ts";
 
 const DEFAULT_BUFFER_AGE_MS = 5 * 60 * 1000; // 5 minutes
 /**
@@ -47,6 +48,12 @@ export interface IRealtimeService {
     targetCollection?: string,
     filter?: IAggregationSourceFilter,
   ): Promise<IDatasetDataPoint[]>;
+
+  queryGroups(
+    query: IGroupsAggregationQuery,
+    targetCollection?: string,
+    filter?: IAggregationSourceFilter,
+  ): Promise<any[]>;
 }
 
 /**
@@ -226,6 +233,133 @@ export class RealtimeBuffer implements IRealtimeService {
 
     const finalResults = Array.from(mergedMap.values());
     finalResults.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return finalResults;
+  }
+
+  async queryGroups(
+    query: IGroupsAggregationQuery,
+    targetCollection?: string,
+    filter?: IAggregationSourceFilter,
+  ): Promise<any[]> {
+    const rawPoints = await queryRedisBuffer(
+      // @ts-ignore: reason
+      this.redis,
+      this.prefix,
+      query,
+      targetCollection,
+      filter,
+    );
+
+    if (!rawPoints || rawPoints.length === 0) {
+      return [];
+    }
+
+    const mergedMap = new Map<string, any>();
+
+    for (const point of rawPoints) {
+      const parts = point.member.split(":");
+      const [
+        _incrementValue,
+        aggType,
+        payloadField,
+        payloadCategory,
+        compoundCategoryKey,
+        _attrType,
+        _attrValue,
+        _sourceId,
+        eventType,
+      ] = parts;
+
+      const truncatedTimestamp = truncateDate(
+        point.timestamp,
+        query.granularity,
+      );
+      const isoTimestamp = truncatedTimestamp.toISOString();
+
+      let dataPoint = mergedMap.get(isoTimestamp);
+      if (!dataPoint) {
+        dataPoint = { timestamp: truncatedTimestamp };
+        query.metrics?.forEach((metric) => {
+          if (metric.endsWith("_count")) {
+            dataPoint[metric] = 0;
+          } else {
+            dataPoint[`${metric}_sum`] = 0;
+          }
+        });
+        query.groupBy.forEach((group) => {
+          dataPoint[`group_by_${group}`] = [];
+        });
+        mergedMap.set(isoTimestamp, dataPoint);
+      }
+
+      if (aggType === AggregationType.SUM) {
+        const metricKey = `${payloadField}_sum`;
+        if (dataPoint[metricKey] !== undefined) {
+          dataPoint[metricKey] += point.value;
+        }
+      } else if (aggType === AggregationType.COUNT) {
+        const metricKey = `${eventType}_count`;
+        if (dataPoint[metricKey] !== undefined) {
+          dataPoint[metricKey] += point.value;
+        }
+      } else if (aggType === AggregationType.COMPOUND_SUM) {
+        const metricKey = `${payloadField}_sum`;
+        const groupField = compoundCategoryKey;
+        const groupName = payloadCategory;
+
+        if (groupField && groupName && query.groupBy.includes(groupField)) {
+          const groupArrayName = `group_by_${groupField}`;
+          let group = dataPoint[groupArrayName].find((g: any) =>
+            g.name === groupName
+          );
+          if (!group) {
+            group = { name: groupName };
+            query.metrics?.forEach((metric) => {
+              if (metric.endsWith("_count")) {
+                group[metric] = 0;
+              } else {
+                group[`${metric}_sum`] = 0;
+              }
+            });
+            dataPoint[groupArrayName].push(group);
+          }
+
+          if (group[metricKey] !== undefined) {
+            group[metricKey] += point.value;
+          }
+        }
+      } else if (aggType === AggregationType.CATEGORY) {
+        const metricKey = `${eventType}_count`;
+        const groupField = payloadField;
+        const groupName = payloadCategory;
+
+        if (groupField && groupName && query.groupBy.includes(groupField)) {
+          const groupArrayName = `group_by_${groupField}`;
+          let group = dataPoint[groupArrayName].find((g: any) =>
+            g.name === groupName
+          );
+          if (!group) {
+            group = { name: groupName };
+            query.metrics?.forEach((metric) => {
+              if (metric.endsWith("_count")) {
+                group[metric] = 0;
+              } else {
+                group[`${metric}_sum`] = 0;
+              }
+            });
+            dataPoint[groupArrayName].push(group);
+          }
+
+          if (group[metricKey] !== undefined) {
+            group[metricKey] += point.value;
+          }
+        }
+      }
+    }
+
+    const finalResults = Array.from(mergedMap.values());
+    finalResults.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
     return finalResults;
   }
 }

@@ -56,6 +56,8 @@ AggregateSchema.index({
   storageEngine: { wiredTiger: { configString: "block_compressor=zstd" } },
 });
 
+AggregateSchema.index({ dimensions: 1 });
+
 export const AggregationFilterSchema = new Schema({
   name: { type: String, required: true },
   id: { type: String, required: true },

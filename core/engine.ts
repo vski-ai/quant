@@ -16,6 +16,10 @@ import {
 import { getReport } from "./db/ReportQuery.ts";
 import { getDataset } from "./db/DatasetQuery.ts";
 import {
+  getGroupsAggregation,
+  IGroupsAggregationQuery,
+} from "./db/GroupsAggregationQuery.ts";
+import {
   EventPayload,
   IDataOffloader,
   IDatasetDataPoint,
@@ -421,6 +425,19 @@ export class Engine {
     });
   }
 
+  public getGroupsAggregation(
+    query: IGroupsAggregationQuery,
+  ) {
+    return tracer.startActiveSpan(
+      "engine.getGroupsAggregation",
+      async (span) => {
+        const result = await getGroupsAggregation(query, this);
+        span.end();
+        return result;
+      },
+    );
+  }
+
   public async getEventSourceDefinitionById(
     id: string,
   ): Promise<IEventSourceDefinitionDoc | null> {
@@ -598,6 +615,29 @@ export class Engine {
 
     const queryPromises = aggregationSources.map((source) => {
       return this.aggregator.bufferService!.queryDataset(
+        query,
+        source.targetCollection,
+        source.filter,
+      );
+    });
+
+    return (await Promise.all(queryPromises)).flat();
+  }
+
+  public async getRealtimeGroupsAggregation(
+    query: IGroupsAggregationQuery,
+  ): Promise<any[]> {
+    if (!this.aggregator.bufferService) return [];
+
+    const aggregationSources = await this.listAggregationSources(
+      query.reportId,
+    );
+    if (!aggregationSources || aggregationSources.length === 0) {
+      return [];
+    }
+
+    const queryPromises = aggregationSources.map((source) => {
+      return this.aggregator.bufferService!.queryGroups(
         query,
         source.targetCollection,
         source.filter,

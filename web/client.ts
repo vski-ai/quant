@@ -1,4 +1,15 @@
 import "./assets/styles.css";
-import { ui } from "./shared/ui.ts";
+import { ui as _ } from "./shared/ui.ts";
 
-// The ui module will automatically handle UI updates.
+import { Calendar } from "vanilla-calendar-pro";
+import "vanilla-calendar-pro/styles/index.css";
+
+declare global {
+  var Calendar: Calendar;
+  interface globalThis {
+    Calendar: Calendar;
+  }
+}
+
+// @ts-expect-error
+globalThis.Calendar = Calendar;

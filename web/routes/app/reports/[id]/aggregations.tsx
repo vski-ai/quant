@@ -51,7 +51,7 @@ export const handler = define.handlers({
       console.error(datasetError);
     }
 
-    return { data: { availableMetrics, dataset: dataset || [] } };
+    return { data: { granularity, availableMetrics, dataset: dataset || [] } };
   },
 });
 

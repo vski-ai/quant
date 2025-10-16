@@ -87,7 +87,7 @@ export default define.page((props) => {
             <div class="card-body">
               <h2 class="card-title">{report.name}</h2>
               <p>{report.description}</p>
-              <div class="card-actions justify-end mt-4">
+              <div class="card-actions grid grid-cols-3 mt-4">
                 <a
                   href={`/app/reports/${report.id}/metrics`}
                   class="btn btn-sm btn-outline"
