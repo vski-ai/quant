@@ -21,7 +21,7 @@ export const SourcesList = ({ data }: { data: EventSources }) => {
           {store.value.map((source: any) => (
             <div
               key={source.id}
-              class="card border border-neutral border-dashed bg-base-100 shadow-xl"
+              class="card bg-base-100 shadow-xl"
               style={semiTransparentBg}
             >
               <div class="card-body">

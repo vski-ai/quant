@@ -6,6 +6,7 @@ import {
 } from "@/quant/http/client.ts";
 import Modal from "@/islands/Modal.tsx";
 import { AddAggregationSourceForm } from "./AddAggregationSourceForm.tsx";
+import { showAlert } from "@/shared/alert.ts";
 
 interface AggregationSourcesManagerProps {
   report: GetApiReportsIdResponse;
@@ -26,7 +27,7 @@ export function AggregationSourcesManager({
     }
 
     const res = await fetch(
-      `/api/reports/${report.id}/aggregation-sources/${sourceId}`,
+      `/app/api/reports/${report.id}/aggregation-sources/${sourceId}`,
       {
         method: "DELETE",
       },
@@ -35,7 +36,7 @@ export function AggregationSourcesManager({
     if (res.ok) {
       aggSources.value = aggSources.value.filter((s) => s.id !== sourceId);
     } else {
-      alert("Failed to delete aggregation source.");
+      showAlert("Failed to delete aggregation source.");
     }
   };
 

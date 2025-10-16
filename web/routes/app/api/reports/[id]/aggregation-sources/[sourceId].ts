@@ -3,7 +3,7 @@ import quant from "@/db/quant.ts";
 
 export const handler = define.handlers({
   async DELETE(ctx) {
-    const { sourceId } = ctx.req.param();
+    const { sourceId } = ctx.params;
 
     const { data, error } = await quant.deleteApiAggregationSourcesSourceId({
       path: { sourceId },

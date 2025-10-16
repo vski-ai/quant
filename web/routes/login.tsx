@@ -10,7 +10,7 @@ export default define.page(function LoginPage(props: PageProps) {
       <Head>
         <title>Login | VSKI·QUANT</title>
       </Head>
-      <div class="min-h-screen bg-base-200 flex items-center">
+      <div class="min-h-screen bg-base-200 flex items-center w-full">
         <div class="card mx-auto w-full max-w-sm shadow-xl">
           <div class="card-body">
             <img

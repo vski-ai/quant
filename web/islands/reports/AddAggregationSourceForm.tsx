@@ -5,7 +5,7 @@ import {
   GetApiReportsIdResponse,
 } from "@/quant/http/client.ts";
 import { Granularity } from "@/quant/core/types.ts";
-
+import { showAlert } from "@/shared/alert.ts";
 interface AddAggregationSourceFormProps {
   report: GetApiReportsIdResponse;
   aggregationSources: Signal<GetApiAggregationSourcesResponse>;
@@ -35,25 +35,27 @@ export function AddAggregationSourceForm(
       },
     };
 
-    const res = await fetch(`/api/reports/${report.id}/aggregation-sources`, {
-      method: "POST",
-      body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
+    const res = await fetch(
+      `/app/api/reports/${report.id}/aggregation-sources`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     if (res.ok) {
       const newSource = await res.json();
       aggregationSources.value = [...aggregationSources.value, newSource];
-      // @ts-ignore: TODO: close modal
-      document.getElementById("add-aggregation-source").close();
       form.reset();
+      globalThis.location.hash = "";
     } else {
-      alert("Failed to add aggregation source.");
+      showAlert("Failed to add aggregation source.");
     }
   };
-  console.log(1, report);
+
   const suggestedTarget = `aggr_${
     report.name.toLowerCase().replace(/[^a-z0-9_]/g, "_")
   }`;

@@ -1,6 +1,6 @@
 import FoldHorizontal from "lucide-react/dist/esm/icons/fold-horizontal.js";
 import UnfoldHorizontal from "lucide-react/dist/esm/icons/unfold-horizontal.js";
-import { updateSettings } from "./updateSettings.ts";
+import { ui } from "@/shared/ui.ts";
 
 export function AsideFold() {
   return (
@@ -8,10 +8,7 @@ export function AsideFold() {
       role="button"
       className="btn btn-ghost"
       onClick={() => {
-        document.body.dataset.dense = document.body.dataset.dense === "1"
-          ? "0"
-          : "1";
-        updateSettings();
+        ui.dense.value = ui.dense.value === "1" ? "0" : "1";
       }}
     >
       <UnfoldHorizontal

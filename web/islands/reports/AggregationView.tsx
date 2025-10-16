@@ -1,22 +1,26 @@
 import { ColumnSelector } from "@/islands/table/ColumnSelector.tsx";
 import { DynamicTable } from "@/islands/table/DynamicTable.tsx";
 import { useSignal } from "@preact/signals";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 import GridIcon from "lucide-react/dist/esm/icons/grid-2x2-plus.js";
 
-export const AggregationView = ({ aggregations }: any) => {
-  const columns = Object.keys(aggregations?.[0]);
+interface AggregationViewProps {
+  aggregations: Record<string, unknown>[];
+  ui: {
+    dense?: string;
+    width?: number;
+  };
+}
+
+export const AggregationView = (
+  { aggregations, ui }: AggregationViewProps,
+) => {
+  const columns = Object.keys(aggregations?.[0] ?? {});
   const allColumns = useSignal<string[]>(columns);
   const selectedColumns = useSignal<string[]>(columns?.slice(0, 5));
   const parent = useRef<HTMLDivElement>(null);
-  const [initialWith, setInitWith] = useState(globalThis.innerWidth - 50);
-
-  useEffect(() => {
-    setInitWith(
-      parent.current?.getBoundingClientRect().width || globalThis.innerWidth,
-    );
-  });
-
+  const delta = ui.dense === "1" ? 130 : 320;
+  const [initialWith] = useState((ui.width ?? globalThis.innerWidth) - delta);
   return (
     <div ref={parent} class="-mx-4">
       <div className="fixed z-50 bottom-2 right-6 dropdown dropdown-top dropdown-end">

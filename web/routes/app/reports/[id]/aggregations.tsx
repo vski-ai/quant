@@ -1,20 +1,21 @@
-import { define } from "@/root.ts";
+import { define, State } from "@/root.ts";
 import quant from "@/db/quant.ts";
 import { PageProps } from "fresh";
 import { GetApiAggregationSourcesResponse } from "@/quant/http/client.ts";
 import { AggregationView } from "@/islands/reports/AggregationView.tsx";
+import { calculateTimeRange } from "@/shared/time.ts";
+import { Granularity } from "@/quant/core/types.ts";
 
 interface AggregationsData {
-  report: any;
   availableMetrics: string[];
-  dataset?: any[]; // Results from a POST request
+  dataset?: Record<string, unknown>[]; // Results from a POST request
 }
 
 export const handler = define.handlers({
   async GET(ctx) {
     const { id } = ctx.params;
     const { state } = ctx;
-    const selectedMetrics: any = [];
+    const selectedMetrics: string[] = [];
 
     // Re-fetch available metrics for rendering
     const { data: aggregationSources, error: sourcesError } = await quant
@@ -31,14 +32,9 @@ export const handler = define.handlers({
     ];
 
     const period = state.period || "1d";
-    const granularity = state.granularity || "hour";
-    const now = new Date();
-    const [magnitude, unit] = [parseInt(period.slice(0, -1)), period.slice(-1)];
-    const start = new Date(
-      now.getTime() - magnitude * (unit === "h" ? 3600000 : 86400000),
-    );
-
-    const timeRange = { start: start.toISOString(), end: now.toISOString() };
+    const granularity: Granularity =
+      (state.granularity || "hour") as Granularity;
+    const timeRange = calculateTimeRange(period);
 
     const { data: dataset, error: datasetError } = await quant
       .postApiReportsIdDataset({
@@ -46,7 +42,7 @@ export const handler = define.handlers({
         body: {
           metrics: selectedMetrics,
           timeRange,
-          granularity: (granularity as any),
+          granularity,
         },
       });
 
@@ -61,5 +57,11 @@ export const handler = define.handlers({
 
 export default define.page((props: PageProps<AggregationsData>) => {
   const { dataset } = props.data;
-  return <AggregationView aggregations={dataset} />;
+  const state = props.state as State;
+  return (
+    <AggregationView
+      aggregations={dataset!}
+      ui={state.ui}
+    />
+  );
 });

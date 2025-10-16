@@ -4,6 +4,7 @@ import { Session, User } from "@/db/models.ts";
 import { setCookie } from "@std/http";
 import { minLength, object, parse, pipe, string } from "valibot";
 import { verifyPassword } from "@/auth/password.ts";
+import { APP_SESSION_COOKIE } from "@/routes/constants.ts";
 
 export const handler = define.handlers({
   async POST(ctx) {
@@ -48,7 +49,7 @@ export const handler = define.handlers({
 
       const headers = new Headers();
       setCookie(headers, {
-        name: "q_session",
+        name: APP_SESSION_COOKIE,
         value: sessionToken,
         expires,
         path: "/",

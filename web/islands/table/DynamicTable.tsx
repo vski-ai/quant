@@ -13,7 +13,6 @@ interface DynamicTableProps {
 function TableView({ data, columns, initialWidth }: DynamicTableProps) {
   const columnWidths = useSignal<Record<string, number>>({});
   const [initColumns] = useState(columns.length);
-  const [initWidth, setInitWidth] = useState(initialWidth);
 
   useEffect(() => {
     const currentWidths = columnWidths.peek();
@@ -22,7 +21,7 @@ function TableView({ data, columns, initialWidth }: DynamicTableProps) {
     const defaultWidth = (initialWidth ?? globalThis.innerWidth) / initColumns;
     // Check for new columns to add
     for (const col of columns) {
-      if (newWidths[col] !== undefined && initialWidth === initWidth) continue;
+      if (newWidths[col] !== undefined) continue;
       newWidths[col] = defaultWidth;
       needsUpdate = true;
     }
@@ -39,7 +38,6 @@ function TableView({ data, columns, initialWidth }: DynamicTableProps) {
     if (needsUpdate) {
       columnWidths.value = newWidths;
     }
-    setInitWidth(initialWidth);
   }, [columns, initialWidth]);
 
   const handleResize = (column: string, newWidth: number) => {

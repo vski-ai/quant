@@ -3,6 +3,7 @@ import { RouteConfig } from "fresh";
 import { AsideSwitch } from "@/islands/navbar/AsideSwitch.tsx";
 import { AsideFold } from "@/islands/navbar/AsideFold.tsx";
 import { ThemeSwitch } from "@/islands/navbar/ThemeSwitch.tsx";
+import { AlertDialog } from "@/islands/AlertDialog.tsx";
 import { Roles } from "@/db/models.ts";
 
 import UserIcon from "lucide-react/dist/esm/icons/user.js";
@@ -33,15 +34,15 @@ export default define.layout(function ({ Component, state, url }) {
       </head>
       <body
         class="scr"
-        data-theme={state.uiTheme || "dark"}
-        data-dense={state.uiDense || "0"}
-        data-aside={state.uiAside || "1"}
+        data-theme={state.ui.theme || "dark"}
+        data-dense={state.ui.dense || "0"}
+        data-aside={state.ui.aside || "1"}
       >
         <nav class="main-navbar">
           <AsideSwitch />
           <div class="flex-1" />
         </nav>
-        <main className="flex w-full bg-base-300">
+        <main className="flex min-w-full w-fit bg-base-300">
           <aside className="main-aside">
             <div class="h-12"></div>
             <ul className="main-aside-menu">
@@ -89,12 +90,13 @@ export default define.layout(function ({ Component, state, url }) {
                 <UserIcon style={{ width: "24px", height: "24px" }} />
               </a>
               <AsideFold />
-              <ThemeSwitch theme={state.uiTheme} />
+              <ThemeSwitch theme={state.ui.theme!} />
             </div>
           </aside>
           <section className="main-outlet">
             <Component />
           </section>
+          <AlertDialog />
         </main>
       </body>
     </html>

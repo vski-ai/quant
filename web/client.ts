@@ -1,2 +1,4 @@
-// Import CSS files here for hot module reloading to work.
 import "./assets/styles.css";
+import { ui } from "./shared/ui.ts";
+
+// The ui module will automatically handle UI updates.

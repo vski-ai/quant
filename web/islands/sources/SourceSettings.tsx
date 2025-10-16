@@ -2,6 +2,7 @@ import { useState } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { GetApiEventSourcesIdResponse } from "@/quant/http/client.ts";
 import ConfirmDialog from "@/islands/ConfirmDialog.tsx";
+import { showAlert } from "@/shared/alert.ts";
 
 type EventSource = GetApiEventSourcesIdResponse;
 
@@ -21,7 +22,7 @@ export default function SourceSettings({ source }: SourceSettingsProps) {
     });
     if (!res.ok) {
       const { error } = await res.json();
-      alert(error);
+      showAlert(error);
     } else {
       globalThis.location.hash = "";
       globalThis.location.reload();
@@ -34,7 +35,7 @@ export default function SourceSettings({ source }: SourceSettingsProps) {
     });
     if (!res.ok) {
       const { error } = await res.json();
-      alert(error);
+      showAlert(error);
     } else {
       globalThis.location.href = "/app/sources";
     }

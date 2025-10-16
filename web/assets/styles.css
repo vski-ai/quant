@@ -25,7 +25,7 @@
     }
   }
   .main-outlet {
-    @apply p-0 min-w-[320px] min-h-screen sm:aside-open:ml-64
+    @apply p-0 min-w-[320px] w-auto min-h-screen sm:aside-open:ml-64
       sm:dense:aside-open:ml-18 flex-1 transition-all ease-in-out duration-200;
   }
   .main-aside-bottom {
@@ -45,9 +45,10 @@
   a[aria-current="page"] {
     @apply menu-active;
   }
+
   .dashboard-page {
-    @apply p-4 m-6 border-1 border-[#cccccc24] rounded-2xl shadow-2xl
-      min-h-[calc(100%-3em)];
+    @apply min-w-[calc(100%-3em)] w-fit p-4 m-6 border-1 border-[#cccccc24]
+      rounded-2xl shadow-2xl min-h-[calc(100%-3em)];
   }
 
   /* Color all ancestor links of the current page

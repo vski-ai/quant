@@ -2,6 +2,7 @@ import { define } from "@/root.ts";
 import quant from "@/db/quant.ts";
 import { AggregationType, Granularity } from "@/quant/core/types.ts";
 import { MetricsView } from "@/islands/reports/MetricsView.tsx";
+import { calculateTimeRange } from "@/shared/time.ts";
 
 export const handler = define.handlers({
   async GET(ctx) {
@@ -10,13 +11,7 @@ export const handler = define.handlers({
 
     const period = state.period || "1d";
     const granularity = state.granularity || "hour";
-    const now = new Date();
-    const [magnitude, unit] = [parseInt(period.slice(0, -1)), period.slice(-1)];
-    const start = new Date(
-      now.getTime() - magnitude * (unit === "h" ? 3600000 : 86400000),
-    );
-
-    const timeRange = { start: start.toISOString(), end: now.toISOString() };
+    const timeRange = calculateTimeRange(period);
 
     const { data: reportData, error: reportError } = await quant
       .postApiReportsIdData({

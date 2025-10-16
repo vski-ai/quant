@@ -1,17 +1,9 @@
 import { Context } from "fresh";
-import { deleteCookie, getCookies, setCookie } from "@std/http";
 import { State } from "@/root.ts";
-import { getUserBySession } from "@/db/user.ts";
-import { Plan, User, UserProfile } from "@/db/models.ts";
-
-const SESSION_COOKIE = "q_session";
-const PERIOD_COOKIE = "q_period";
-const GRANULARITY_COOKIE = "q_granularity";
+import { Cookie, getCookie, setCookieHeader } from "@/shared/cookies.ts";
 
 declare module "@/root.ts" {
   interface State {
-    session?: string;
-    user?: User & { profile: UserProfile & { plan: Plan } };
     period?: string;
     granularity?: string;
   }
@@ -20,63 +12,31 @@ declare module "@/root.ts" {
 export async function handler(
   ctx: Context<State>,
 ) {
-  const cookies = getCookies(ctx.req.headers);
-  const sessionToken = cookies[SESSION_COOKIE];
+  const { state } = ctx;
 
-  if (!sessionToken) {
+  if (!state.session || !state.user) {
     return new Response("", {
       status: 307,
       headers: { Location: "/login" },
     });
   }
 
-  const user = await getUserBySession(sessionToken);
-
-  if (!user) {
-    const headers = new Headers();
-    deleteCookie(headers, SESSION_COOKIE, {
-      path: "/",
-      domain: ctx.url.hostname,
-    });
-    headers.set("location", "/login");
-    return new Response(null, {
-      status: 307,
-      headers,
-    });
-  }
-
-  ctx.state.session = sessionToken;
-  ctx.state.user = user;
-
-  const period = ctx.url.searchParams.get("period") ?? cookies[PERIOD_COOKIE];
+  const period = ctx.url.searchParams.get("period") ??
+    getCookie(ctx.req.headers, Cookie.PERIOD);
   ctx.state.period = period!;
 
   const granularity = ctx.url.searchParams.get("granularity") ??
-    cookies[GRANULARITY_COOKIE];
+    getCookie(ctx.req.headers, Cookie.GRANULARITY);
   ctx.state.granularity = granularity!;
-
-  if (ctx.req.headers.get("upgrade") === "websocket") {
-    return await ctx.next();
-  }
 
   const resp = await ctx.next();
 
   if (period) {
-    setCookie(resp.headers, {
-      name: PERIOD_COOKIE,
-      value: period,
-      path: "/",
-      maxAge: 31536000, // 1 year
-    });
+    setCookieHeader(resp.headers, Cookie.PERIOD, period);
   }
 
   if (granularity) {
-    setCookie(resp.headers, {
-      name: GRANULARITY_COOKIE,
-      value: granularity,
-      path: "/",
-      maxAge: 31536000, // 1 year
-    });
+    setCookieHeader(resp.headers, Cookie.GRANULARITY, granularity);
   }
 
   return resp;
