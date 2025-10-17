@@ -9,8 +9,10 @@ export function client() {
     masterKey: "",
     apiKey: "",
   };
+
   return {
     ...methods,
+    client: null as ReturnType<typeof createClient> | null,
     setMasterKey(key: string | null) {
       keys.masterKey = key!;
     },
@@ -26,9 +28,11 @@ export function client() {
       masterKey?: string;
       apiKey?: string;
     }) {
-      const client = createClient(createConfig({
+      const config = createConfig({
         baseUrl,
-      }));
+      })
+      const client = createClient(config);
+      this.client = client;
       for (const [key, value] of Object.entries(client)) {
         if (typeof value === "function") {
           // @ts-expect-error:
