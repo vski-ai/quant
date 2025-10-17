@@ -256,6 +256,13 @@ export interface IReportDataPoint {
   lastFlushedTimestamp?: Date | null;
 }
 
+export interface IReportMetadata {
+  metrics: string[];
+  groupableFields: string[];
+  eventSources: string[];
+  eventTypes: string[];
+}
+
 import { Engine } from "./engine.ts";
 import { IEventDoc } from "./db/Event.ts";
 import { IMetricUpdate } from "./db/AggregateQuery.ts";

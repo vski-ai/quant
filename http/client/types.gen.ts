@@ -371,7 +371,7 @@ export type PostApiAuthUsageDatasetResponses = {
 export type PostApiAuthUsageDatasetResponse =
   PostApiAuthUsageDatasetResponses[keyof PostApiAuthUsageDatasetResponses];
 
-export type PostApiEventsSourceEventsData = {
+export type PostApiEventsSourceIdEventsData = {
   body?: {
     type: string;
     uuid: string;
@@ -385,13 +385,13 @@ export type PostApiEventsSourceEventsData = {
     timestamp?: string;
   };
   path: {
-    source: string;
+    sourceId: string;
   };
   query?: never;
-  url: "/api/events/{source}/events";
+  url: "/api/events/{sourceId}/events";
 };
 
-export type PostApiEventsSourceEventsErrors = {
+export type PostApiEventsSourceIdEventsErrors = {
   /**
    * Invalid request body or parameters
    */
@@ -402,7 +402,7 @@ export type PostApiEventsSourceEventsErrors = {
   404: unknown;
 };
 
-export type PostApiEventsSourceEventsResponses = {
+export type PostApiEventsSourceIdEventsResponses = {
   /**
    * Event recorded successfully
    */
@@ -983,53 +983,16 @@ export type PostApiReportsResponses = {
 export type PostApiReportsResponse =
   PostApiReportsResponses[keyof PostApiReportsResponses];
 
-export type PostApiReportsIdDataData = {
-  body?: {
-    metric: {
-      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
-      field?: string;
-    };
-    timeRange: {
-      start: string;
-      end: string;
-    };
-    granularity:
-      | "100ms"
-      | "200ms"
-      | "250ms"
-      | "500ms"
-      | "second"
-      | "minute"
-      | "5minute"
-      | "10minute"
-      | "15minute"
-      | "30minute"
-      | "hour"
-      | "2hour"
-      | "4hour"
-      | "6hour"
-      | "12hour"
-      | "day"
-      | "3day"
-      | "7day"
-      | "15day"
-      | "30day"
-      | "45day"
-      | "60day"
-      | "90day";
-    attribution?: {
-      type: string;
-      value: string;
-    };
-  };
+export type GetApiReportsIdMetaData = {
+  body?: never;
   path: {
     id: string;
   };
   query?: never;
-  url: "/api/reports/{id}/data";
+  url: "/api/reports/{id}/meta";
 };
 
-export type PostApiReportsIdDataErrors = {
+export type GetApiReportsIdMetaErrors = {
   /**
    * Error response
    */
@@ -1038,89 +1001,23 @@ export type PostApiReportsIdDataErrors = {
   };
 };
 
-export type PostApiReportsIdDataError =
-  PostApiReportsIdDataErrors[keyof PostApiReportsIdDataErrors];
+export type GetApiReportsIdMetaError =
+  GetApiReportsIdMetaErrors[keyof GetApiReportsIdMetaErrors];
 
-export type PostApiReportsIdDataResponses = {
+export type GetApiReportsIdMetaResponses = {
   /**
-   * Report data
+   * Report metadata
    */
-  200: Array<{
-    timestamp: string;
-    value: number;
-    category?: string;
-  }>;
-};
-
-export type PostApiReportsIdDataResponse =
-  PostApiReportsIdDataResponses[keyof PostApiReportsIdDataResponses];
-
-export type PostApiReportsIdDatasetData = {
-  body?: {
+  200: {
     metrics: Array<string>;
-    timeRange: {
-      start: string;
-      end: string;
-    };
-    granularity:
-      | "100ms"
-      | "200ms"
-      | "250ms"
-      | "500ms"
-      | "second"
-      | "minute"
-      | "5minute"
-      | "10minute"
-      | "15minute"
-      | "30minute"
-      | "hour"
-      | "2hour"
-      | "4hour"
-      | "6hour"
-      | "12hour"
-      | "day"
-      | "3day"
-      | "7day"
-      | "15day"
-      | "30day"
-      | "45day"
-      | "60day"
-      | "90day";
-    attribution?: {
-      type: string;
-      value: string;
-    };
-  };
-  path: {
-    id: string;
-  };
-  query?: never;
-  url: "/api/reports/{id}/dataset";
-};
-
-export type PostApiReportsIdDatasetErrors = {
-  /**
-   * Error response
-   */
-  404: {
-    error: string;
+    groupableFields: Array<string>;
+    eventSources: Array<string>;
+    eventTypes: Array<string>;
   };
 };
 
-export type PostApiReportsIdDatasetError =
-  PostApiReportsIdDatasetErrors[keyof PostApiReportsIdDatasetErrors];
-
-export type PostApiReportsIdDatasetResponses = {
-  /**
-   * Dataset data
-   */
-  200: Array<{
-    [key: string]: unknown;
-  }>;
-};
-
-export type PostApiReportsIdDatasetResponse =
-  PostApiReportsIdDatasetResponses[keyof PostApiReportsIdDatasetResponses];
+export type GetApiReportsIdMetaResponse =
+  GetApiReportsIdMetaResponses[keyof GetApiReportsIdMetaResponses];
 
 export type DeleteApiReportsIdData = {
   body?: never;
@@ -1234,3 +1131,363 @@ export type PatchApiReportsIdResponses = {
 
 export type PatchApiReportsIdResponse =
   PatchApiReportsIdResponses[keyof PatchApiReportsIdResponses];
+
+export type PostApiReportsIdDataData = {
+  body?: {
+    metric: {
+      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      field?: string;
+    };
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    attribution?: {
+      type: string;
+      value: string;
+    };
+    groupBy?: Array<string>;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/data";
+};
+
+export type PostApiReportsIdDataErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdDataError =
+  PostApiReportsIdDataErrors[keyof PostApiReportsIdDataErrors];
+
+export type PostApiReportsIdDataResponses = {
+  /**
+   * Report data
+   */
+  200: Array<{
+    timestamp: string;
+    value: number;
+    category?: string;
+  }>;
+};
+
+export type PostApiReportsIdDataResponse =
+  PostApiReportsIdDataResponses[keyof PostApiReportsIdDataResponses];
+
+export type PostApiReportsIdDatasetData = {
+  body?: {
+    metrics: Array<string>;
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    attribution?: {
+      type: string;
+      value: string;
+    };
+    groupBy?: Array<string>;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/dataset";
+};
+
+export type PostApiReportsIdDatasetErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdDatasetError =
+  PostApiReportsIdDatasetErrors[keyof PostApiReportsIdDatasetErrors];
+
+export type PostApiReportsIdDatasetResponses = {
+  /**
+   * Dataset data
+   */
+  200: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type PostApiReportsIdDatasetResponse =
+  PostApiReportsIdDatasetResponses[keyof PostApiReportsIdDatasetResponses];
+
+export type PostApiReportsIdRealtimeDataData = {
+  body?: {
+    metric: {
+      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      field?: string;
+    };
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    attribution?: {
+      type: string;
+      value: string;
+    };
+    groupBy?: Array<string>;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/realtime/data";
+};
+
+export type PostApiReportsIdRealtimeDataErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdRealtimeDataError =
+  PostApiReportsIdRealtimeDataErrors[keyof PostApiReportsIdRealtimeDataErrors];
+
+export type PostApiReportsIdRealtimeDataResponses = {
+  /**
+   * Report data
+   */
+  200: Array<{
+    timestamp: string;
+    value: number;
+    category?: string;
+  }>;
+};
+
+export type PostApiReportsIdRealtimeDataResponse =
+  PostApiReportsIdRealtimeDataResponses[
+    keyof PostApiReportsIdRealtimeDataResponses
+  ];
+
+export type PostApiReportsIdRealtimeDatasetData = {
+  body?: {
+    metrics: Array<string>;
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    attribution?: {
+      type: string;
+      value: string;
+    };
+    groupBy?: Array<string>;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/realtime/dataset";
+};
+
+export type PostApiReportsIdRealtimeDatasetErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdRealtimeDatasetError =
+  PostApiReportsIdRealtimeDatasetErrors[
+    keyof PostApiReportsIdRealtimeDatasetErrors
+  ];
+
+export type PostApiReportsIdRealtimeDatasetResponses = {
+  /**
+   * Dataset data
+   */
+  200: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type PostApiReportsIdRealtimeDatasetResponse =
+  PostApiReportsIdRealtimeDatasetResponses[
+    keyof PostApiReportsIdRealtimeDatasetResponses
+  ];
+
+export type PostApiReportsIdRealtimeGroupsData = {
+  body?: {
+    metrics: Array<string>;
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    attribution?: {
+      type: string;
+      value: string;
+    };
+    groupBy?: Array<string>;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/realtime/groups";
+};
+
+export type PostApiReportsIdRealtimeGroupsErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdRealtimeGroupsError =
+  PostApiReportsIdRealtimeGroupsErrors[
+    keyof PostApiReportsIdRealtimeGroupsErrors
+  ];
+
+export type PostApiReportsIdRealtimeGroupsResponses = {
+  /**
+   * Groups data
+   */
+  200: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type PostApiReportsIdRealtimeGroupsResponse =
+  PostApiReportsIdRealtimeGroupsResponses[
+    keyof PostApiReportsIdRealtimeGroupsResponses
+  ];

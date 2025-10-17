@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import * as v from "valibot";
 import { describeRoute, validator as vValidator } from "hono-openapi";
 import { HonoEnv } from "@/http/types.ts";
+import { EventSource } from "@/core/event_source.ts";
 
 const events = new Hono<HonoEnv>();
 
@@ -17,7 +18,7 @@ const RecordEventSchema = v.object({
 });
 
 events.post(
-  "/:source/events",
+  "/:sourceId/events",
   describeRoute({
     responses: {
       200: { description: "Event recorded successfully" },
@@ -28,15 +29,16 @@ events.post(
   vValidator("json", RecordEventSchema),
   async (c) => {
     const engine = c.get("engine");
-    const { source } = c.req.param();
+    const { sourceId } = c.req.param();
     const { uuid, type, payload, attributions, timestamp } = c.req.valid<any>(
       "json",
     );
 
-    const eventSource = await engine.getEventSource(source);
-    if (!eventSource) {
+    const sourceDef = await engine.getEventSourceDefinitionById(sourceId);
+    if (!sourceDef) {
       return c.json({ error: "Source not found" }, 404);
     }
+    const eventSource = new EventSource(engine, sourceDef);
 
     const recordedEvent = await eventSource.record({
       uuid,

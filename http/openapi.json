@@ -904,9 +904,9 @@
         ]
       }
     },
-    "/api/events/{source}/events": {
+    "/api/events/{sourceId}/events": {
       "post": {
-        "operationId": "postApiEvents:sourceEvents",
+        "operationId": "postApiEvents:sourceIdEvents",
         "responses": {
           "200": {
             "description": "Event recorded successfully"
@@ -971,7 +971,7 @@
               "type": "string"
             },
             "in": "path",
-            "name": "source",
+            "name": "sourceId",
             "required": true
           }
         ]
@@ -2296,6 +2296,314 @@
         ]
       }
     },
+    "/api/reports/{id}/meta": {
+      "get": {
+        "operationId": "getApiReports:idMeta",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Get a Report's metadata",
+        "responses": {
+          "200": {
+            "description": "Report metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "metrics": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "groupableFields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "eventSources": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "eventTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "metrics",
+                    "groupableFields",
+                    "eventSources",
+                    "eventTypes"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/reports/{id}": {
+      "get": {
+        "operationId": "getApiReports:id",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Get a Report Definition",
+        "responses": {
+          "200": {
+            "description": "A single report definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "active",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patchApiReports:id",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Update a Report Definition",
+        "responses": {
+          "200": {
+            "description": "Report updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "active",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteApiReports:id",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Delete a Report Definition",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
     "/api/reports/{id}/data": {
       "post": {
         "operationId": "postApiReports:idData",
@@ -3026,233 +3334,6 @@
                   "timeRange",
                   "granularity"
                 ]
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/api/reports/{id}": {
-      "get": {
-        "operationId": "getApiReports:id",
-        "tags": [
-          "Reports"
-        ],
-        "summary": "Get a Report Definition",
-        "responses": {
-          "200": {
-            "description": "A single report definition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    },
-                    "active": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string"
-                    },
-                    "updatedAt": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "active",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      },
-      "patch": {
-        "operationId": "patchApiReports:id",
-        "tags": [
-          "Reports"
-        ],
-        "summary": "Update a Report Definition",
-        "responses": {
-          "200": {
-            "description": "Report updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    },
-                    "active": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string"
-                    },
-                    "updatedAt": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "active",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "active": {
-                    "type": "boolean",
-                    "default": true
-                  }
-                },
-                "required": []
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteApiReports:id",
-        "tags": [
-          "Reports"
-        ],
-        "summary": "Delete a Report Definition",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "success"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ]
-                }
               }
             }
           }

@@ -113,6 +113,15 @@ withTestDatabase({ dbName }, async (t, engine, down) => {
     assertEquals(catA.value, 2, "Category A should have 2 events");
     assertEquals(catB.value, 1, "Category B should have 1 event");
 
+    // --- 4. Metadata Verification ---
+    const metadata = await engine.getReportMetadata(reportDef._id.toString());
+    assertExists(metadata);
+    console.log("metadata.metrics  >>", metadata.metrics);
+    assertEquals(metadata.metrics, ["value_sum", "service_event_count"]);
+    assertEquals(metadata.groupableFields, ["category"]);
+    assertEquals(metadata.eventSources, ["ServiceTestSource"]);
+    assertEquals(metadata.eventTypes, ["service_event"]);
+
     await engine.aggregator.stop();
   });
   await down();

@@ -51,8 +51,8 @@ withTestApi({ dbName }, async (t, { client }) => {
 
   // --- 2. EXECUTION ---
   const baseTime = new Date("2023-11-20T10:00:00.000Z");
-  await client.postApiEventsSourceEvents({
-    path: { source: "DatasetSource" },
+  await client.postApiEventsSourceIdEvents({
+    path: { sourceId: source.id },
     body: {
       uuid: crypto.randomUUID(),
       type: "sale",
@@ -61,8 +61,8 @@ withTestApi({ dbName }, async (t, { client }) => {
       timestamp: new Date("2023-11-20T09:59:00.000Z").toISOString(),
     },
   });
-  await client.postApiEventsSourceEvents({
-    path: { source: "DatasetSource" },
+  await client.postApiEventsSourceIdEvents({
+    path: { sourceId: source.id },
     body: {
       uuid: crypto.randomUUID(),
       type: "sale",
@@ -71,8 +71,8 @@ withTestApi({ dbName }, async (t, { client }) => {
       timestamp: new Date("2023-11-20T09:58:00.000Z").toISOString(),
     },
   });
-  await client.postApiEventsSourceEvents({
-    path: { source: "DatasetSource" },
+  await client.postApiEventsSourceIdEvents({
+    path: { sourceId: source.id },
     body: {
       uuid: crypto.randomUUID(),
       type: "sale",
@@ -81,8 +81,8 @@ withTestApi({ dbName }, async (t, { client }) => {
       timestamp: new Date("2023-11-20T09:57:00.000Z").toISOString(),
     },
   });
-  await client.postApiEventsSourceEvents({
-    path: { source: "DatasetSource" },
+  await client.postApiEventsSourceIdEvents({
+    path: { sourceId: source.id },
     body: {
       uuid: crypto.randomUUID(),
       type: "sale",

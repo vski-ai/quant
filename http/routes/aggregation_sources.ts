@@ -4,44 +4,16 @@ import { describeRoute, resolver, validator as vValidator } from "hono-openapi";
 import { HonoEnv } from "@/http/types.ts";
 import { ApiKey } from "@/http/auth/types.ts";
 import { normalizeDoc, normalizeDocs } from "@/http/utils.ts";
-import { AggregationType, granularity } from "@/core/types.ts";
 import { ErrorResponse, SuccessResponse } from "@/http/schemas.ts";
+import {
+  AggregationSourceSchema,
+  FullAggregationSourceSchema,
+} from "@/http/schemas/aggregation_sources.ts";
+import { canAccessReportFromQuery } from "@/http/auth/middleware.ts";
 
 const aggregationSources = new Hono<
   HonoEnv & { Variables: { apiKey: ApiKey; isMaster: boolean } }
 >();
-
-const AggregationDefinitionSchema = v.object({
-  type: v.enum(AggregationType),
-  payloadField: v.optional(v.string()),
-  categoryField: v.optional(v.string()),
-});
-
-const FullAggregationSourceSchema = v.object({
-  id: v.string(),
-  reportId: v.string(),
-  targetCollection: v.string(),
-  granularity: v.picklist(granularity),
-  aggregations: v.optional(v.array(AggregationDefinitionSchema)),
-  filter: v.optional(
-    v.object({
-      sources: v.array(v.object({ id: v.string(), name: v.string() })),
-      events: v.array(v.string()),
-    }),
-  ),
-});
-
-const AggregationSourceSchema = v.object({
-  targetCollection: v.string(),
-  granularity: v.optional(v.picklist<any>(granularity)),
-  filter: v.optional(
-    v.object({
-      sources: v.array(v.object({ id: v.string(), name: v.string() })),
-      events: v.array(v.string()),
-    }),
-  ),
-  aggregations: v.optional(v.array(AggregationDefinitionSchema)),
-});
 
 aggregationSources.post(
   "/",
@@ -63,17 +35,11 @@ aggregationSources.post(
   }),
   vValidator("query", v.object({ reportId: v.string() })),
   vValidator("json", AggregationSourceSchema),
+  canAccessReportFromQuery,
   async (c) => {
     const engine = c.get("engine");
-    const apiKey = c.get("apiKey");
-    const isMaster = c.get("isMaster");
-    const authStorage = c.get("authStorage");
     const { reportId } = c.req.valid("query");
     const sourceData = c.req.valid("json");
-
-    if (!isMaster && !await authStorage.isReportOwner(apiKey.owner, reportId)) {
-      return c.json({ error: "Report not found" }, 404);
-    }
 
     const newSource = await engine.addAggregationSource(reportId, sourceData);
     return c.json(normalizeDoc(newSource), 201);
@@ -99,16 +65,10 @@ aggregationSources.get(
     },
   }),
   vValidator("query", v.object({ reportId: v.string() })),
+  canAccessReportFromQuery,
   async (c) => {
     const engine = c.get("engine");
-    const apiKey = c.get("apiKey");
-    const isMaster = c.get("isMaster");
-    const authStorage = c.get("authStorage");
     const { reportId } = c.req.valid("query");
-
-    if (!isMaster && !await authStorage.isReportOwner(apiKey.owner, reportId)) {
-      return c.json({ error: "Report not found" }, 404);
-    }
 
     const sources = await engine.listAggregationSources(reportId);
     return c.json(normalizeDocs(sources));

@@ -44,6 +44,9 @@ import type {
   GetApiReportsErrors,
   GetApiReportsIdData,
   GetApiReportsIdErrors,
+  GetApiReportsIdMetaData,
+  GetApiReportsIdMetaErrors,
+  GetApiReportsIdMetaResponses,
   GetApiReportsIdResponses,
   GetApiReportsResponses,
   PatchApiAuthKeysIdData,
@@ -69,9 +72,9 @@ import type {
   PostApiAuthUsageReportResponses,
   PostApiEventSourcesData,
   PostApiEventSourcesResponses,
-  PostApiEventsSourceEventsData,
-  PostApiEventsSourceEventsErrors,
-  PostApiEventsSourceEventsResponses,
+  PostApiEventsSourceIdEventsData,
+  PostApiEventsSourceIdEventsErrors,
+  PostApiEventsSourceIdEventsResponses,
   PostApiReportsData,
   PostApiReportsIdDataData,
   PostApiReportsIdDataErrors,
@@ -79,6 +82,15 @@ import type {
   PostApiReportsIdDatasetData,
   PostApiReportsIdDatasetErrors,
   PostApiReportsIdDatasetResponses,
+  PostApiReportsIdRealtimeDataData,
+  PostApiReportsIdRealtimeDataErrors,
+  PostApiReportsIdRealtimeDataResponses,
+  PostApiReportsIdRealtimeDatasetData,
+  PostApiReportsIdRealtimeDatasetErrors,
+  PostApiReportsIdRealtimeDatasetResponses,
+  PostApiReportsIdRealtimeGroupsData,
+  PostApiReportsIdRealtimeGroupsErrors,
+  PostApiReportsIdRealtimeGroupsResponses,
   PostApiReportsResponses,
 } from "./types.gen.ts";
 
@@ -299,12 +311,12 @@ export const postApiAuthUsageDataset = <ThrowOnError extends boolean = false>(
   });
 };
 
-export const postApiEventsSourceEvents = <ThrowOnError extends boolean = false>(
-  options: Options<PostApiEventsSourceEventsData, ThrowOnError>,
-) => {
+export const postApiEventsSourceIdEvents = <
+  ThrowOnError extends boolean = false,
+>(options: Options<PostApiEventsSourceIdEventsData, ThrowOnError>) => {
   return (options.client ?? client).post<
-    PostApiEventsSourceEventsResponses,
-    PostApiEventsSourceEventsErrors,
+    PostApiEventsSourceIdEventsResponses,
+    PostApiEventsSourceIdEventsErrors,
     ThrowOnError
   >({
     security: [
@@ -317,7 +329,7 @@ export const postApiEventsSourceEvents = <ThrowOnError extends boolean = false>(
         type: "apiKey",
       },
     ],
-    url: "/api/events/{source}/events",
+    url: "/api/events/{sourceId}/events",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -629,14 +641,14 @@ export const postApiReports = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Query a Report's data
+ * Get a Report's metadata
  */
-export const postApiReportsIdData = <ThrowOnError extends boolean = false>(
-  options: Options<PostApiReportsIdDataData, ThrowOnError>,
+export const getApiReportsIdMeta = <ThrowOnError extends boolean = false>(
+  options: Options<GetApiReportsIdMetaData, ThrowOnError>,
 ) => {
-  return (options.client ?? client).post<
-    PostApiReportsIdDataResponses,
-    PostApiReportsIdDataErrors,
+  return (options.client ?? client).get<
+    GetApiReportsIdMetaResponses,
+    GetApiReportsIdMetaErrors,
     ThrowOnError
   >({
     security: [
@@ -649,42 +661,8 @@ export const postApiReportsIdData = <ThrowOnError extends boolean = false>(
         type: "apiKey",
       },
     ],
-    url: "/api/reports/{id}/data",
+    url: "/api/reports/{id}/meta",
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-};
-
-/**
- * Query a Report's dataset
- */
-export const postApiReportsIdDataset = <ThrowOnError extends boolean = false>(
-  options: Options<PostApiReportsIdDatasetData, ThrowOnError>,
-) => {
-  return (options.client ?? client).post<
-    PostApiReportsIdDatasetResponses,
-    PostApiReportsIdDatasetErrors,
-    ThrowOnError
-  >({
-    security: [
-      {
-        name: "X-API-Key",
-        type: "apiKey",
-      },
-      {
-        name: "X-Master-Key",
-        type: "apiKey",
-      },
-    ],
-    url: "/api/reports/{id}/dataset",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
   });
 };
 
@@ -762,6 +740,156 @@ export const patchApiReportsId = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/api/reports/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's data
+ */
+export const postApiReportsIdData = <ThrowOnError extends boolean = false>(
+  options: Options<PostApiReportsIdDataData, ThrowOnError>,
+) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdDataResponses,
+    PostApiReportsIdDataErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/data",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's dataset
+ */
+export const postApiReportsIdDataset = <ThrowOnError extends boolean = false>(
+  options: Options<PostApiReportsIdDatasetData, ThrowOnError>,
+) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdDatasetResponses,
+    PostApiReportsIdDatasetErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/dataset",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's data in realtime
+ */
+export const postApiReportsIdRealtimeData = <
+  ThrowOnError extends boolean = false,
+>(options: Options<PostApiReportsIdRealtimeDataData, ThrowOnError>) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdRealtimeDataResponses,
+    PostApiReportsIdRealtimeDataErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/realtime/data",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's dataset in realtime
+ */
+export const postApiReportsIdRealtimeDataset = <
+  ThrowOnError extends boolean = false,
+>(options: Options<PostApiReportsIdRealtimeDatasetData, ThrowOnError>) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdRealtimeDatasetResponses,
+    PostApiReportsIdRealtimeDatasetErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/realtime/dataset",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's groups in realtime
+ */
+export const postApiReportsIdRealtimeGroups = <
+  ThrowOnError extends boolean = false,
+>(options: Options<PostApiReportsIdRealtimeGroupsData, ThrowOnError>) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdRealtimeGroupsResponses,
+    PostApiReportsIdRealtimeGroupsErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/realtime/groups",
     ...options,
     headers: {
       "Content-Type": "application/json",

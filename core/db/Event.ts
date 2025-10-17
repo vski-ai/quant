@@ -30,6 +30,19 @@ export const EventTypeSchema = new Schema({
 // Ensure that an event type name is unique within a given source.
 EventTypeSchema.index({ sourceId: 1, name: 1 }, { unique: true });
 
+export const EventSourceMetadataSchema = new Schema({
+  sourceId: {
+    type: Schema.Types.ObjectId,
+    ref: "EventSourceDefinition",
+    required: true,
+    unique: true,
+    index: true,
+  },
+  metrics: { type: [String], default: [] },
+  groupableFields: { type: [String], default: [] },
+  eventTypes: { type: [String], default: [] },
+});
+
 /**
  * Schema for the Attribution subdocument.
  */
@@ -81,6 +94,13 @@ export interface IEventSourceDefinitionDoc extends Document {
   owners?: string[];
 }
 
+export interface IEventSourceMetadataDoc extends Document {
+  sourceId: Types.ObjectId;
+  metrics: string[];
+  groupableFields: string[];
+  eventTypes: string[];
+}
+
 export interface IEventTypeDoc extends Document {
   _id: Types.ObjectId;
   sourceId: Types.ObjectId;
@@ -103,6 +123,13 @@ export const getEventSourceDefinitionModel = (connection: Connection) => {
   return connection.model<IEventSourceDefinitionDoc>(
     "EventSourceDefinition",
     EventSourceDefinitionSchema,
+  );
+};
+
+export const getEventSourceMetadataModel = (connection: Connection) => {
+  return connection.model<IEventSourceMetadataDoc>(
+    "EventSourceMetadata",
+    EventSourceMetadataSchema,
   );
 };
 

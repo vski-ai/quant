@@ -82,8 +82,8 @@ withTestApi({ dbName }, async (t, { client }) => {
 
       console.log("Recording events...");
       // Record events for Stripe
-      await client.postApiEventsSourceEvents({
-        path: { source: "Stripe" },
+      await client.postApiEventsSourceIdEvents({
+        path: { sourceId: stripeSource.id },
         body: {
           uuid: crypto.randomUUID(),
           type: "payment_succeeded",
@@ -95,8 +95,9 @@ withTestApi({ dbName }, async (t, { client }) => {
         },
       });
 
-      await client.postApiEventsSourceEvents({
-        path: { source: "Stripe" },
+      // postApiEventsSourceEvents
+      await client.postApiEventsSourceIdEvents({
+        path: { sourceId: stripeSource.id },
         body: {
           uuid: crypto.randomUUID(),
           type: "payment_succeeded",
@@ -108,8 +109,8 @@ withTestApi({ dbName }, async (t, { client }) => {
         },
       });
 
-      await client.postApiEventsSourceEvents({
-        path: { source: "Stripe" },
+      await client.postApiEventsSourceIdEvents({
+        path: { sourceId: stripeSource.id },
         body: {
           uuid: crypto.randomUUID(),
           type: "payment_succeeded",
@@ -122,8 +123,8 @@ withTestApi({ dbName }, async (t, { client }) => {
       });
 
       // Record events for Adyen
-      await client.postApiEventsSourceEvents({
-        path: { source: "Adyen" },
+      await client.postApiEventsSourceIdEvents({
+        path: { sourceId: adyenSource.id },
         body: {
           uuid: crypto.randomUUID(),
           type: "payment_succeeded",
@@ -132,8 +133,8 @@ withTestApi({ dbName }, async (t, { client }) => {
         },
       });
 
-      await client.postApiEventsSourceEvents({
-        path: { source: "Adyen" },
+      await client.postApiEventsSourceIdEvents({
+        path: { sourceId: adyenSource.id },
         body: {
           uuid: crypto.randomUUID(),
           type: "payment_succeeded",

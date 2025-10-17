@@ -1,7 +1,9 @@
 import { MiddlewareHandler } from "hono";
+import { createMiddleware } from "hono/factory";
 import { AuthStorage } from "./db/storage.ts";
 import { IEventSource } from "@/core/mod.ts";
 import { ApiKey } from "./types.ts";
+import { HonoEnv } from "@/http/types.ts";
 
 export function createAuthMiddleware(
   storage: AuthStorage,
@@ -91,3 +93,79 @@ export function createAuthMiddleware(
     recordUsage(c.res.status, apiKeyData);
   };
 }
+
+export const canAccessReport = createMiddleware<
+  HonoEnv & { Variables: { apiKey: ApiKey; isMaster: boolean } }
+>(async (c, next) => {
+  const apiKey = c.get("apiKey");
+  const isMaster = c.get("isMaster");
+  const authStorage = c.get("authStorage");
+  const { id } = c.req.param() as { id: string };
+
+  if (isMaster) {
+    return next();
+  }
+
+  if (!apiKey) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const isOwner = await authStorage.isReportOwner(apiKey.owner, id);
+  if (!isOwner) {
+    return c.json({ error: "Not Found" }, 404);
+  }
+
+  await next();
+});
+
+export const canAccessEventSource = createMiddleware<
+  HonoEnv & { Variables: { apiKey: ApiKey; isMaster: boolean } }
+>(async (c, next) => {
+  const engine = c.get("engine");
+  const apiKey = c.get("apiKey");
+  const isMaster = c.get("isMaster");
+  const { id } = c.req.param() as { id: string };
+
+  if (isMaster) {
+    return next();
+  }
+
+  if (!apiKey) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const source = await engine.getEventSourceDefinitionById(id);
+  if (!source || !source.owners?.includes(apiKey.owner)) {
+    return c.json({ error: "Not Found" }, 404);
+  }
+
+  await next();
+});
+
+export const canAccessReportFromQuery = createMiddleware<
+  HonoEnv & { Variables: { apiKey: ApiKey; isMaster: boolean } }
+>(async (c, next) => {
+  const authStorage = c.get("authStorage");
+  const apiKey = c.get("apiKey");
+  const isMaster = c.get("isMaster");
+  const { reportId } = c.req.query();
+
+  if (isMaster) {
+    return next();
+  }
+
+  if (!apiKey) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  if (!reportId) {
+    return c.json({ error: "reportId is required" }, 400);
+  }
+
+  const isOwner = await authStorage.isReportOwner(apiKey.owner, reportId);
+  if (!isOwner) {
+    return c.json({ error: "Not Found" }, 404);
+  }
+
+  await next();
+});

@@ -4,6 +4,7 @@ import { getReportModel, IReportDoc } from "./db/Report.ts";
 import {
   createEventModel,
   getEventSourceDefinitionModel,
+  getEventSourceMetadataModel,
   getEventTypeModel,
   getRecentEvents,
   IEventSourceDefinitionDoc,
@@ -29,6 +30,7 @@ import {
   IPlugin,
   IQuery,
   IReport,
+  IReportMetadata,
 } from "./types.ts";
 import { Aggregator } from "./aggregator.ts";
 import { EventSource } from "./event_source.ts";
@@ -69,6 +71,9 @@ export class Engine {
   private eventSourceDefinitionModel: ReturnType<
     typeof getEventSourceDefinitionModel
   >;
+  private eventSourceMetadataModel: ReturnType<
+    typeof getEventSourceMetadataModel
+  >;
   private eventTypeModel: ReturnType<typeof getEventTypeModel>;
   private reportCacheModel: Model<IReportCacheDoc>;
   private aggregationSourceModel: ReturnType<typeof getAggregationSourceModel>;
@@ -84,6 +89,9 @@ export class Engine {
       : new Redis();
     this.reportModel = getReportModel(this.connection);
     this.eventSourceDefinitionModel = getEventSourceDefinitionModel(
+      this.connection,
+    );
+    this.eventSourceMetadataModel = getEventSourceMetadataModel(
       this.connection,
     );
     this.eventTypeModel = getEventTypeModel(this.connection);
@@ -118,6 +126,10 @@ export class Engine {
 
   get EventSourceDefinitionModel() {
     return this.eventSourceDefinitionModel;
+  }
+
+  get EventSourceMetadataModel() {
+    return this.eventSourceMetadataModel;
   }
 
   get EventTypeModel() {
@@ -233,6 +245,59 @@ export class Engine {
         return report;
       },
     );
+  }
+
+  public async getReportMetadata(
+    reportId: string,
+  ): Promise<IReportMetadata | null> {
+    const report = await this.getReportDefinition(reportId);
+    if (!report) {
+      return null;
+    }
+
+    const aggregationSources = await this.listAggregationSources(reportId);
+    if (!aggregationSources || aggregationSources.length === 0) {
+      return {
+        metrics: [],
+        groupableFields: [],
+        eventSources: [],
+        eventTypes: [],
+      };
+    }
+
+    const eventSourceIds = new Set<string>();
+    for (const source of aggregationSources) {
+      if (source.filter) {
+        source.filter.sources.forEach((s) => eventSourceIds.add(s.id));
+      }
+    }
+
+    const metadata = await this.EventSourceMetadataModel.find({
+      sourceId: { $in: Array.from(eventSourceIds) },
+    }).lean();
+
+    const metrics = new Set<string>();
+    const groupableFields = new Set<string>();
+    const eventTypes = new Set<string>();
+    const eventSources = new Set<string>();
+
+    for (const meta of metadata) {
+      meta.metrics.forEach((m) => metrics.add(m));
+      meta.groupableFields.forEach((f) => groupableFields.add(f));
+      meta.eventTypes.forEach((e) => eventTypes.add(e));
+    }
+
+    const eventSourceDocs = await this.EventSourceDefinitionModel.find({
+      _id: { $in: Array.from(eventSourceIds) },
+    }).lean();
+    eventSourceDocs.forEach((s) => eventSources.add(s.name));
+
+    return {
+      metrics: Array.from(metrics),
+      groupableFields: Array.from(groupableFields),
+      eventSources: Array.from(eventSources),
+      eventTypes: Array.from(eventTypes),
+    };
   }
 
   public async listReportDefinitions(ids?: string[]): Promise<IReportDoc[]> {
@@ -448,12 +513,19 @@ export class Engine {
       cacheKey,
     );
     if (cached) return cached;
-
-    const sourceDoc = await this.EventSourceDefinitionModel.findById(id).lean();
-    if (sourceDoc) {
-      await this.eventSourceDefCache.set(cacheKey, sourceDoc);
+    try {
+      const sourceDoc = await this.EventSourceDefinitionModel.findById(id)
+        .lean();
+      if (sourceDoc) {
+        await this.eventSourceDefCache.set(cacheKey, sourceDoc);
+        return sourceDoc;
+      }
+    } catch (e) {
+      console.error(e);
+      return null;
     }
-    return sourceDoc;
+
+    return null;
   }
 
   public async getEventTypeById(
@@ -490,6 +562,24 @@ export class Engine {
     }
 
     return eventTypeDoc;
+  }
+
+  /**
+   * Retrieves an EventSource instance by its name.
+   * This is the primary way to interact with a specific event source.
+   * @param name The name of the event source.
+   * @returns An IEventSource instance or null if not found.
+   */
+  public async getEventSourceById(
+    id: string,
+  ): Promise<IEventSource | null> {
+    const sourceDef = await this.getEventSourceDefinitionById(id);
+
+    if (!sourceDef) {
+      return null;
+    }
+
+    return new EventSource(this, sourceDef);
   }
 
   /**

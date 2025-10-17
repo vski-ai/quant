@@ -185,24 +185,28 @@ export class EventSource implements IEventSource {
     // --- 3. Insert new documents into DB ---
     const insertedDocs = await this.eventModel.insertMany(docsToInsert);
 
+    // --- 4. Update metadata (non-blocking) ---
+    // @ts-ignore:
+    this._updateMetadata(insertedDocs, eventTypeDocs).catch(console.error);
+
     // Create a map from eventTypeId to eventType name for quick lookups.
     const eventTypeIdToNameMap = new Map<string, string>();
     for (const doc of eventTypeDocs.values()) {
       eventTypeIdToNameMap.set(doc._id.toString(), doc.name);
     }
 
-    // --- 4. Post-processing for newly inserted docs ---
+    // --- 5. Post-processing for newly inserted docs ---
     for (const newEventDoc of insertedDocs) {
       // --- Plugin Hook: afterEventRecord ---
-      await this.engine.pluginManager.executeActionHook("afterEventRecord", {
+      this.engine.pluginManager.executeActionHook("afterEventRecord", {
         eventDoc: newEventDoc,
-      });
+      }).catch(console.log);
 
       // Enqueue for durable processing
-      await this.engine.aggregator.queueEventForProcessing(
+      this.engine.aggregator.queueEventForProcessing(
         newEventDoc._id.toString(),
         this.eventModel.collection.name,
-      );
+      ).catch(console.log);
 
       // Handle real-time buffer
       await this.processRealtime(newEventDoc as any);
@@ -218,6 +222,45 @@ export class EventSource implements IEventSource {
         e.uuid === (eventOrEvents as IEventTransfer<T>).uuid
       )!
       : results as any;
+  }
+
+  private async _updateMetadata(
+    insertedDocs: IEventDoc<any>[],
+    eventTypeDocs: Map<string, IEventTypeDoc>,
+  ) {
+    const metrics = new Set<string>();
+    const groupableFields = new Set<string>();
+    const eventTypes = new Set<string>();
+
+    for (const doc of insertedDocs) {
+      const payload = doc.payload;
+      for (const key in payload) {
+        if (typeof payload[key] === "number") {
+          metrics.add(`${key}_sum`);
+        } else if (typeof payload[key] === "string") {
+          groupableFields.add(key);
+        }
+      }
+      const eventTypeDoc = eventTypeDocs.get(doc.eventTypeId.toString());
+      if (eventTypeDoc) {
+        eventTypes.add(eventTypeDoc.name);
+        metrics.add(`${eventTypeDoc.name}_count`);
+      }
+    }
+
+    if (metrics.size > 0 || groupableFields.size > 0 || eventTypes.size > 0) {
+      await this.engine.EventSourceMetadataModel.updateOne(
+        { sourceId: this.definitionDoc._id },
+        {
+          $addToSet: {
+            metrics: { $each: Array.from(metrics) },
+            groupableFields: { $each: Array.from(groupableFields) },
+            eventTypes: { $each: Array.from(eventTypes) },
+          },
+        },
+        { upsert: true },
+      );
+    }
   }
 
   private async processRealtime(newEventDoc: IEventDoc<any>) {
@@ -251,10 +294,10 @@ export class EventSource implements IEventSource {
         );
       }
 
-      await this.engine.pluginManager.executeActionHook(
+      this.engine.pluginManager.executeActionHook(
         "afterRealtimeMetricsGenerated",
         { reportId: config.reportId.toString(), event: newEventDoc, metrics },
-      );
+      ).catch(console.log);
     }
   }
 
