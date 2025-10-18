@@ -1,7 +1,9 @@
 import { define } from "@/root.ts";
 import { getUserBySession } from "@/db/user.ts";
-import { Plan, User, UserProfile } from "@/db/models.ts";
+import { Plan, Roles, User, UserProfile } from "@/db/models.ts";
 import { Cookie, getCookie } from "@/shared/cookies.ts";
+import userApi from "@/shared/api.ts";
+import masterApi from "@/db/quant.ts";
 
 declare module "@/root.ts" {
   interface State {
@@ -14,6 +16,7 @@ declare module "@/root.ts" {
     };
     session?: string;
     user?: User & { profile: UserProfile & { plan: Plan } };
+    client: ReturnType<typeof userApi>;
   }
 }
 
@@ -36,8 +39,8 @@ export const handler = define.middleware(async (ctx) => {
     if (user) {
       ctx.state.session = sessionToken;
       ctx.state.user = user;
+      ctx.state.client = userApi(sessionToken);
     }
   }
-
   return await ctx.next();
 });

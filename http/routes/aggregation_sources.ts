@@ -69,7 +69,6 @@ aggregationSources.get(
   async (c) => {
     const engine = c.get("engine");
     const { reportId } = c.req.valid("query");
-
     const sources = await engine.listAggregationSources(reportId);
     return c.json(normalizeDocs(sources));
   },

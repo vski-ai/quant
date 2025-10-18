@@ -1,11 +1,12 @@
+import { Granularity } from "@/quant/core/types.ts";
 import { ColumnSelector } from "@/islands/table/ColumnSelector.tsx";
-import { GroupingSelector } from "../table/GroupingSelector.tsx";
-import { DynamicTable } from "@/islands/table/DynamicTable.tsx";
+import { GroupingSelector } from "@/islands/table/GroupingSelector.tsx";
+import { DynamicTable } from "@/islands/table/index.tsx";
 import { useSignal } from "@preact/signals";
 import { useRef, useState } from "preact/hooks";
 import GridIcon from "lucide-react/dist/esm/icons/grid-2x2-plus.js";
 import GroupIcon from "lucide-react/dist/esm/icons/group.js";
-import { Granularity } from "@/quant/core/types.ts";
+import { ColumnSorter, SortState } from "@/islands/table/ColumnSorter.tsx";
 
 interface AggregationViewProps {
   granularity?: Granularity;
@@ -25,7 +26,18 @@ export const AggregationView = (
   const selectedGroups = useSignal<string[]>([]);
   const parent = useRef<HTMLDivElement>(null);
   const delta = ui.dense === "1" ? 130 : 320;
-  const [initialWith] = useState((ui.width ?? globalThis.innerWidth) - delta);
+  const [initialWith] = useState(
+    globalThis.innerWidth <= 980
+      ? 100
+      : (ui.width ?? globalThis.innerWidth) - delta,
+  );
+  const sortState = useSignal<SortState>({
+    column: "timestamp",
+    sort: "asc",
+  });
+  const selected = useSignal<any[]>([]);
+  const expanded = useSignal<any>({});
+
   return (
     <div ref={parent} class="-mx-4">
       <div className="fixed z-50 bottom-2 right-6 flex flex-col gap-2">
@@ -68,7 +80,21 @@ export const AggregationView = (
         data={aggregations}
         columns={selectedColumns.value}
         initialWidth={initialWith}
-        groupBy={selectedGroups.value}
+        selectedRows={selected}
+        expandedRows={expanded}
+        renderExpandedRow={(row) => {
+          return <p>Hello World!</p>;
+        }}
+        columnExtensions={(column: string) => (
+          <ColumnSorter
+            key={sortState.value.column}
+            column={column}
+            state={sortState}
+            onChange={(s) => {
+              console.log("needs update");
+            }}
+          />
+        )}
       />
     </div>
   );

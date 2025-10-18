@@ -15,6 +15,7 @@
     "jsr:@std/assert@0.221": "0.221.0",
     "jsr:@std/async@0.221": "0.221.0",
     "jsr:@std/bytes@^1.0.6": "1.0.6",
+    "jsr:@std/cache@0.2": "0.2.0",
     "jsr:@std/cli@0.221": "0.221.0",
     "jsr:@std/cli@^1.0.23": "1.0.23",
     "jsr:@std/crypto@^1.0.3": "1.0.5",
@@ -171,6 +172,9 @@
     },
     "@std/bytes@1.0.6": {
       "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
+    },
+    "@std/cache@0.2.0": {
+      "integrity": "63a2ccd5a9e7c03e430f7d34dfcfd0d0cfc90731a1eaf8208f4c66e418fc3035"
     },
     "@std/cli@0.221.0": {
       "integrity": "157c2f881f0f85a73d994e7668754aeeccdf597680bd9c65de9c6bcd670416ac",
@@ -1827,6 +1831,7 @@
       "jsr:@deno/kv-oauth@0.11",
       "jsr:@fresh/core@^2.1.2",
       "jsr:@fresh/plugin-vite@^1.0.4",
+      "jsr:@std/cache@0.2",
       "jsr:@std/http@^1.0.21",
       "npm:@observablehq/plot@~0.6.17",
       "npm:@preact/signals@^2.3.2",

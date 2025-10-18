@@ -1,4 +1,5 @@
 import {
+  any as anything,
   array,
   date,
   enum as enumType,
@@ -8,6 +9,7 @@ import {
   object,
   optional,
   pipe,
+  record,
   string,
 } from "valibot";
 import { type ObjectId } from "deno_mongo";
@@ -69,3 +71,23 @@ export type Session = InferOutput<typeof SessionSchema> & {
   _id: ObjectId;
   userId: ObjectId;
 };
+
+// UI Preset is where we store generic ui configurations
+// May want to read thru in-memory LRU cache
+// Ref: query includes '?preset={key}'
+export const UIPresetSchema = object({
+  key: string(),
+  value: record(string(), anything()),
+});
+
+export type UIPreset = InferOutput<typeof UIPresetSchema>;
+
+// Query And Filters is where we save serialized query params
+// May want to read thru in-memory LRU cache
+// Ref: query includers `?q={key}`
+export const QueryAndFiltersSchema = object({
+  key: string(),
+  value: record(string(), anything()),
+});
+
+export type QueryAndFilters = InferOutput<typeof QueryAndFiltersSchema>;

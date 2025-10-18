@@ -89,7 +89,6 @@ export function createAuthMiddleware(
 
     c.set("apiKey", apiKeyData);
     await next();
-    // Record successful usage after the request has been handled
     recordUsage(c.res.status, apiKeyData);
   };
 }

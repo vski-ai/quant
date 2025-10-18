@@ -5,6 +5,7 @@ import { HonoEnv } from "../types.ts";
 export const httpErrorHandler: ErrorHandler<HonoEnv> = (err, c) => {
   if (err instanceof HTTPException) {
     // Use the HTTPException's response if it's a known HTTP error
+    console.log(123123, err)
     return err.getResponse();
   }
 

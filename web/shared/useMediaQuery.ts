@@ -1,12 +1,15 @@
 import { useSignal, useSignalEffect } from "@preact/signals";
-import { useEffect } from "preact/hooks";
 
 export function useMediaQuery(query: string) {
-  const matches = useSignal(false);
+  const matches = useSignal(
+    globalThis.innerWidth <= parseInt(
+      query.match(/\d+/ig)?.at(0) ?? "768",
+    ),
+  );
 
   useSignalEffect(() => {
     if (typeof window !== "undefined") {
-      const media = window.matchMedia(query);
+      const media = globalThis.matchMedia(query);
       if (media.matches !== matches.value) {
         matches.value = media.matches;
       }

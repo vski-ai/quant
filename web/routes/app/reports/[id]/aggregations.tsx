@@ -15,14 +15,18 @@ export const handler = define.handlers({
   async GET(ctx) {
     const { id } = ctx.params;
     const { state } = ctx;
+    const client = state.client;
     const selectedMetrics: string[] = [];
 
     // Re-fetch available metrics for rendering
-    const { data: aggregationSources, error: sourcesError } = await quant
-      .getApiAggregationSources({ query: { reportId: id } });
+    const { data: aggregationSources, error: sourcesError } = await client
+      .getApiAggregationSources({
+        query: { reportId: id },
+      });
     if (sourcesError) {
-      return new Response((sourcesError as any).error, { status: 500 });
+      return Response.json(sourcesError.error, { status: 400 });
     }
+
     const availableMetrics = [
       ...new Set(
         (aggregationSources as GetApiAggregationSourcesResponse).flatMap((as) =>
@@ -36,7 +40,7 @@ export const handler = define.handlers({
       (state.granularity || "hour") as Granularity;
     const timeRange = calculateTimeRange(period);
 
-    const { data: dataset, error: datasetError } = await quant
+    const { data: dataset, error: datasetError } = await client!
       .postApiReportsIdDataset({
         path: { id },
         body: {
