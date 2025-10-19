@@ -2,6 +2,7 @@ import { useMemo, useRef } from "preact/hooks";
 import { formatColumnName } from "../../shared/formatters.ts";
 import { useVariableVirtualizer } from "./useVariableVirtualizer.ts";
 import { VirtualTableViewProps } from "./types.ts";
+import { CellFormatter } from "./CellFormatter.tsx";
 
 interface CardViewProps extends VirtualTableViewProps {}
 
@@ -18,6 +19,7 @@ export function CardView(
     rowIdentifier,
     renderExpandedRow,
     expandedRows,
+    cellFormatting,
   }: CardViewProps,
 ) {
   const tableRef = useRef<HTMLDivElement>(null);
@@ -119,9 +121,10 @@ export function CardView(
                         class="text-right truncate badge badge-sm badge-soft"
                         title={row[col]}
                       >
-                        {typeof row[col] === "boolean"
-                          ? row[col].toString()
-                          : row[col]}
+                        <CellFormatter
+                          value={row[col]}
+                          formatting={cellFormatting?.value[col]}
+                        />
                       </span>
                     </div>
                   );

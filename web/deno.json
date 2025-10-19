@@ -14,6 +14,7 @@
     "@/": "./",
     "@/quant/": "../",
     "@deno/gfm": "jsr:@deno/gfm@^0.11.0",
+    "@faker-js/faker": "npm:@faker-js/faker@^10.1.0",
     "@std/cache": "jsr:@std/cache@^0.2.0",
     "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.19",
     "deno_mongo": "https://deno.land/x/mongo@v0.34.0/mod.ts",

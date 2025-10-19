@@ -2,11 +2,16 @@ import { Granularity } from "@/quant/core/types.ts";
 import { ColumnSelector } from "@/islands/table/ColumnSelector.tsx";
 import { GroupingSelector } from "@/islands/table/GroupingSelector.tsx";
 import { DynamicTable } from "@/islands/table/index.tsx";
-import { useSignal } from "@preact/signals";
-import { useRef, useState } from "preact/hooks";
+import { Signal, useSignal } from "@preact/signals";
+import { useMemo, useRef } from "preact/hooks";
 import GridIcon from "lucide-react/dist/esm/icons/grid-2x2-plus.js";
 import GroupIcon from "lucide-react/dist/esm/icons/group.js";
 import { ColumnSorter, SortState } from "@/islands/table/ColumnSorter.tsx";
+import { ColumnMenu } from "@/islands/table/ColumnMenu.tsx";
+import { GeneralFormatting } from "@/islands/table/formatting/General.tsx";
+import { StyleFormatting } from "@/islands/table/formatting/Style.tsx";
+import { DateFormatting } from "@/islands/table/formatting/Date.tsx";
+import { generateMockData } from "../../mocks/groupable-table.ts";
 
 interface AggregationViewProps {
   granularity?: Granularity;
@@ -20,23 +25,42 @@ interface AggregationViewProps {
 export const AggregationView = (
   { aggregations, ui }: AggregationViewProps,
 ) => {
-  const columns = Object.keys(aggregations?.[0] ?? {});
+  const isReserved = (col: string) =>
+    [
+      "$group_by",
+      "$group_level",
+      "$parent_id",
+      "$is_group_root",
+      "name",
+    ].includes(col);
+  const data = aggregations; //useMemo(() => generateMockData(), []);
+
+  const columns = Object.keys(data?.[0] ?? {}).filter((c) => !isReserved(c));
   const allColumns = useSignal<string[]>(columns);
   const selectedColumns = useSignal<string[]>(columns?.slice(0, 5));
   const selectedGroups = useSignal<string[]>([]);
   const parent = useRef<HTMLDivElement>(null);
-  const delta = ui.dense === "1" ? 130 : 320;
-  const [initialWith] = useState(
-    globalThis.innerWidth <= 980
-      ? 100
-      : (ui.width ?? globalThis.innerWidth) - delta,
-  );
   const sortState = useSignal<SortState>({
     column: "timestamp",
     sort: "asc",
   });
   const selected = useSignal<any[]>([]);
   const expanded = useSignal<any>({});
+  const formatting = useSignal<any>({});
+  const groupStates = useSignal<Record<string, boolean>>({});
+
+  const onColumnDrop = (draggedId: string, targetId: string) => {
+    const newColumns = [...selectedColumns.value];
+    const draggedIndex = newColumns.indexOf(draggedId);
+    const targetIndex = newColumns.indexOf(targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    const [draggedItem] = newColumns.splice(draggedIndex, 1);
+    newColumns.splice(targetIndex, 0, draggedItem);
+
+    selectedColumns.value = newColumns;
+  };
 
   return (
     <div ref={parent} class="-mx-4">
@@ -57,35 +81,19 @@ export const AggregationView = (
             />
           </div>
         </div>
-        <div className="dropdown dropdown-top dropdown-end">
-          {/* a focusable div with tabIndex is necessary to work on all browsers. role="button" is necessary for accessibility */}
-          <button
-            tabIndex={0}
-            type="button"
-            className="btn btn-md btn-primary transition-opacity opacity-40 hover:opacity-100 focus:opacity-100"
-          >
-            <GridIcon />
-            <span class="badge badge-xs">{selectedColumns.value.length}</span>
-          </button>
-
-          <div class="dropdown-content z-100 mb-2">
-            <ColumnSelector
-              allColumns={allColumns.value}
-              selectedColumns={selectedColumns}
-            />
-          </div>
-        </div>
       </div>
       <DynamicTable
-        data={aggregations}
+        data={data}
         columns={selectedColumns.value}
-        initialWidth={initialWith}
+        cellFormatting={formatting}
+        onColumnDrop={onColumnDrop}
+        //groupStates={groupStates}
         selectedRows={selected}
-        expandedRows={expanded}
-        renderExpandedRow={(row) => {
-          return <p>Hello World!</p>;
-        }}
-        columnExtensions={(column: string) => (
+        // expandedRows={expanded}
+        // renderExpandedRow={(row) => {
+        //   return <p>Hello World!</p>;
+        // }}
+        columnAction={(column: string) => (
           <ColumnSorter
             key={sortState.value.column}
             column={column}
@@ -95,6 +103,54 @@ export const AggregationView = (
             }}
           />
         )}
+        columnExtensions={(column: string) => {
+          const activeTab = useSignal("general");
+          return (
+            <ColumnMenu>
+              <div class="menu card bg-base-100 w-100 border">
+                <div class="tabs">
+                  <a
+                    tabIndex={1}
+                    class={`tab tab-lifted ${
+                      activeTab.value === "general" ? "tab-active" : ""
+                    }`}
+                    onClick={() => activeTab.value = "general"}
+                  >
+                    General
+                  </a>
+                </div>
+
+                <div class="p-2">
+                  {activeTab.value === "general" && (
+                    <GeneralFormatting
+                      column={column}
+                      formatting={formatting}
+                    />
+                  )}
+                </div>
+              </div>
+            </ColumnMenu>
+          );
+        }}
+        tableAddon={
+          <div className="dropdown dropdown-end w-full">
+            <button
+              tabIndex={0}
+              type="button"
+              className="btn shadow rounded-none opacity-45 hover:opacity-100 transition-opacity"
+            >
+              <GridIcon />
+              {/* <span class="badge badge-xs">{selectedColumns.value.length}</span> */}
+            </button>
+
+            <div class="dropdown-content z-100 mb-2">
+              <ColumnSelector
+                allColumns={allColumns.value}
+                selectedColumns={selectedColumns}
+              />
+            </div>
+          </div>
+        }
       />
     </div>
   );

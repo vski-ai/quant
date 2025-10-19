@@ -28,12 +28,14 @@ export function useVariableVirtualizer(
     const scrollTop = scrollElement
       ? scrollElement.scrollTop
       : globalThis.scrollY;
+
     const containerHeight = scrollElement
       ? scrollElement.clientHeight
       : globalThis.innerHeight;
 
     const tableTop = tableElement.getBoundingClientRect().top + scrollTop -
       (scrollElement?.getBoundingClientRect().top ?? 0);
+
     const relativeScrollTop = scrollTop - tableTop;
 
     let paddingTop = 0;

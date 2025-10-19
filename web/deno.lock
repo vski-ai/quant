@@ -51,6 +51,7 @@
     "jsr:@std/uuid@^1.0.7": "1.0.9",
     "npm:@babel/core@^7.28.0": "7.28.4",
     "npm:@babel/preset-react@^7.27.1": "7.27.1_@babel+core@7.28.4",
+    "npm:@faker-js/faker@^10.1.0": "10.1.0",
     "npm:@mjackson/node-fetch-server@0.7": "0.7.0",
     "npm:@observablehq/plot@~0.6.17": "0.6.17",
     "npm:@opentelemetry/api@^1.9.0": "1.9.0",
@@ -729,6 +730,9 @@
       "integrity": "sha512-FaPsAHTwm+1Gfvn37Eg3E5HIpfR3i6x1AIcla/MkqAIupD4BW3MrSeUqfoTzwwJhk3WE2/KqUn4/eenEJC76VA==",
       "os": ["win32"],
       "cpu": ["x64"]
+    },
+    "@faker-js/faker@10.1.0": {
+      "integrity": "sha512-C3mrr3b5dRVlKPJdfrAXS8+dq+rq8Qm5SNRazca0JKgw1HQERFmrVb0towvMmw5uu8hHKNiQasMaR/tydf3Zsg=="
     },
     "@isaacs/fs-minipass@4.0.1": {
       "integrity": "sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==",
@@ -1833,6 +1837,7 @@
       "jsr:@fresh/plugin-vite@^1.0.4",
       "jsr:@std/cache@0.2",
       "jsr:@std/http@^1.0.21",
+      "npm:@faker-js/faker@^10.1.0",
       "npm:@observablehq/plot@~0.6.17",
       "npm:@preact/signals@^2.3.2",
       "npm:@tailwindcss/typography@~0.5.19",

@@ -10,6 +10,7 @@ export function DynamicTable(
     columns,
     initialWidth,
     columnExtensions,
+    columnAction,
     onLoadMore,
     loading,
     rowHeight,
@@ -19,6 +20,9 @@ export function DynamicTable(
     rowIdentifier,
     renderExpandedRow,
     expandedRows,
+    tableAddon,
+    cellFormatting,
+    groupStates,
   }: VirtualTableViewProps,
 ) {
   const isMobile = useMediaQuery("(max-width: 980px)");
@@ -51,6 +55,9 @@ export function DynamicTable(
         rowHeight={rowHeight}
         buffer={buffer}
         scrollContainerRef={scrollContainerRef}
+        tableAddon={tableAddon}
+        columnAction={columnAction}
+        cellFormatting={cellFormatting}
       />
     );
   }
@@ -70,6 +77,10 @@ export function DynamicTable(
       rowIdentifier={rowIdentifier}
       renderExpandedRow={renderExpandedRow}
       expandedRows={expandedRows}
+      tableAddon={tableAddon}
+      columnAction={columnAction}
+      cellFormatting={cellFormatting}
+      groupStates={groupStates}
     />
   );
 }

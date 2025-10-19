@@ -1,20 +1,27 @@
 import { type JSX } from "preact";
 import { useSignal } from "@preact/signals";
 import { formatColumnName } from "../../shared/formatters.ts";
-
-interface ResizableHeaderProps {
+import { useRef } from "preact/hooks";
+import { Draggable } from "./Draggable.tsx";
+export interface ResizableHeaderProps {
   column: string;
   width: number;
   extensions?: (col: string) => JSX.Element;
+  action?: (col: string) => JSX.Element;
   onResize: (column: string, newWidth: number) => void;
+  onColumnDrop?: (draggedColumn: string, targetColumn: string) => void;
+  children?: any;
 }
 
 export function ResizableHeader(
-  { column, width, onResize, extensions }: ResizableHeaderProps,
+  { column, width, onResize, extensions, action, onColumnDrop, children }:
+    ResizableHeaderProps,
 ) {
   const isResizing = useSignal(false);
   const startX = useSignal(0);
   const startWidth = useSignal(0);
+  const edit = useSignal(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const formattedName = formatColumnName(column);
 
@@ -46,18 +53,52 @@ export function ResizableHeader(
       style={{ width: `${width}px` }}
       class="sticky top-0 bg-base-200 z-10 shadow"
     >
-      <div class="flex justify-between items-center">
-        <div
-          contentEditable
-          class="truncate p-1 min-w-32"
-          title={formattedName}
-        >
-          {formattedName}
-        </div>
-        <div>
-          {extensions?.(column)}
-        </div>
-      </div>
+      <Draggable onDrop={onColumnDrop} id={column}>
+        {children ? children : (
+          <div class="flex justify-between items-center">
+            {action?.(column)}
+            {!edit.value
+              ? (
+                <div
+                  class="truncate p-1 min-w-32"
+                  title={formattedName}
+                  onDblClick={() => {
+                    edit.value = true;
+                    setTimeout(() => {
+                      inputRef.current?.focus();
+                    });
+                  }}
+                >
+                  {formattedName}
+                </div>
+              )
+              : (
+                <input
+                  autoFocus
+                  autoComplete="off"
+                  type="text"
+                  value={formattedName}
+                  class="input insput-sm w-full"
+                  ref={inputRef}
+                  onFocusOut={() => {
+                    edit.value = false;
+                  }}
+                  onKeyUp={(ev) => {
+                    if (ev.key === "Enter") {
+                      edit.value = false;
+                    }
+                    if (ev.key === "esc") {
+                      edit.value = false;
+                    }
+                  }}
+                />
+              )}
+            <div class="ml-2">
+              {extensions?.(column)}
+            </div>
+          </div>
+        )}
+      </Draggable>
       <div
         class="absolute -right-2 top-0 h-full w-4 cursor-col-resize select-none bg-transparent"
         onMouseDown={handleMouseDown}

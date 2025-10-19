@@ -34,7 +34,8 @@ export default define.layout(({ params: { id }, url, Component, state }) => {
                 <a type="button" tabIndex={0}>
                   {report?.name}
                 </a>
-                <div class="dropdown-content mt-2 menu card bg-base-100 hover:decoration-0 grid">
+                {
+                  /* <div class="dropdown-content mt-2 menu card bg-base-100 hover:decoration-0 grid">
                   <a
                     class={`p-2 ${activeTab === "metrics" ? "active" : ""}`}
                     href={`${basePath}/metrics`}
@@ -55,7 +56,8 @@ export default define.layout(({ params: { id }, url, Component, state }) => {
                   >
                     Settings
                   </a>
-                </div>
+                </div> */
+                }
               </li>
             </ul>
           </div>

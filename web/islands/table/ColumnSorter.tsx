@@ -2,7 +2,6 @@ import { Signal } from "@preact/signals";
 import ArrowDownIcon from "lucide-react/dist/esm/icons/arrow-down-0-1.js";
 import ArrowUpIcon from "lucide-react/dist/esm/icons/arrow-up-1-0.js";
 import ArrowDownUpIcon from "lucide-react/dist/esm/icons/arrow-down-up.js";
-import { string } from "valibot";
 
 export type SortState = {
   column: string;
@@ -20,7 +19,7 @@ interface ColumnSorterProps {
 export const ColumnSorter = ({
   column,
   state,
-  className = "btn btn-xs btn-ghost",
+  className = "btn btn-xs btn-ghost w-8 h-8",
   activeClassName = "btn-active",
   onChange,
 }: ColumnSorterProps) => {
