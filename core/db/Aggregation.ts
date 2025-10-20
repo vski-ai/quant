@@ -27,6 +27,7 @@ export const AggregateSchema = new Schema({
   payloadField: { type: String, default: null },
   payloadCategory: { type: String, default: null },
   compoundCategoryKey: { type: String, default: null },
+  leafKey: { type: Schema.Types.Mixed, default: null },
   value: { type: Number, required: true, default: 0 },
 }, {
   timestamps: true,
@@ -50,6 +51,7 @@ AggregateSchema.index({
   payloadField: 1,
   payloadCategory: 1,
   compoundCategoryKey: 1,
+  leafKey: 1,
 }, {
   name: "reporting_idx",
   unique: true,
@@ -103,6 +105,7 @@ export interface IAggregateDoc extends Document {
   payloadField?: string;
   payloadCategory?: string;
   compoundCategoryKey?: string;
+  leafKey?: any;
   value: number;
 }
 

@@ -33,8 +33,8 @@ export const AggregationView = (
       "$is_group_root",
       "name",
     ].includes(col);
-  const data = aggregations; //useMemo(() => generateMockData(), []);
-
+  const data = useMemo(() => generateMockData(), []);
+  console.log("d", JSON.stringify(data, null, 2));
   const columns = Object.keys(data?.[0] ?? {}).filter((c) => !isReserved(c));
   const allColumns = useSignal<string[]>(columns);
   const selectedColumns = useSignal<string[]>(columns?.slice(0, 5));
@@ -87,7 +87,7 @@ export const AggregationView = (
         columns={selectedColumns.value}
         cellFormatting={formatting}
         onColumnDrop={onColumnDrop}
-        //groupStates={groupStates}
+        groupStates={groupStates}
         selectedRows={selected}
         // expandedRows={expanded}
         // renderExpandedRow={(row) => {

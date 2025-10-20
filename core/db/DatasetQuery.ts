@@ -3,6 +3,7 @@ import { IAggregationSourceFilter } from "./Aggregation.ts";
 import { getReportModel } from "./Report.ts";
 import {
   AggregationType,
+  Granularity,
   IDatasetDataPoint,
   IDatasetQuery,
   ITimeRange,
@@ -32,6 +33,12 @@ export async function queryMongoForDataset(
   boolean_groups?: { name: string; value: boolean; timestamp: Date }[];
 }[]> {
   const { metrics, attribution, timeRange, granularity } = query;
+
+  if (Array.isArray(granularity)) {
+    throw new Error(
+      "queryMongoForDataset does not support multiple granularities.",
+    );
+  }
 
   const matchStage: Record<string, any> = {
     timestamp: { $gte: timeRange.start, $lte: timeRange.end },

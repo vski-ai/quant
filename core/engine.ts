@@ -21,6 +21,10 @@ import {
   IGroupsAggregationQuery,
 } from "./db/GroupsAggregationQuery.ts";
 import {
+  getFlatGroupsAggregation,
+  IFlatGroupsAggregationQuery,
+} from "./db/FlatGroupsAggregationQuery.ts";
+import {
   EventPayload,
   IDataOffloader,
   IDatasetDataPoint,
@@ -503,6 +507,19 @@ export class Engine {
     );
   }
 
+  public getFlatGroupsAggregation(
+    query: IFlatGroupsAggregationQuery,
+  ) {
+    return tracer.startActiveSpan(
+      "engine.getFlatGroupsAggregation",
+      async (span) => {
+        const result = await getFlatGroupsAggregation(query, this);
+        span.end();
+        return result;
+      },
+    );
+  }
+
   public async getEventSourceDefinitionById(
     id: string,
   ): Promise<IEventSourceDefinitionDoc | null> {
@@ -663,6 +680,9 @@ export class Engine {
   ) {
     return tracer.startActiveSpan("engine.getRealtimeReport", async (span) => {
       if (!this.aggregator.bufferService) return [];
+      if (Array.isArray(query.granularity)) {
+        throw new Error("Report queries do not support multiple granularities");
+      }
 
       const aggregationSources = await this.listAggregationSources(
         query.reportId,

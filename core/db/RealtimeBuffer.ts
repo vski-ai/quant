@@ -1,5 +1,6 @@
 import {
   AggregationType,
+  Granularity,
   IDatasetDataPoint,
   IDatasetQuery,
   IQuery,
@@ -159,6 +160,9 @@ export class RealtimeBuffer implements IRealtimeService {
     targetCollection?: string,
     filter?: IAggregationSourceFilter,
   ): Promise<IDatasetDataPoint[]> {
+    if (Array.isArray(query.granularity)) {
+      throw new Error("queryDataset does not support multiple granularities.");
+    }
     const rawPoints = await queryRedisBuffer(
       // @ts-ignore: reason
       this.redis,
@@ -188,7 +192,7 @@ export class RealtimeBuffer implements IRealtimeService {
       // Truncate timestamp to group into time buckets
       const truncatedTimestamp = truncateDate(
         point.timestamp,
-        query.granularity,
+        query.granularity as Granularity,
       );
       const isoTimestamp = truncatedTimestamp.toISOString();
 
@@ -241,6 +245,9 @@ export class RealtimeBuffer implements IRealtimeService {
     targetCollection?: string,
     filter?: IAggregationSourceFilter,
   ): Promise<any[]> {
+    if (Array.isArray(query.granularity)) {
+      throw new Error("queryGroups does not support multiple granularities.");
+    }
     const rawPoints = await queryRedisBuffer(
       // @ts-ignore: reason
       this.redis,
@@ -272,7 +279,7 @@ export class RealtimeBuffer implements IRealtimeService {
 
       const truncatedTimestamp = truncateDate(
         point.timestamp,
-        query.granularity,
+        query.granularity as Granularity,
       );
       const isoTimestamp = truncatedTimestamp.toISOString();
 

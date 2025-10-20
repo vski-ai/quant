@@ -1,6 +1,6 @@
 import { Model } from "mongoose";
 import { getReportModel } from "./Report.ts";
-import { AggregationType, IDatasetQuery } from "../types.ts";
+import { AggregationType, Granularity, IDatasetQuery } from "../types.ts";
 import { getPartitionedCollectionNames } from "./Partition.ts";
 import { Engine } from "../engine.ts";
 import { TOTAL_ATTRIBUTION } from "../constants.ts";
@@ -60,6 +60,12 @@ export async function queryMongoForGroups(
   filter: IAggregationSourceFilter,
 ): Promise<any[]> {
   const { metrics = [], attribution, timeRange, granularity, groupBy } = query;
+
+  if (Array.isArray(granularity)) {
+    throw new Error(
+      "queryMongoForGroups does not support multiple granularities.",
+    );
+  }
 
   const sumMetrics = metrics.filter((m) => !m.endsWith("_count"));
   const countMetrics = metrics.filter((m) => m.endsWith("_count"));

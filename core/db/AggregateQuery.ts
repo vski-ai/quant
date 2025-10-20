@@ -156,6 +156,29 @@ export async function getMetricsFromEvent(
           });
         }
       }
+
+      // LEAF_SUM metrics
+      const leafKey: Record<string, string> = {};
+      for (const [field, value] of categoricalFields.entries()) {
+        leafKey[field] = value;
+      }
+
+      for (const [numField, numValue] of numericalFields.entries()) {
+        metrics.push({
+          query: buildAggregateQuery(
+            eventDoc.sourceId.toString(),
+            eventTypeDoc.name,
+            truncatedTimestamp,
+            attr,
+            storageGranularity,
+            AggregationType.LEAF_SUM,
+            numField,
+            null, // No single payloadCategory for LEAF_SUM
+            { leafKey },
+          ),
+          incrementValue: numValue,
+        });
+      }
     }
 
     // --- Plugin Hook: onGetMetrics ---
@@ -256,30 +279,12 @@ export async function writeMetricsToMongo(
   );
 
   if (bulkOps.length > 0) {
-    try {
-      await AggregateModel.bulkWrite(bulkOps);
-
-      // --- Plugin Hook: afterMetricsWritten ---
-      await engine.pluginManager.executeActionHook("afterMetricsWritten", {
-        metrics: finalMetrics,
-        targetCollection: finalTargetCollection,
-      });
-    } catch (error) {
-      // sometimes duplicate keys stuck up in one session before initial write
-      // so we get a conflict even with {upsert: true}
-      // here we give db some time to commit the first batch
-      if ((error as any).code === 11000 && retry < 100) {
-        await new Promise((resolve) => setTimeout(resolve, 100 * retry));
-        await writeMetricsToMongo(
-          engine,
-          finalTargetCollection,
-          finalMetrics,
-          retry + 1,
-        );
-        return;
-      }
-      throw error;
-    }
+    await AggregateModel.bulkWrite(bulkOps);
+    // --- Plugin Hook: afterMetricsWritten ---
+    engine.pluginManager.executeActionHook("afterMetricsWritten", {
+      metrics: finalMetrics,
+      targetCollection: finalTargetCollection,
+    }).catch(console.error);
   }
 }
 

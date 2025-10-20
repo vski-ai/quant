@@ -139,6 +139,7 @@ export enum AggregationType {
   SUM = "SUM",
   CATEGORY = "CATEGORY",
   COMPOUND_SUM = "COMPOUND_SUM",
+  LEAF_SUM = "LEAF_SUM",
   BOOLEAN = "BOOLEAN",
 }
 
@@ -212,7 +213,7 @@ export interface IQuery {
     start: Date;
     end: Date;
   };
-  granularity: Granularity;
+  granularity: Granularity | Granularity[];
   rebuildCache?: boolean;
   cache?: boolean;
   groupBy?: string[];
@@ -231,7 +232,7 @@ export interface IDatasetQuery {
     start: Date;
     end: Date;
   };
-  granularity: Granularity;
+  granularity: Granularity | Granularity[];
   rebuildCache?: boolean;
   cache?: boolean;
 }

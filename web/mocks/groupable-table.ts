@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 function generateGroupData(level = 0, maxLevel = 3, parentId = null) {
   const items = [];
   const numItems = 5;
-
+  const groups = ["company", "sex", "name", "hours"];
   for (let i = 0; i < numItems; i++) {
     const id = faker.string.uuid();
     const isGroup = level < maxLevel && faker.datatype.boolean();
@@ -12,14 +12,16 @@ function generateGroupData(level = 0, maxLevel = 3, parentId = null) {
     const baseItem = {
       id,
       $parent_id: parentId,
-      $group_by: "name",
+      $group_by: groups[level],
       $group_level: level,
-      name: faker.commerce.productName(),
-      price: faker.commerce.price(),
-      quantity: faker.number.int({ min: 1, max: 100 }),
+      name: faker.person.fullName(),
+      company: faker.company.name(),
+      sex: faker.person.sex(),
+      user: "",
+      bonus: faker.commerce.price(),
+      hours: faker.number.int({ min: 1, max: 100 }),
       timestamp: faker.date.recent().toISOString(),
     };
-
     if (isGroup) {
       baseItem.$is_group_root = true;
       items.push(baseItem);

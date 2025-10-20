@@ -115,16 +115,17 @@ export class Aggregator {
           booleanMetrics,
         );
       }
+
       // Run the hook to notify plugins that a batch of aggregations has been persisted.
       // This should happen after all metrics for this config have been written.
-      await this.engine.pluginManager.executeActionHook(
+      this.engine.pluginManager.executeActionHook(
         "afterAggregationWritten",
         {
           reportId: config.reportId.toString(),
           sourceName: targetCollection,
           metrics,
         },
-      );
+      ).catch(console.error);
     }
   }
 
@@ -199,6 +200,8 @@ export class Aggregator {
   }
 
   public async flush() {
+    this.stop();
+    await this.queue.requeueDelayedJobs();
     let job = await this.queue.fetchJob();
     while (job) {
       try {
@@ -218,8 +221,10 @@ export class Aggregator {
         console.error("Aggregator flush error:", error);
         await this.queue.failJob(job);
       }
+      await this.queue.requeueDelayedJobs();
       job = await this.queue.fetchJob();
     }
+    this.start();
   }
 
   public async reprocessEventsForReport(
@@ -246,7 +251,6 @@ export class Aggregator {
           ...(config.filter.events.length > 0 &&
             { eventType: { $in: config.filter.events } }),
         }).lean().cursor();
-
         for await (const eventDoc of eventsCursor) {
           const metrics = await getMetricsFromEvent(
             eventDoc,

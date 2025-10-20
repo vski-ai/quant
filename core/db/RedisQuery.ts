@@ -1,6 +1,7 @@
 import { Redis } from "ioredis";
 import {
   AggregationType,
+  Granularity,
   IDatasetQuery,
   IQuery,
   IReportDataPoint,
@@ -31,6 +32,13 @@ export async function queryRedisBuffer(
   { member: string; timestamp: Date; value: number; category?: string }[]
 > {
   const { attribution, timeRange, granularity } = query;
+
+  if (Array.isArray(granularity)) {
+    throw new Error(
+      "queryRedisBuffer does not support multiple granularities.",
+    );
+  }
+
   const metric = "metric" in query ? query.metric : undefined;
   const metrics = "metrics" in query ? query.metrics : undefined;
 
@@ -168,7 +176,10 @@ export async function queryRedisBuffer(
   const mergedMap = new Map<string, IReportDataPoint>();
   for (const metricData of filteredMetrics) {
     // Normalize the timestamp to the query's granularity to ensure correct grouping.
-    const truncatedTimestamp = truncateDate(metricData.timestamp, granularity);
+    const truncatedTimestamp = truncateDate(
+      metricData.timestamp,
+      granularity as Granularity,
+    );
 
     // Create a unique key for each time bucket (and category, if applicable).
     const key = metric?.type === AggregationType.CATEGORY

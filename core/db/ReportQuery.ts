@@ -29,6 +29,11 @@ export async function queryMongo(
   filter?: IAggregationSourceFilter,
 ): Promise<IReportDataPoint[]> {
   const { metric, attribution, timeRange, granularity, groupBy } = query;
+
+  if (Array.isArray(granularity)) {
+    throw new Error("queryMongo does not support multiple granularities.");
+  }
+
   const matchStage: Record<string, any> = {
     timestamp: { $gte: timeRange.start, $lte: timeRange.end },
   };
@@ -256,6 +261,10 @@ export async function getReport(
 ): Promise<IReportDataPoint[]> {
   const cacheConfig = engine.config.cache;
 
+  if (Array.isArray(query.granularity)) {
+    throw new Error("getReport does not support multiple granularities.");
+  }
+
   let shouldTryCache = false;
   if (cacheConfig?.enabled) {
     if (cacheConfig.controlled) {
@@ -289,7 +298,7 @@ export async function getReport(
         // The entire range is covered by the cache!
         const finalReport = mergeAndAggregateResults(
           cachedData,
-          query.granularity,
+          query.granularity as Granularity,
           query.metric.type,
         );
         await engine.pluginManager.executeActionHook("afterReportGenerated", {
@@ -316,7 +325,7 @@ export async function getReport(
       // Merge cached data with newly fetched gap data
       const finalReport = mergeAndAggregateResults(
         [...cachedData, ...gapResults],
-        query.granularity,
+        query.granularity as Granularity,
         query.metric.type,
       );
       await engine.pluginManager.executeActionHook("afterReportGenerated", {
@@ -484,7 +493,7 @@ async function getReportFromSources(
   // Note: The final merge for partial cache hits happens in the main getReport function.
   return mergeAndAggregateResults(
     mongoResults,
-    modifiedQuery.granularity,
+    modifiedQuery.granularity as Granularity,
     modifiedQuery.metric.type,
   );
 }

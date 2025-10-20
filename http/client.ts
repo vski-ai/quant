@@ -30,7 +30,7 @@ export function client() {
     }) {
       const config = createConfig({
         baseUrl,
-      })
+      });
       const client = createClient(config);
       this.client = client;
       for (const [key, value] of Object.entries(client)) {
