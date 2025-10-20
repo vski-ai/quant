@@ -234,6 +234,8 @@ export interface IDatasetQuery {
   };
   granularity: Granularity | Granularity[];
   rebuildCache?: boolean;
+  sortBy?: string;
+  sortDirection?: "asc" | "desc";
   cache?: boolean;
 }
 

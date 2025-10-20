@@ -250,18 +250,32 @@ export async function writeMetricsToMongo(
   const finalMetrics = modified.metrics;
   const finalTargetCollection = modified.targetCollection;
 
+  // Pre-aggregate metrics in memory to prevent duplicate key errors from multiple
+  // upserts targeting the same document in a single bulkWrite operation.
+  const aggregatedMetrics = new Map<string, IMetricUpdate>();
+  for (const metric of finalMetrics) {
+    // Using JSON.stringify as a key. This assumes that the order of keys
+    // in the query object is consistent for metrics that should be aggregated.
+    const key = JSON.stringify(metric.query);
+    const existingMetric = aggregatedMetrics.get(key);
+
+    if (existingMetric) {
+      existingMetric.incrementValue += metric.incrementValue;
+    } else {
+      // Store a copy to avoid mutating the original metric object,
+      // which might be used by plugins.
+      aggregatedMetrics.set(key, { ...metric });
+    }
+  }
+  const uniqueMetrics = Array.from(aggregatedMetrics.values());
+
   // Prepare bulk write operations for MongoDB.
   const AggregateModel = await createAggregateModel(
     engine.connection,
     finalTargetCollection,
   );
-  const bulkOps = finalMetrics.map(
-    (
-      agg: {
-        query: { timestamp: string | number | Date };
-        incrementValue: any;
-      },
-    ) => {
+  const bulkOps = uniqueMetrics.map(
+    (agg) => {
       const truncatedTimestamp = new Date(agg.query.timestamp);
       const finalQuery = { ...agg.query, timestamp: truncatedTimestamp };
 
@@ -281,6 +295,8 @@ export async function writeMetricsToMongo(
   if (bulkOps.length > 0) {
     await AggregateModel.bulkWrite(bulkOps);
     // --- Plugin Hook: afterMetricsWritten ---
+    // Pass the original metrics to the hook, as plugins might expect
+    // the non-aggregated data.
     engine.pluginManager.executeActionHook("afterMetricsWritten", {
       metrics: finalMetrics,
       targetCollection: finalTargetCollection,

@@ -45,6 +45,7 @@ AggregateSchema.index({
   sourceId: 1,
   eventType: 1,
   timestamp: 1,
+  granularity: 1,
   attributionType: 1,
   attributionValue: 1,
   aggregationType: 1,

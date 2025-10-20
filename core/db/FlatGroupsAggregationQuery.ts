@@ -12,20 +12,26 @@ import { Engine } from "../engine.ts";
 import { TOTAL_ATTRIBUTION } from "../constants.ts";
 import { createAggregateModel } from "./Aggregation.ts";
 import { IAggregationSourceFilter } from "./Aggregation.ts";
+import init, { build_hierarchy } from "../rust/pkg/quant_core.js";
+
+await init();
 
 export interface IFlatGroupsAggregationQuery extends IDatasetQuery {
   groupBy: string[];
   fields?: string[];
   groupByGranularity?: Granularity[];
+  sortBy?: string;
+  wasm?: boolean;
 }
 
 async function getLeafAggregatesForQuery(
   query: IFlatGroupsAggregationQuery,
   engine: Engine,
   aggregationSources: IAggregationSource[],
+  granularities: Granularity[],
 ): Promise<any[]> {
   const sources = aggregationSources.filter(
-    (s) => s.granularity === query.granularity,
+    (s) => granularities.includes(s.granularity!),
   );
 
   const mongoQueryPromises = sources.flatMap((source) => {
@@ -42,7 +48,12 @@ async function getLeafAggregatesForQuery(
         engine.connection,
         collectionName,
       );
-      return queryMongoForFlatGroups(query, model, source.filter!);
+      return queryMongoForFlatGroups(
+        query,
+        model,
+        source.filter!,
+        granularities,
+      );
     });
   });
 
@@ -70,51 +81,57 @@ export async function getFlatGroupsAggregation(
   }
 
   if (query.groupByGranularity && query.groupByGranularity.length > 0) {
-    const leafAggregates = (await Promise.all(
-      query.groupByGranularity.map(async (granularity) => {
-        const newQuery = { ...query, granularity };
-        const aggregates = await getLeafAggregatesForQuery(
-          newQuery,
-          engine,
-          aggregationSources,
-        );
-        return aggregates.map((agg) => ({
-          ...agg,
-          group: { ...agg.group, granularity },
-        }));
-      }),
-    )).flat();
+    const leafAggregates = await getLeafAggregatesForQuery(
+      query,
+      engine,
+      aggregationSources,
+      query.groupByGranularity,
+    );
 
     const groupBy = ["granularity", ...query.groupBy];
-    return buildHierarchy(leafAggregates, groupBy, query.metrics![0]);
+    return await buildHierarchy(
+      leafAggregates,
+      groupBy,
+      query.metrics![0],
+      query.sortBy,
+      query.wasm,
+    );
   }
 
   const leafAggregates = await getLeafAggregatesForQuery(
     query,
     engine,
     aggregationSources,
+    [query.granularity!] as any,
   );
 
   if (!query.metrics || query.metrics.length === 0) {
     return [];
   }
 
-  return buildHierarchy(leafAggregates, query.groupBy, query.metrics[0]);
+  return await buildHierarchy(
+    leafAggregates,
+    query.groupBy,
+    query.metrics[0],
+    query.sortBy,
+    query.wasm,
+  );
 }
 
 async function queryMongoForFlatGroups(
   query: IFlatGroupsAggregationQuery,
   model: Model<any>,
   filter: IAggregationSourceFilter,
+  granularities: Granularity[],
 ): Promise<any[]> {
-  const { metrics = [], timeRange, attribution, granularity } = query;
+  const { metrics = [], timeRange, attribution } = query;
   const metric = metrics.filter((m) => !m.endsWith("_count"))[0];
 
   const matchStage: Record<string, any> = {
     timestamp: { $gte: timeRange.start, $lte: timeRange.end },
     aggregationType: AggregationType.LEAF_SUM,
     payloadField: metric,
-    granularity: granularity,
+    granularity: { $in: granularities },
   };
 
   if (filter.sources.length) {
@@ -146,7 +163,7 @@ async function queryMongoForFlatGroups(
         _id: 0,
         group: "$_id",
         value: "$value",
-        timestamp: "$timestamp",
+        timestamp: { $toLong: "$timestamp" },
       },
     },
   ];
@@ -154,10 +171,24 @@ async function queryMongoForFlatGroups(
   return model.aggregate(pipeline).exec();
 }
 
-function buildHierarchy(
+async function buildHierarchy(
   leafAggregates: any[],
   groupBy: string[],
   metric: string,
+  sortBy?: string,
+  wasm?: boolean,
+): Promise<any[]> {
+  if (wasm) {
+    return build_hierarchy(leafAggregates, groupBy, metric, sortBy) as any;
+  }
+  return buildHierarchyTs(leafAggregates, groupBy, metric, sortBy);
+}
+
+function buildHierarchyTs(
+  leafAggregates: any[],
+  groupBy: string[],
+  metric: string,
+  sortBy?: string,
 ): any[] {
   const tree = new Map();
 
@@ -177,7 +208,7 @@ function buildHierarchy(
         currentNode = {
           children: new Map(),
           value: 0,
-          timestamp: new Date(0),
+          timestamp: 0,
           groupField: groupField,
           groupValue: groupValue,
           level: i,
@@ -199,9 +230,25 @@ function buildHierarchy(
   }
 
   const flatList: any[] = [];
+  let counter = 0;
   function flatten(nodes: Map<any, any>, parentIds: string[]) {
-    for (const [, node] of nodes.entries()) {
-      const id = crypto.randomUUID();
+    let sortedNodes = Array.from(nodes.entries());
+
+    sortedNodes = sortedNodes.sort(([, a], [, b]) => {
+      const field = sortBy ?? "groupValue";
+      const valA = field === "groupValue" ? a.groupValue : a.groupPath[field];
+      const valB = field === "groupValue" ? b.groupValue : b.groupPath[field];
+
+      if (typeof valA === "string" && typeof valB === "string") {
+        return valA.localeCompare(valB);
+      }
+      if (valA < valB) return -1;
+      if (valA > valB) return 1;
+      return 0;
+    });
+
+    for (const [, node] of sortedNodes) {
+      const id = `ji-${++counter}`;
       const output: any = {
         id,
         $parent_id: parentIds.length > 0 ? parentIds : null,

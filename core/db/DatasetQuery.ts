@@ -269,7 +269,7 @@ async function getFromCache(
 /**
  * Finds gaps in a requested time range compared to cached chunks for datasets.
  */
-function findDatasetCacheGaps(
+function findDatasetCacheGups(
   requestedRange: ITimeRange,
   cachedChunks: IReportCacheDoc[],
 ): {
@@ -357,14 +357,14 @@ export async function getDataset(
         "timeRange.end": { $gt: query.timeRange.start },
       }).lean();
 
-      const { cachedData, gaps } = findDatasetCacheGaps(
+      const { cachedData, gaps } = findDatasetCacheGups(
         query.timeRange,
         overlappingChunks,
       );
 
       if (gaps.length === 0) {
         // The entire range is covered by the cache!
-        return mergeAndFormatDataset(cachedData as any);
+        return mergeAndFormatDataset(cachedData as any, query);
       }
 
       // Fetch data for the gaps
@@ -380,7 +380,10 @@ export async function getDataset(
 
       const gapResults = (await Promise.all(gapPromises)).flat();
 
-      return mergeAndFormatDataset([...cachedData as any, ...gapResults]);
+      return mergeAndFormatDataset(
+        [...cachedData as any, ...gapResults],
+        query,
+      );
     } else {
       // --- Standard (non-partial) caching logic ---
       cacheKey = generateCacheKey(query);
@@ -401,12 +404,12 @@ export async function getDataset(
     // Save the formatted data for standard caching
     await saveDatasetToCache(
       query,
-      mergeAndFormatDataset(rawResults as any),
+      mergeAndFormatDataset(rawResults as any, query),
       engine,
     );
   }
 
-  return mergeAndFormatDataset(rawResults as any);
+  return mergeAndFormatDataset(rawResults as any, query);
 }
 
 async function saveDatasetToCache(
@@ -498,6 +501,7 @@ function mergeAndFormatDataset(
     boolean_groups?: any[];
     value: number;
   }[],
+  query: IDatasetQuery,
 ): IDatasetDataPoint[] {
   const mergedMap = new Map<string, IDatasetDataPoint>();
 
@@ -527,6 +531,20 @@ function mergeAndFormatDataset(
   const finalResults = Array.from(mergedMap.values());
 
   // Sort the final results chronologically.
-  finalResults.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  finalResults.sort((a, b) => {
+    if (query.sortBy) {
+      const aValue = a[query.sortBy] as any;
+      const bValue = b[query.sortBy] as any;
+
+      if (aValue < bValue) {
+        return query.sortDirection === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return query.sortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
+    }
+    return a.timestamp.getTime() - b.timestamp.getTime();
+  });
   return finalResults;
 }

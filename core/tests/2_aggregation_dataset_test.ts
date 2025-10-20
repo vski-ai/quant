@@ -135,5 +135,23 @@ withTestDatabase({
       "Compound metrics for requested field should be included",
     );
   });
+
+  await t.step("should sort by a given metric", async () => {
+    const query: IDatasetQuery = {
+      reportId: report._id.toString(),
+      timeRange: { start: new Date("2023-11-20T09:30:00.000Z"), end: baseTime },
+      granularity: "minute",
+      sortBy: "amount_sum",
+      sortDirection: "desc",
+    };
+
+    const reportResult = await engine.getDataset(query);
+    assertEquals(reportResult.length, 4, "Expected four time buckets");
+    assertEquals(reportResult[0].amount_sum, 200);
+    assertEquals(reportResult[1].amount_sum, 150);
+    assertEquals(reportResult[2].amount_sum, 100);
+    assertEquals(reportResult[3].amount_sum, 50);
+  });
+
   await teardown();
 });

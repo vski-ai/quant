@@ -10,6 +10,8 @@ import { IAggregationSourceFilter } from "./Aggregation.ts";
 export interface IGroupsAggregationQuery extends IDatasetQuery {
   groupBy: string[];
   fields?: string[];
+  sortBy?: "timestamp";
+  sortDirection?: "asc" | "desc";
 }
 
 export async function getGroupsAggregation(
@@ -50,6 +52,17 @@ export async function getGroupsAggregation(
   const mongoResults = await Promise.all(mongoQueryPromises).then((res) =>
     res.flat()
   );
+
+  if (query.sortBy === "timestamp") {
+    mongoResults.sort((a: any, b: any) => {
+      const aTime = new Date(a.timestamp).getTime();
+      const bTime = new Date(b.timestamp).getTime();
+      if (query.sortDirection === "asc") {
+        return aTime - bTime;
+      }
+      return bTime - aTime;
+    });
+  }
 
   return mongoResults;
 }

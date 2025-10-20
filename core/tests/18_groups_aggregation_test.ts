@@ -149,5 +149,30 @@ withTestDatabase({ dbName }, async (t, engine, teardown) => {
     },
   );
 
+  await t.step(
+    "should correctly sort the data by timestamp in descending order",
+    async () => {
+      const query: IGroupsAggregationQuery = {
+        reportId: report._id.toString(),
+        metrics: ["amount"],
+        groupBy: ["category"],
+        timeRange: {
+          start: new Date("2025-10-16T09:00:00.000Z"),
+          end: new Date("2025-10-16T11:00:00.000Z"),
+        },
+        granularity: "minute",
+        sortBy: "timestamp",
+        sortDirection: "desc",
+      };
+
+      const result = await engine.getGroupsAggregation(query);
+
+      assertEquals(result.length, 3, "Expected three time buckets");
+      assertEquals(new Date(result[0].timestamp).getTime(), time3.getTime());
+      assertEquals(new Date(result[1].timestamp).getTime(), time2.getTime());
+      assertEquals(new Date(result[2].timestamp).getTime(), time1.getTime());
+    },
+  );
+
   await teardown();
 });
