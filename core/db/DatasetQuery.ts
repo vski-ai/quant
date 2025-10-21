@@ -6,14 +6,18 @@ import {
   Granularity,
   IDatasetDataPoint,
   IDatasetQuery,
-  ITimeRange,
 } from "../types.ts";
 import { getPartitionedCollectionNames } from "./Partition.ts";
 import { Engine } from "../engine.ts";
 import { TOTAL_ATTRIBUTION } from "../constants.ts";
 import { createAggregateModel } from "./Aggregation.ts";
-import { createHash } from "node:crypto";
-import { IReportCacheDoc } from "./ReportCache.ts";
+import {
+  findCacheGaps,
+  generateBaseCacheKey,
+  generateCacheKey,
+  getFromCache,
+  saveToCache,
+} from "./Cache.ts";
 
 /**
  * Queries a MongoDB aggregate collection to fetch data for a dataset report.
@@ -202,124 +206,6 @@ export async function queryMongoForDataset(
   return await model.aggregate(pipeline).exec();
 }
 
-function sortObject<T>(obj: T): T {
-  if (obj instanceof Date) {
-    return obj.getTime() as any;
-  }
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(sortObject) as any;
-  }
-  if (obj.constructor !== Object) {
-    return obj;
-  }
-  const sortedKeys = Object.keys(obj).sort();
-  const newObj: any = {};
-  for (const key of sortedKeys) {
-    newObj[key] = sortObject((obj as any)[key]);
-  }
-  return newObj;
-}
-
-function generateCacheKey(query: IDatasetQuery): string {
-  const stableQuery = sortObject({
-    ...query,
-    rebuildCache: undefined,
-    cache: undefined,
-  });
-  const queryString = JSON.stringify(stableQuery);
-  return createHash("sha256").update(queryString).digest("hex");
-}
-
-function generateBaseCacheKey(query: IDatasetQuery): string {
-  // Hash of the query object *without* the timeRange.
-  const stableQuery = sortObject({
-    ...query,
-    timeRange: undefined,
-    rebuildCache: undefined,
-    cache: undefined,
-  });
-  const queryString = JSON.stringify(stableQuery);
-  return createHash("sha256").update(queryString).digest("hex");
-}
-
-async function getFromCache(
-  engine: Engine,
-  key: string,
-): Promise<IDatasetDataPoint[] | null> {
-  const cached = await engine.ReportCacheModel.findOne({ cacheKey: key })
-    .lean();
-  const ttlSeconds = engine.config.cache?.ttlSeconds;
-
-  if (cached && ttlSeconds && ttlSeconds > 0) {
-    const isExpired =
-      (Date.now() - cached.createdAt.getTime()) > (ttlSeconds * 1000);
-    if (isExpired) {
-      return null; // Treat as a cache miss if the document is logically expired
-    }
-  }
-  if (cached) {
-    return cached.data as IDatasetDataPoint[];
-  }
-  return null;
-}
-
-/**
- * Finds gaps in a requested time range compared to cached chunks for datasets.
- */
-function findDatasetCacheGups(
-  requestedRange: ITimeRange,
-  cachedChunks: IReportCacheDoc[],
-): {
-  cachedData: IDatasetDataPoint[];
-  gaps: ITimeRange[];
-} {
-  if (cachedChunks.length === 0) {
-    return { cachedData: [], gaps: [requestedRange] };
-  }
-
-  // Sort cached chunks by start time
-  cachedChunks.sort((a, b) =>
-    a.timeRange.start.getTime() - b.timeRange.start.getTime()
-  );
-
-  const gaps: ITimeRange[] = [];
-  let lastCoveredTime = requestedRange.start.getTime();
-  const cachedData = cachedChunks.flatMap((chunk) =>
-    chunk.data as IDatasetDataPoint[]
-  );
-
-  for (const chunk of cachedChunks) {
-    const chunkStart = chunk.timeRange.start.getTime();
-    const chunkEnd = chunk.timeRange.end.getTime();
-
-    // If there's a gap between the last covered time and the start of this chunk
-    if (chunkStart > lastCoveredTime) {
-      gaps.push({
-        start: new Date(lastCoveredTime),
-        end: new Date(chunkStart),
-      });
-    }
-
-    // Move the "last covered time" pointer forward
-    if (chunkEnd > lastCoveredTime) {
-      lastCoveredTime = chunkEnd;
-    }
-  }
-
-  // If there's a final gap at the end of the requested range
-  if (requestedRange.end.getTime() > lastCoveredTime) {
-    gaps.push({
-      start: new Date(lastCoveredTime),
-      end: requestedRange.end,
-    });
-  }
-
-  return { cachedData, gaps };
-}
-
 /**
  * Retrieves a dataset report, aggregating multiple metrics from historical data.
  *
@@ -357,7 +243,7 @@ export async function getDataset(
         "timeRange.end": { $gt: query.timeRange.start },
       }).lean();
 
-      const { cachedData, gaps } = findDatasetCacheGups(
+      const { cachedData, gaps } = findCacheGaps(
         query.timeRange,
         overlappingChunks,
       );
@@ -373,7 +259,7 @@ export async function getDataset(
         const gapData = await getDatasetFromSources(gapQuery, engine);
         if (gapData.length > 0) {
           // Save the raw data to cache, not the formatted data
-          await saveDatasetToCache(gapQuery, gapData, engine);
+          await saveToCache(gapQuery, gapData, engine);
         }
         return gapData;
       });
@@ -402,7 +288,7 @@ export async function getDataset(
   // If caching is enabled, store the result.
   if (shouldTryCache) {
     // Save the formatted data for standard caching
-    await saveDatasetToCache(
+    await saveToCache(
       query,
       mergeAndFormatDataset(rawResults as any, query),
       engine,
@@ -410,38 +296,6 @@ export async function getDataset(
   }
 
   return mergeAndFormatDataset(rawResults as any, query);
-}
-
-async function saveDatasetToCache(
-  query: IDatasetQuery,
-  data: any[],
-  engine: Engine,
-) {
-  const cacheConfig = engine.config.cache;
-  if (!cacheConfig?.enabled) return;
-
-  if (cacheConfig.partialHits) {
-    const baseKey = generateBaseCacheKey(query);
-    await engine.ReportCacheModel.create({
-      baseKey,
-      timeRange: query.timeRange,
-      reportId: query.reportId,
-      data,
-    });
-  } else {
-    const cacheKey = generateCacheKey(query);
-    await engine.ReportCacheModel.findOneAndUpdate(
-      { cacheKey: cacheKey },
-      {
-        cacheKey: cacheKey,
-        baseKey: cacheKey,
-        timeRange: query.timeRange,
-        data,
-        reportId: query.reportId,
-      },
-      { upsert: true, new: true },
-    ).exec();
-  }
 }
 
 async function getDatasetFromSources(

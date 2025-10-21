@@ -36,6 +36,14 @@ real-time data buffering.
   It supports atomic operations, retries with exponential backoff, and a
   dead-letter queue.
 
+- **PluginManager (`plugin_manager.ts`)**: Manages the registration and
+  execution of plugins, allowing for the extension of the engine's core
+  functionality.
+
+- **LifecycleManager (`lifecycle_manager.ts`)**: Manages data retention
+  policies, including offloading and deleting old data from partitioned
+  collections.
+
 ### Data Stores
 
 - **MongoDB**:
@@ -80,8 +88,15 @@ real-time data buffering.
      DB).
    - For each matching configuration, it calls `getMetricsFromEvent()`. This
      function generates multiple metric documents for different aggregation
-     types (`COUNT`, `SUM`, `CATEGORY`, `COMPOUND_SUM`) and for each
-     attribution.
+     types:
+     - `COUNT`: A simple count of events.
+     - `SUM`: A sum of a numerical field in the payload.
+     - `CATEGORY`: A count of the occurrences of each unique value of a string
+       field.
+     - `COMPOUND_SUM`: A sum of a numerical field, categorized by the value of
+       another string field.
+     - `LEAF_SUM`: A sum of a numerical field, with a `leafKey` containing all
+       categorical fields. This is used for flat group aggregations.
    - The generated metrics are written to the target MongoDB aggregation
      collection (which may be a time-partitioned collection) using a single
      `bulkWrite` operation for efficiency.
@@ -89,246 +104,130 @@ real-time data buffering.
      the job is moved to a delayed queue for a later retry.
 
 3. **Querying**:
-   - **Historical (`engine.getReport`, `engine.getDataset`)**:
+   - **Historical (e.g., `engine.getReport`,
+     `engine.getFlatGroupsAggregation`)**:
      - The query is sent to MongoDB.
      - The system identifies all relevant aggregation collections, including
        handling time partitions (`getPartitionedCollectionNames`).
      - If caching is enabled, the system first checks the `report_cache`
-       collection for a valid entry. If found, the data is returned directly,
-       bypassing the expensive database query. If not found, the query proceeds,
-       and the result is stored in the cache for future requests.
-     - MongoDB's aggregation pipeline is used to match, group, and sum the data
-       according to the query's time range, granularity, and filters.
-     - Results from multiple collections (if applicable) are merged.
-   - **Real-time (`engine.getRealtimeReport`, `engine.getRealtimeDataset`)**:
+       collection for a valid entry.
+     - MongoDB's aggregation pipeline is used to match, group, and sum the data.
+   - **Real-time (e.g., `engine.getRealtimeReport`,
+     `engine.getRealtimeFlatGroupsAggregation`)**:
      - The query is sent to the `RealtimeBuffer` (Redis).
-     - A Lua script (`queryRedisBuffer`) filters the members of the relevant
-       Redis ZSETs by time range and metadata.
+     - `queryRedisBuffer` filters the members of the relevant Redis ZSETs by
+       time range and metadata.
      - The results are aggregated in memory to produce the final report.
-   - **Combined (Future)**: A complete query would merge results from both the
-     historical MongoDB data and the real-time Redis buffer. The current
-     implementation keeps them separate.
 
-## 3. Technical Details & Gotchas
+## 3. Query Types
+
+The engine supports several types of queries, each with a different purpose:
+
+- **`IQuery` (`getReport`)**: For fetching a single metric (e.g., total revenue,
+  or revenue by country). This is the simplest query type.
+- **`IDatasetQuery` (`getDataset`)**: For fetching multiple metrics for the same
+  time range, resulting in a wide, dataset-like format.
+- **`IGroupsAggregationQuery` (`getGroupsAggregation`)**: For creating nested
+  group aggregations.
+- **`IFlatGroupsAggregationQuery` (`getFlatGroupsAggregation`)**: For creating
+  "flat group" aggregations, which are ordered, flattened tree structures. This
+  query type uses the `LEAF_SUM` aggregation type and a hierarchy builder that
+  can be run in either TypeScript or WebAssembly for performance.
+
+## 4. Technical Details & Gotchas
 
 - **Idempotency**: The `event_source.record()` method is idempotent based on the
-  `uuid` field. If an event with the same UUID is recorded twice, the system
-  returns the original event and does not process it again.
+  `uuid` field.
+- **Partitioning**: Aggregation collections can be partitioned by time, which is
+  crucial for managing large datasets.
+- **Redis Key Format**: The Redis key for the real-time buffer is a
+  colon-delimited string. To prevent corruption, the `leafKey` (which is a JSON
+  string) is Base64 encoded.
+- **Code Duplication**: There is significant code duplication in the `core/db`
+  query files, especially for caching and query setup logic. A refactoring is
+  planned to extract this into shared utilities.
+- **Type Safety**: The codebase uses `@ts-ignore` and `any` in several places,
+  particularly in the `Engine` and `PluginManager`. These should be addressed in
+  the future to improve type safety.
+- **WASM for Performance**: The flat group hierarchy builder (`FGAHierarchy.ts`)
+  has a dual implementation in TypeScript and Rust (compiled to WASM), allowing
+  for performance-critical code to be optimized.
 
-- **Partitioning**: Aggregation collections can be partitioned by time. The
-  collection name is generated based on a bucket index derived from the event
-  timestamp, the storage granularity, and a configured partition length. This is
-  crucial for managing large datasets and keeping query times low.
+## 5. TODO & Future Improvements
 
-- **Concurrency & Race Conditions**:
-  - The use of `rpoplpush` in the `ReliableQueue` makes job fetching atomic,
-    preventing multiple workers from processing the same job.
-  - There's a potential race condition where an event is recorded before its
-    corresponding `AggregationSource` configuration is created and cached. The
-    `setTimeout` calls in the tests are a symptom of this. A more robust
-    solution might involve a versioned cache or an event-driven cache
-    invalidation mechanism.
-  - The `bulkWrite` operation with `upsert: true` can still face duplicate key
-    errors (`E11000`) under high concurrency if multiple workers try to insert
-    the same new aggregate document simultaneously. The code currently handles
-    this with a simple retry-with-delay mechanism, which is effective but could
-    be improved.
-
-- **Automatic Metric Discovery**: The system automatically creates `SUM` metrics
-  for all numerical payload fields and `CATEGORY` counts for all string/boolean
-  fields. It also creates `COMPOUND_SUM` metrics (a numerical field broken down
-  by a categorical field). This is powerful but can lead to a high volume of
-  metric documents if payloads are highly variable.
-
-- **Telemetry**: The system is instrumented with OpenTelemetry (`telemetry.ts`),
-  manually wrapping key methods for Mongoose and IORedis. This is great for
-  observability but requires manual maintenance as new methods are used.
-
-## 4. TODO & Future Improvements
-
+- **[ ] Refactor Query Layer**: Create shared utilities for caching (`Cache.ts`)
+  and query execution (`QueryRunner.ts`) to reduce code duplication in the
+  `core/db` directory.
+- **[ ] Improve Type Safety**: Remove all instances of `@ts-ignore` and `any` to
+  make the codebase more robust.
 - **[ ] Combined Queries**: Implement a query path that seamlessly merges
   historical data from MongoDB with real-time data from the Redis buffer for a
   single, unified view.
-
-- **[ ] Cache Invalidation Strategy**: Replace `setTimeout` workarounds in tests
-  and production with a more robust cache invalidation strategy. A pub/sub model
-  on Redis could be used where updating a configuration publishes an
-  invalidation message to all engine instances.
-
-- **[ ] Schema Validation**: The `IEventType` interface includes a `_schema`
-  property, but payload validation is not yet implemented. Integrating a library
-  like Zod would add significant type safety.
-
-- **[ ] Worker Management**: The current implementation spawns workers using
-  `Deno.Command`. This is simple but lacks sophisticated management (e.g.,
-  health checks, automatic restarts). Consider using a process manager or Deno's
-  native `Worker` API for better control.
-
-- **[ ] Dead-Letter Queue Management**: The `ReliableQueue` moves failed jobs to
-  a dead-letter queue, but there is no mechanism to inspect or re-process these
-  jobs. An admin UI or CLI command should be added.
-
-- **[ ] Dataset Query from Buffer**: The `getRealtimeDataset` implementation in
-  `engine.ts` appears to be incomplete, as it returns a flat array from multiple
-  sources without merging them into single data points per timestamp. This needs
-  to be corrected to match the behavior of `getDataset`.
-
-- **[ ] Refine `queryRedisBuffer`**: The function `queryRedisBuffer` uses `KEYS`
-  to find collections if none are provided, which is a major performance risk in
-  production Redis. The code correctly avoids this by requiring the calling
-  context to provide collections, but this contract should be strictly enforced
-  and documented. The current implementation in `engine.ts` correctly provides
-  the collections.
-
+- **[ ] Cache Invalidation Strategy**: Replace `setTimeout` workarounds with a
+  more robust cache invalidation strategy, such as a Redis pub/sub model.
+- **[ ] Schema Validation**: Implement payload validation using a library like
+  Zod.
+- **[ ] Dead-Letter Queue Management**: Add a UI or CLI to inspect and
+  re-process jobs in the dead-letter queue.
+- **[ ] Lifecycle Manager Enhancements**:
+  - Make the check interval configurable.
+  - Add support for offloading non-partitioned collections.
 - **[ ] Event Type Filter in Aggregator**: The `processEvent` method in
   `aggregator.ts` has a `// TODO:` comment to add event type filtering. This is
-  a critical feature that needs to be implemented to ensure aggregations only
-  process relevant events.
+  a critical feature that needs to be implemented.
 
----
-
-## 5. Caching Layer
+## 6. Caching Layer
 
 The engine includes a sophisticated, optional caching layer to improve
 performance for `getReport` and `getDataset` queries. It uses a dedicated
 MongoDB collection (`report_cache`) to store query results.
 
-### Configuration
-
-Caching is configured via the `cache` object in the `EngineConfig`:
-
-```typescript
-export interface EngineConfig {
-  // ...
-  cache?: {
-    enabled: boolean; // Master switch to enable/disable caching.
-    ttlSeconds: number; // Time-to-live for cache entries in seconds.
-    controlled?: boolean; // Enables "controlled" caching mode.
-    partialHits?: boolean; // Enables "partial cache hits" mode.
-  };
-}
-```
-
 ### Caching Strategies
 
-1. **Standard Caching** (`enabled: true`):
-   - This is the default mode when caching is enabled.
-   - The result of every unique query is stored as a single document in the
-     cache. The cache key is a hash of the entire query object.
-
-2. **Controlled Caching** (`controlled: true`):
-   - In this mode, caching is opt-in on a per-query basis.
-   - To cache a specific query, the consumer must pass `cache: true` in the
-     query object. Queries without this flag will bypass the cache.
-
-3. **Partial Hits Caching** (`partialHits: true`):
-   - An advanced optimization strategy. The system can use smaller, previously
-     cached time-range "chunks" to assemble a response for a larger query.
-   - **Example**: If "Day 1" and "Day 3" are cached, a query for "Day 1 to Day
-     5" will use the cached data for Day 1 and 3, and only query the database
-     for the missing "gaps" (Day 2, 4, and 5).
-   - This mode stores data differently, creating many small documents instead of
-     one large one.
+1. **Standard Caching**: The result of every unique query is stored as a single
+   document in the cache.
+2. **Controlled Caching**: Caching is opt-in on a per-query basis by passing
+   `cache: true` in the query object.
+3. **Partial Hits Caching**: The system can use smaller, previously cached
+   time-range "chunks" to assemble a response for a larger query.
 
 ### Usage and Invalidation
 
-- **Opting-in (Controlled Mode)**:
-  ```typescript
-  engine.getReport({ ..., cache: true });
-  ```
-
-- **Manual Invalidation**: To force a cache miss and regenerate a report, use
-  the `rebuildCache` flag. This works in all caching modes.
-  ```typescript
-  engine.getReport({ ..., rebuildCache: true });
-  ```
-
+- **Opting-in (Controlled Mode)**: `engine.getReport({ ..., cache: true });`
+- **Manual Invalidation**: `engine.getReport({ ..., rebuildCache: true });`
 - **Automatic Expiration**: The system uses a combination of an
   application-level TTL check and a MongoDB TTL index to expire stale documents.
-  An entry is considered stale if `Date.now() - entry.createdAt > ttlSeconds`.
 
-### Important Considerations & "Gotchas"
+### Important Considerations
 
-- **Partial Hits Invalidation**: This is the most critical behavior to
-  understand. There is **no mechanism to invalidate a single chunk** of a
-  partially cached report.
-  - If you use `rebuildCache: true` on a query (e.g., "last 7 days"), the system
-    re-fetches the _entire_ 7-day range and saves it as a _new, single chunk_.
-    It does not invalidate or replace the smaller, older chunks that might have
-    existed within that range.
-  - This mode is best for data that is largely immutable. For data that is
-    frequently reprocessed or back-filled, the "Standard" or "Controlled" modes
-    are more predictable.
-
+- **Partial Hits Invalidation**: There is **no mechanism to invalidate a single
+  chunk** of a partially cached report. Using `rebuildCache: true` re-fetches
+  the entire range and saves it as a new, single chunk. This mode is best for
+  immutable data.
 - **Cache Key Generation**: The cache key is a hash of the query object. Any
-  minor difference between two query objects (e.g., a 1ms difference in a
-  timestamp) will result in a different key and a cache miss.
+  minor difference between two query objects will result in a cache miss.
 
-- **Storage**: The `partialHits` strategy will naturally create more documents
-  in the `report_cache` collection than the standard strategy. Setting an
-  appropriate `ttlSeconds` is crucial for managing storage space.
-
-### Cache Schema (`report_cache` collection)
-
-- `_id`: `ObjectId` (auto-generated for partial hits) or `String` (hash for
-  standard cache).
-- `cacheKey`: `String` (indexed, sparse). Used by standard caching as the
-  primary lookup key.
-- `baseKey`: `String` (indexed). A hash of the query _without_ the time range.
-  Used by partial hits caching to find all chunks for a given report type.
-- `timeRange`: `{ start: Date, end: Date }`. The specific time window this cache
-  entry covers.
-- `data`: `Mixed`. The cached report or dataset array.
-- `createdAt`: `Date`. Used for TTL calculation.
-
-## 5. Plugin System
+## 7. Plugin System
 
 The engine features a hook-based plugin system to allow for extending its core
-functionality without modifying the source code. This is useful for adding
-custom aggregation types, enriching event data, or triggering external actions.
+functionality.
 
 ### Creating a Plugin
 
-A plugin is an object that implements the `IPlugin` interface. It must have a
-`name` and `version`, and can optionally implement one or more hook methods.
-
-```typescript
-import { Engine, IPlugin } from "./core/types.ts";
-
-export class MyAwesomePlugin implements IPlugin {
-  name = "my-awesome-plugin";
-  version = "1.0.0";
-
-  async onEngineInit(engine: Engine) {
-    console.log("My plugin has been initialized!");
-  }
-
-  // Other hook methods...
-}
-```
+A plugin is an object that implements the `IPlugin` interface.
 
 ### Registering a Plugin
 
-To use a plugin, you must register it with the engine instance after it has been
-created.
-
-```typescript
-import { Engine } from "./core/engine.ts";
-import { MyAwesomePlugin } from "./plugins/my_awesome_plugin.ts";
-
-const engine = new Engine({ mongoUri: "..." });
-await engine.registerPlugin(new MyAwesomePlugin());
-```
+Register a plugin with the `engine.registerPlugin()` method.
 
 ### Available Hooks
 
-- **`onEngineInit(engine)`**: Called once when the plugin is registered. Ideal
-  for setup tasks.
+- **`onEngineInit(engine)`**: Called once when the plugin is registered.
 - **`beforeEventRecord(context)`**: A "waterfall" hook that allows you to modify
   an event's `payload` and `attributions` before it is saved.
 - **`afterEventRecord(context)`**: An "action" hook that is called after an
   event has been successfully saved to the database.
 - **`onGetMetrics(context)`**: A "collector" hook that allows you to generate
-  custom `IMetricUpdate` objects from an event during the aggregation process.
+  custom `IMetricUpdate` objects from an event.
 - **`registerEngineMethods(engine)`**: Allows you to add new public methods
   directly to the `engine` instance.
