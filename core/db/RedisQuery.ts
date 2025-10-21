@@ -90,12 +90,16 @@ export async function queryRedisBuffer(
         const score = membersWithScores[i + 1];
         // Parse the structured member string.
         const parts = member.split(":");
+        if (parts.length === 11) {
+          parts.splice(5, 0, "null");
+        }
         const [
           incrementValue,
           aggType,
           payloadField,
           payloadCategory,
           _compoundCategoryKey,
+          _leafKey,
           attrType,
           attrValue,
           sourceId,
@@ -126,7 +130,9 @@ export async function queryRedisBuffer(
               (aggType === AggregationType.CATEGORY &&
                 (query as IGroupsAggregationQuery).groupBy?.includes(
                   payloadField,
-                ));
+                )) ||
+              (aggType === AggregationType.LEAF_SUM &&
+                metrics.includes(payloadField));
           }
         }
         // If it's a dataset query with no metrics filter, typeMatch and fieldMatch remain true.

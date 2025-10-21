@@ -1,6 +1,6 @@
 import { assertEquals, assertExists } from "@std/assert";
 import { withTestDatabase } from "./utils.ts";
-import { IFlatGroupsAggregationQuery } from "../db/FlatGroupsAggregationQuery.ts";
+import { IFlatGroupsAggregationQuery } from "../db/FGAQuery.ts";
 
 const dbName = "flat_grouping_test_db";
 
@@ -244,8 +244,6 @@ withTestDatabase({ dbName }, async (t, engine, teardown) => {
 
       const result: any[] = await engine.getFlatGroupsAggregation(query);
 
-      // The wasm implementation uses a different UUID generation, so we can't compare IDs directly.
-      // We will check the structure and values.
       // console.log("Result ->>", result)
 
       assertEquals(result.length, 9, "Incorrect number of items");
@@ -299,6 +297,5 @@ withTestDatabase({ dbName }, async (t, engine, teardown) => {
       assertEquals(techSf.amount, 300);
     },
   );
-
   await teardown();
 });

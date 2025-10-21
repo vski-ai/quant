@@ -23,7 +23,7 @@ import {
 import {
   getFlatGroupsAggregation,
   IFlatGroupsAggregationQuery,
-} from "./db/FlatGroupsAggregationQuery.ts";
+} from "./db/FGAQuery.ts";
 import {
   EventPayload,
   IDataOffloader,
@@ -748,6 +748,29 @@ export class Engine {
 
     const queryPromises = aggregationSources.map((source) => {
       return this.aggregator.bufferService!.queryGroups(
+        query,
+        source.targetCollection,
+        source.filter,
+      );
+    });
+
+    return (await Promise.all(queryPromises)).flat();
+  }
+
+  public async getRealtimeFlatGroupsAggregation(
+    query: IFlatGroupsAggregationQuery,
+  ): Promise<any[]> {
+    if (!this.aggregator.bufferService) return [];
+
+    const aggregationSources = await this.listAggregationSources(
+      query.reportId,
+    );
+    if (!aggregationSources || aggregationSources.length === 0) {
+      return [];
+    }
+
+    const queryPromises = aggregationSources.map((source) => {
+      return this.aggregator.bufferService!.queryFlatGroups(
         query,
         source.targetCollection,
         source.filter,

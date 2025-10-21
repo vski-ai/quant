@@ -48,10 +48,8 @@ withTestDatabase({ dbName }, async (t, engine, teardown) => {
           },
         },
       ]);
-      // because we turned off the buffer, there is a race condition
-      // between active aggregation sources and events, so we need
-      // to wait a second for aggregator polling
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await engine.aggregator.flush();
       console.log("Recording events...");
       // Record events for Stripe
       await stripeSource.record({
@@ -99,8 +97,7 @@ withTestDatabase({ dbName }, async (t, engine, teardown) => {
         attributions: [{ type: "identity", value: "user_3" }],
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Give a moment for DB writes
-
+      await engine.aggregator.flush();
       // --- 3. VERIFICATION PHASE ---
       console.log("Querying reports...");
       const now = new Date();
@@ -208,7 +205,7 @@ withTestDatabase({ dbName }, async (t, engine, teardown) => {
           currency: "CNY",
         },
       });
-      await new Promise((r) => setTimeout(r, 500));
+      await engine.aggregator.flush();
 
       const postFlushCountQuery: IQuery = {
         reportId: report._id.toString(),

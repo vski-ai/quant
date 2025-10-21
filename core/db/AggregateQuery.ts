@@ -232,7 +232,6 @@ export async function writeMetricsToMongo(
   engine: Engine,
   targetCollection: string,
   metrics: IMetricUpdate[],
-  retry: number = 0,
 ): Promise<void> {
   if (metrics.length === 0) {
     return;
@@ -293,7 +292,7 @@ export async function writeMetricsToMongo(
   );
 
   if (bulkOps.length > 0) {
-    await AggregateModel.bulkWrite(bulkOps);
+    await AggregateModel.bulkWrite(bulkOps, { ordered: false });
     // --- Plugin Hook: afterMetricsWritten ---
     // Pass the original metrics to the hook, as plugins might expect
     // the non-aggregated data.

@@ -10,6 +10,7 @@ import { ReliableQueue } from "./db/RedisQueue.ts";
 import { Engine } from "./mod.ts";
 import { IAggregationSource } from "./db/Aggregation.ts";
 import { getPartitionedCollectionName } from "./db/Partition.ts";
+import { delay } from "@std/async/delay";
 
 const AGGREGATOR_QUEUE_KEY = "aggregator_queue";
 
@@ -201,6 +202,7 @@ export class Aggregator {
 
   public async flush() {
     this.stop();
+    await delay(2000);
     await this.queue.requeueDelayedJobs();
     let job = await this.queue.fetchJob();
     while (job) {

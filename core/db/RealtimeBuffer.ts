@@ -14,6 +14,8 @@ import { REDIS_NULL_VALUE } from "../constants.ts";
 import { meter } from "../telemetry.ts";
 import { truncateDate } from "../utils.ts";
 import { IGroupsAggregationQuery } from "./GroupsAggregationQuery.ts";
+import { IFlatGroupsAggregationQuery } from "./FGAQuery.ts";
+import { getRealtimeFlatGroupsAggregation } from "./RedisFGAQuery.ts";
 
 const DEFAULT_BUFFER_AGE_MS = 5 * 60 * 1000; // 5 minutes
 /**
@@ -52,6 +54,12 @@ export interface IRealtimeService {
 
   queryGroups(
     query: IGroupsAggregationQuery,
+    targetCollection?: string,
+    filter?: IAggregationSourceFilter,
+  ): Promise<any[]>;
+
+  queryFlatGroups(
+    query: IFlatGroupsAggregationQuery,
     targetCollection?: string,
     filter?: IAggregationSourceFilter,
   ): Promise<any[]>;
@@ -96,6 +104,7 @@ export class RealtimeBuffer implements IRealtimeService {
       query.payloadField || REDIS_NULL_VALUE,
       query.payloadCategory || REDIS_NULL_VALUE,
       query.compoundCategoryKey || REDIS_NULL_VALUE,
+      query.leafKey ? btoa(JSON.stringify(query.leafKey)) : REDIS_NULL_VALUE,
       query.attributionType || REDIS_NULL_VALUE,
       query.attributionValue || REDIS_NULL_VALUE,
       query.sourceId,
@@ -175,14 +184,18 @@ export class RealtimeBuffer implements IRealtimeService {
     const mergedMap = new Map<string, IDatasetDataPoint>();
 
     for (const point of rawPoints) {
-      const parts = point.member.split(":");
-      // Note: The original timestamp is in point.timestamp, not in the member string.
+      let parts = point.member.split(":");
+      // Backward compatibility for keys that don't have leafKey
+      if (parts.length === 11) {
+        parts.splice(5, 0, REDIS_NULL_VALUE);
+      }
       const [
         _incrementValue,
         aggType,
         payloadField,
         payloadCategory,
         compoundCategoryKey,
+        _leafKey,
         _attrType,
         _attrValue,
         _sourceId,
@@ -264,13 +277,18 @@ export class RealtimeBuffer implements IRealtimeService {
     const mergedMap = new Map<string, any>();
 
     for (const point of rawPoints) {
-      const parts = point.member.split(":");
+      let parts = point.member.split(":");
+      // Backward compatibility for keys that don't have leafKey
+      if (parts.length === 11) {
+        parts.splice(5, 0, REDIS_NULL_VALUE);
+      }
       const [
         _incrementValue,
         aggType,
         payloadField,
         payloadCategory,
         compoundCategoryKey,
+        _leafKey,
         _attrType,
         _attrValue,
         _sourceId,
@@ -368,5 +386,27 @@ export class RealtimeBuffer implements IRealtimeService {
     finalResults.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
     return finalResults;
+  }
+
+  async queryFlatGroups(
+    query: IFlatGroupsAggregationQuery,
+    targetCollection?: string,
+    filter?: IAggregationSourceFilter,
+  ): Promise<any[]> {
+    if (Array.isArray(query.granularity)) {
+      throw new Error(
+        "queryFlatGroups does not support multiple granularities.",
+      );
+    }
+    const rawPoints = await queryRedisBuffer(
+      // @ts-ignore: reason
+      this.redis,
+      this.prefix,
+      query,
+      targetCollection,
+      filter,
+    );
+
+    return getRealtimeFlatGroupsAggregation(query, rawPoints);
   }
 }
