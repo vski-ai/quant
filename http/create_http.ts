@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { GenerateSpecOptions, generateSpecs } from "hono-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
 
+import { extendSchema } from "./schemas/schema_hook.ts";
 import { createApiRouter } from "./routes/index.ts";
 import { httpErrorHandler } from "./middleware/errorHandler.ts";
 import type { HonoEnv, IHttpPlugin } from "./types.ts";
@@ -24,6 +25,10 @@ export async function createHttp(
     c.set("engine", engine);
     await next();
   });
+
+  for (const plugin of plugins) {
+    plugin.schema?.(extendSchema);
+  }
 
   // Separate plugins based on their desired namespace.
   const rootPlugins = plugins.filter((p) => p.namespace === "root");

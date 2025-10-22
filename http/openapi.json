@@ -2756,6 +2756,38 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "limit": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {},
+                          "OR": {}
+                        },
+                        "required": [
+                          "operator",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "compute": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
@@ -2892,6 +2924,38 @@
                   "groupBy": {
                     "type": "array",
                     "items": {
+                      "type": "string"
+                    }
+                  },
+                  "limit": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {},
+                          "OR": {}
+                        },
+                        "required": [
+                          "operator",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "compute": {
+                    "type": "object",
+                    "additionalProperties": {
                       "type": "string"
                     }
                   }
@@ -3061,6 +3125,38 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "limit": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {},
+                          "OR": {}
+                        },
+                        "required": [
+                          "operator",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "compute": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
@@ -3197,6 +3293,38 @@
                   "groupBy": {
                     "type": "array",
                     "items": {
+                      "type": "string"
+                    }
+                  },
+                  "limit": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {},
+                          "OR": {}
+                        },
+                        "required": [
+                          "operator",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "compute": {
+                    "type": "object",
+                    "additionalProperties": {
                       "type": "string"
                     }
                   }
@@ -3337,6 +3465,38 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "limit": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {},
+                          "OR": {}
+                        },
+                        "required": [
+                          "operator",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "compute": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
@@ -3472,6 +3632,38 @@
                   },
                   "wasm": {
                     "type": "boolean"
+                  },
+                  "limit": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {},
+                          "OR": {}
+                        },
+                        "required": [
+                          "operator",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "compute": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
@@ -3607,6 +3799,38 @@
                   },
                   "wasm": {
                     "type": "boolean"
+                  },
+                  "limit": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {},
+                          "OR": {}
+                        },
+                        "required": [
+                          "operator",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "compute": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [

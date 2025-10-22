@@ -1,6 +1,7 @@
 import type { Engine } from "@/core/mod.ts";
 import type { Hono } from "hono";
 import { AuthStorage } from "./auth/db/storage.ts"; // This path is now correct for the new orchestrator
+import { extendSchema } from "./schemas/schema_hook.ts";
 
 export type HonoEnv = {
   Variables: {
@@ -17,5 +18,9 @@ export interface IHttpPlugin {
   name: string;
   version: string;
   namespace?: "root" | "api";
-  register(app: Hono<HonoEnv>, engine: Engine): Promise<void>;
+  schema?(extend: typeof extendSchema): void;
+  register(
+    app: Hono<HonoEnv>,
+    engine: Engine,
+  ): Promise<void>;
 }

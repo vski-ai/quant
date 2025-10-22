@@ -1201,6 +1201,18 @@ export type PostApiReportsIdDataData = {
       value: string;
     };
     groupBy?: Array<string>;
+    limit?: number;
+    offset?: number;
+    filter?: {
+      [key: string]: Array<{
+        operator: string;
+        value: unknown;
+        OR?: unknown;
+      }>;
+    };
+    compute?: {
+      [key: string]: string;
+    };
   };
   path: {
     id: string;
@@ -1271,6 +1283,18 @@ export type PostApiReportsIdDatasetData = {
       value: string;
     };
     groupBy?: Array<string>;
+    limit?: number;
+    offset?: number;
+    filter?: {
+      [key: string]: Array<{
+        operator: string;
+        value: unknown;
+        OR?: unknown;
+      }>;
+    };
+    compute?: {
+      [key: string]: string;
+    };
   };
   path: {
     id: string;
@@ -1348,6 +1372,18 @@ export type PostApiReportsIdRealtimeDataData = {
       value: string;
     };
     groupBy?: Array<string>;
+    limit?: number;
+    offset?: number;
+    filter?: {
+      [key: string]: Array<{
+        operator: string;
+        value: unknown;
+        OR?: unknown;
+      }>;
+    };
+    compute?: {
+      [key: string]: string;
+    };
   };
   path: {
     id: string;
@@ -1420,6 +1456,18 @@ export type PostApiReportsIdRealtimeDatasetData = {
       value: string;
     };
     groupBy?: Array<string>;
+    limit?: number;
+    offset?: number;
+    filter?: {
+      [key: string]: Array<{
+        operator: string;
+        value: unknown;
+        OR?: unknown;
+      }>;
+    };
+    compute?: {
+      [key: string]: string;
+    };
   };
   path: {
     id: string;
@@ -1492,6 +1540,18 @@ export type PostApiReportsIdRealtimeGroupsData = {
       value: string;
     };
     groupBy?: Array<string>;
+    limit?: number;
+    offset?: number;
+    filter?: {
+      [key: string]: Array<{
+        operator: string;
+        value: unknown;
+        OR?: unknown;
+      }>;
+    };
+    compute?: {
+      [key: string]: string;
+    };
   };
   path: {
     id: string;
@@ -1563,6 +1623,18 @@ export type PostApiReportsIdFlatGroupsData = {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
     wasm?: boolean;
+    limit?: number;
+    offset?: number;
+    filter?: {
+      [key: string]: Array<{
+        operator: string;
+        value: unknown;
+        OR?: unknown;
+      }>;
+    };
+    compute?: {
+      [key: string]: string;
+    };
   };
   path: {
     id: string;
@@ -1632,6 +1704,18 @@ export type PostApiReportsIdRealtimeFlatGroupsData = {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
     wasm?: boolean;
+    limit?: number;
+    offset?: number;
+    filter?: {
+      [key: string]: Array<{
+        operator: string;
+        value: unknown;
+        OR?: unknown;
+      }>;
+    };
+    compute?: {
+      [key: string]: string;
+    };
   };
   path: {
     id: string;

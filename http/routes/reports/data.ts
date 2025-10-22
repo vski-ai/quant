@@ -10,6 +10,7 @@ import {
   ReportQuerySchema,
 } from "@/http/schemas/reports.ts";
 import { canAccessReport } from "@/http/auth/middleware.ts";
+import { useSchema } from "@/http/schemas/schema_hook.ts";
 
 const data = new Hono<
   HonoEnv & { Variables: { apiKey: ApiKey; isMaster: boolean } }
@@ -33,7 +34,7 @@ data.post(
     },
   }),
   canAccessReport,
-  vValidator("json", ReportQuerySchema),
+  useSchema(ReportQuerySchema, (Schema) => vValidator("json", Schema)),
   async (c) => {
     const engine = c.get("engine");
     const { id } = c.req.param();
@@ -70,7 +71,7 @@ data.post(
     },
   }),
   canAccessReport,
-  vValidator("json", DatasetQuerySchema),
+  useSchema(DatasetQuerySchema, (Schema) => vValidator("json", Schema)),
   async (c) => {
     const engine = c.get("engine");
     const { id } = c.req.param();
