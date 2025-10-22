@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from "@std/assert";
-import { WasmFormulaExecutor } from "./mod.ts";
+import { WasmFormulaExecutor } from "../mod.ts";
 
 const executor = new WasmFormulaExecutor();
 

@@ -483,7 +483,7 @@ export class Engine {
         query,
       );
       const result = await getReport(query, this);
-      this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+      this.pluginManager.executeActionHook("afterAggregateGenerated", {
         data: result,
         query,
       });
@@ -501,7 +501,7 @@ export class Engine {
         query,
       );
       const result = await getDataset(query, this);
-      this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+      this.pluginManager.executeActionHook("afterAggregateGenerated", {
         data: result,
         query,
       });
@@ -521,7 +521,7 @@ export class Engine {
           query,
         );
         const result = await getGroupsAggregation(query, this);
-        this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+        this.pluginManager.executeActionHook("afterAggregateGenerated", {
           data: result,
           query,
         });
@@ -542,7 +542,7 @@ export class Engine {
           query,
         );
         const result = await getFlatGroupsAggregation(query, this);
-        this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+        this.pluginManager.executeActionHook("afterAggregateGenerated", {
           data: result,
           query,
         });
@@ -742,7 +742,7 @@ export class Engine {
         query.granularity as any,
         query.metric.type,
       );
-      this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+      this.pluginManager.executeActionHook("afterAggregateGenerated", {
         data: result,
         query,
       });
@@ -775,7 +775,7 @@ export class Engine {
       );
     });
     const result = (await Promise.all(queryPromises)).flat();
-    this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+    this.pluginManager.executeActionHook("afterAggregateGenerated", {
       data: result,
       query,
     });
@@ -805,7 +805,7 @@ export class Engine {
       );
     });
     const result = (await Promise.all(queryPromises)).flat();
-    this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+    this.pluginManager.executeActionHook("afterAggregateGenerated", {
       data: result,
       query,
     });
@@ -837,7 +837,7 @@ export class Engine {
     });
 
     const result = (await Promise.all(queryPromises)).flat();
-    this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+    this.pluginManager.executeActionHook("afterAggregateGenerated", {
       data: result,
       query,
     });

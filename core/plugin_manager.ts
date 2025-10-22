@@ -78,7 +78,7 @@ export class PluginManager {
       | "afterMetricsWritten"
       | "afterRealtimeMetricsGenerated"
       | "afterAggregationWritten"
-      | "afterAgrregateGenerated",
+      | "afterAggregateGenerated",
     context: any,
   ): Promise<void> {
     for (const plugin of this.plugins) {

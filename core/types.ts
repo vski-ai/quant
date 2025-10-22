@@ -380,7 +380,7 @@ export interface IPlugin {
    * Called after a report has been generated.
    * Allows for post-processing of the report results.
    */
-  afterAgrregateGenerated?: (context: {
+  afterAggregateGenerated?: (context: {
     data: any[];
     query: any;
   }) => Promise<void>;
