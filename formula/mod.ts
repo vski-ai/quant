@@ -1,4 +1,8 @@
-import init, { evaluate, parse_formula } from "./pkg/formula_engine.js";
+import init, {
+  compute,
+  evaluate,
+  parse_formula,
+} from "./pkg/formula_engine.js";
 
 // Initialize the Wasm module
 await init();
@@ -12,12 +16,27 @@ export class WasmFormulaExecutor {
   constructor() {}
 
   /**
+   * @param context
+   * @returns A promise that resolves to the compiled formula (AST JSON string).
+   */
+  compute(
+    ctx: Record<string, number>,
+    spec: Record<string, string>,
+  ): Record<string, number> {
+    return compute(
+      Object.keys(ctx),
+      Float64Array.from(Object.values(ctx)),
+      Object.keys(spec),
+      Object.values(spec),
+    );
+  }
+  /**
    * Parses a formula string into a compiled, serializable AST.
    * Results are cached in memory.
    * @param formula The user-defined formula string.
    * @returns A promise that resolves to the compiled formula (AST JSON string).
    */
-  public async compile(formula: string): Promise<CompiledFormula> {
+  public compile(formula: string): CompiledFormula {
     if (this.formulaCache.has(formula)) {
       return this.formulaCache.get(formula)!;
     }
@@ -37,10 +56,10 @@ export class WasmFormulaExecutor {
    * @param context A data row object, e.g., { revenue: 100, cost: 60 }.
    * @returns The numerical result of the formula.
    */
-  public async execute(
+  public execute(
     compiledFormula: CompiledFormula,
     context: Record<string, number>,
-  ): Promise<number> {
+  ): number {
     const keys = Object.keys(context);
     const values = Object.values(context);
 

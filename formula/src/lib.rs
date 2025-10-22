@@ -6,12 +6,13 @@ use nom::{
     error::ParseError,
     multi::separated_list0,
     number::complete::double,
-    sequence::{delimited, pair, preceded, tuple},
+    sequence::{delimited, pair, tuple},
     IResult, Parser,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
+use js_sys::{Object, Reflect};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum Expr {
@@ -170,4 +171,37 @@ pub fn evaluate(ast_json: &str, context_keys: Vec<String>, context_values: Vec<f
     let context: HashMap<String, f64> = context_keys.into_iter().zip(context_values.into_iter()).collect();
 
     evaluate_ast(&ast, &context)
+}
+
+
+#[wasm_bindgen]
+pub fn compute(
+    context_keys: Vec<String>,
+    context_values: Vec<f64>,
+    computed_keys: Vec<String>,
+    computed_formulas: Vec<String>,
+) -> Result<JsValue, String> {
+    if context_keys.len() != context_values.len() {
+        return Err("Context keys and values must have the same length".to_string());
+    }
+    if computed_keys.len() != computed_formulas.len() {
+        return Err("Computed keys and formulas must have the same length".to_string());
+    }
+
+    let context: HashMap<String, f64> = context_keys.clone().into_iter().zip(context_values.clone().into_iter()).collect();
+    let obj = Object::new();
+
+    for (key, formula) in computed_keys.iter().zip(computed_formulas.iter()) {
+        let ast_json = parse_formula(formula)?;
+        let ast: Expr = serde_json::from_str(&ast_json)
+            .map_err(|e| format!("AST Deserialization Error: {}", e))?;
+        let result = evaluate_ast(&ast, &context)?;
+        Reflect::set(&obj, &key.into(), &result.into()).unwrap();
+    }
+
+    for (key, value) in context_keys.iter().zip(context_values.iter()) {
+        Reflect::set(&obj, &key.into(), &(*value).into()).unwrap();
+    }
+
+    Ok(obj.into())
 }

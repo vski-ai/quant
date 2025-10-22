@@ -62,7 +62,7 @@ Deno.test("Formula Executor - Missing Identifier", async () => {
 Deno.test("Formula Executor - Invalid Formula Syntax", async () => {
   const formula = "deal_value_sum -+ cost_sum";
   await assertRejects(
-    () => executor.compile(formula),
+    async () => executor.compile(formula),
     Error,
     "Formula compilation failed",
   );
@@ -98,4 +98,22 @@ Deno.test("Formula Executor - Identifier with Underscore and Numbers", async () 
   const compiled = await executor.compile(formula);
   const result = await executor.execute(compiled, context);
   assertEquals(result, 300000);
+});
+
+Deno.test("Formula Executor - Compute New Fields", async () => {
+  const context = { a: 50, b: 0.5 };
+  const computedFields = {
+    ab_sum: "a + b",
+    ab_prod: "a * b",
+    my_ab_metric: "a * b + a",
+  };
+  const result = await executor.compute(context, computedFields);
+  console.log(result);
+  assertEquals(result, {
+    a: 50,
+    b: 0.5,
+    ab_sum: 50.5,
+    ab_prod: 25.0,
+    my_ab_metric: 75.0,
+  });
 });
