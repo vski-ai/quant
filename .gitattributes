@@ -1,5 +1,6 @@
 *.md linguist-documentation
 *.ipynb linguist-documentation
 *.js linguist-generated
+*.css linguist-generated
 *.wasm linguist-generated
 _bench/ linguist-documentation
