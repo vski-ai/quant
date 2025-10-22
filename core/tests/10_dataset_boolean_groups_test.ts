@@ -66,7 +66,7 @@ withTestDatabase({ dbName }, async (t, engine, down) => {
   });
 
   // Wait for aggregator to process events
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await engine.aggregator.flush();
 
   await t.step(
     "should query dataset and correctly form boolean groups",

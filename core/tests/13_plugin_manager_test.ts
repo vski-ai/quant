@@ -32,8 +32,8 @@ class TestTrackerPlugin implements IPlugin {
     onGetMetrics: 0,
     beforeMetricsWritten: 0,
     afterMetricsWritten: 0,
-    beforeReportGenerated: 0,
-    afterReportGenerated: 0,
+    beforeAggregateGenerated: 0,
+    afterAgrregateGenerated: 0,
   };
 
   onEngineInit = async (_engine: Engine) => {
@@ -80,15 +80,15 @@ class TestTrackerPlugin implements IPlugin {
     this.callTracker.afterMetricsWritten++;
   };
 
-  beforeReportGenerated = async (query: IQuery) => {
-    this.callTracker.beforeReportGenerated++;
+  beforeAggregateGenerated = async (query: IQuery) => {
+    this.callTracker.beforeAggregateGenerated++;
     return query;
   };
 
-  afterReportGenerated = async (
-    _context: { report: IReportDataPoint[]; query: IQuery },
+  afterAgrregateGenerated = async (
+    _context: { data: IReportDataPoint[]; query: IQuery },
   ) => {
-    this.callTracker.afterReportGenerated++;
+    this.callTracker.afterAgrregateGenerated++;
   };
 }
 
@@ -164,8 +164,8 @@ withTestDatabase({ dbName }, async (t, engine, down) => {
     });
 
     // Check report hooks
-    assertEquals(trackerPlugin.callTracker.beforeReportGenerated, 1);
-    assertEquals(trackerPlugin.callTracker.afterReportGenerated, 1);
+    assertEquals(trackerPlugin.callTracker.beforeAggregateGenerated, 1);
+    assertEquals(trackerPlugin.callTracker.afterAgrregateGenerated, 1);
   });
 
   await t.step(

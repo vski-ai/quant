@@ -217,6 +217,7 @@ export interface IQuery {
   rebuildCache?: boolean;
   cache?: boolean;
   groupBy?: string[];
+  compute?: Record<string, string>;
 }
 
 /**
@@ -237,15 +238,15 @@ export interface IDatasetQuery {
   sortBy?: string;
   sortDirection?: "asc" | "desc";
   cache?: boolean;
+  compute?: Record<string, string>;
 }
 
 /** Represents a single row in a dataset report, potentially containing multiple metrics for a single timestamp. */
-export interface IDatasetDataPoint {
+export interface IDatasetDataPoint
+  extends Record<string, number | Date | any[] | undefined> {
   timestamp: Date;
   /** A special field containing an array of all boolean events that occurred within this time bucket. */
   $boolean_groups?: { name: string; value: boolean; timestamp: Date }[];
-  /** Dynamic keys for each metric, e.g., 'amount_sum': 123, 'total_count': 5 */
-  [metricKey: string]: number | Date | any[] | undefined;
 }
 
 /**
@@ -269,6 +270,7 @@ export interface IReportMetadata {
 import { Engine } from "./engine.ts";
 import { IEventDoc } from "./db/Event.ts";
 import { IMetricUpdate } from "./db/AggregateQuery.ts";
+import { string } from "valibot";
 
 /**
  * Defines the contract for a data offloader plugin.
@@ -372,15 +374,15 @@ export interface IPlugin {
    * Allows for modification of the report query.
    * @returns The (potentially modified) query.
    */
-  beforeReportGenerated?: (query: IQuery) => Promise<IQuery>;
+  beforeAggregateGenerated?: (query: any) => Promise<any>;
 
   /**
    * Called after a report has been generated.
    * Allows for post-processing of the report results.
    */
-  afterReportGenerated?: (context: {
-    report: IReportDataPoint[];
-    query: IQuery;
+  afterAgrregateGenerated?: (context: {
+    data: any[];
+    query: any;
   }) => Promise<void>;
 
   /**

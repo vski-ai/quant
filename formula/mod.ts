@@ -16,7 +16,8 @@ export class WasmFormulaExecutor {
   constructor() {}
 
   /**
-   * @param context
+   * @param context - an object containing values
+   * @param spec - an object containing pairs computed_filed: formula
    * @returns A promise that resolves to the compiled formula (AST JSON string).
    */
   compute(

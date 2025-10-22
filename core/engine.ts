@@ -478,7 +478,15 @@ export class Engine {
     query: IQuery,
   ) {
     return tracer.startActiveSpan("engine.getReport", async (span) => {
+      query = await this.pluginManager.executeWaterfallHook(
+        "beforeAggregateGenerated",
+        query,
+      );
       const result = await getReport(query, this);
+      this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+        data: result,
+        query,
+      });
       span.end();
       return result;
     });
@@ -488,7 +496,15 @@ export class Engine {
     query: IDatasetQuery,
   ) {
     return tracer.startActiveSpan("engine.getDataset", async (span) => {
+      query = await this.pluginManager.executeWaterfallHook(
+        "beforeAggregateGenerated",
+        query,
+      );
       const result = await getDataset(query, this);
+      this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+        data: result,
+        query,
+      });
       span.end();
       return result;
     });
@@ -500,7 +516,15 @@ export class Engine {
     return tracer.startActiveSpan(
       "engine.getGroupsAggregation",
       async (span) => {
+        query = await this.pluginManager.executeWaterfallHook(
+          "beforeAggregateGenerated",
+          query,
+        );
         const result = await getGroupsAggregation(query, this);
+        this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+          data: result,
+          query,
+        });
         span.end();
         return result;
       },
@@ -513,7 +537,15 @@ export class Engine {
     return tracer.startActiveSpan(
       "engine.getFlatGroupsAggregation",
       async (span) => {
+        query = await this.pluginManager.executeWaterfallHook(
+          "beforeAggregateGenerated",
+          query,
+        );
         const result = await getFlatGroupsAggregation(query, this);
+        this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+          data: result,
+          query,
+        });
         span.end();
         return result;
       },
@@ -683,6 +715,10 @@ export class Engine {
       if (Array.isArray(query.granularity)) {
         throw new Error("Report queries do not support multiple granularities");
       }
+      query = await this.pluginManager.executeWaterfallHook(
+        "beforeAggregateGenerated",
+        query,
+      );
 
       const aggregationSources = await this.listAggregationSources(
         query.reportId,
@@ -703,9 +739,13 @@ export class Engine {
 
       const result = mergeAndAggregateResults(
         bufferResults,
-        query.granularity,
+        query.granularity as any,
         query.metric.type,
       );
+      this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+        data: result,
+        query,
+      });
       span.end();
       return result;
     });
@@ -715,6 +755,10 @@ export class Engine {
     query: IDatasetQuery,
   ): Promise<IDatasetDataPoint[]> {
     if (!this.aggregator.bufferService) return [];
+    query = await this.pluginManager.executeWaterfallHook(
+      "beforeAggregateGenerated",
+      query,
+    );
 
     const aggregationSources = await this.listAggregationSources(
       query.reportId,
@@ -730,15 +774,22 @@ export class Engine {
         source.filter,
       );
     });
-
-    return (await Promise.all(queryPromises)).flat();
+    const result = (await Promise.all(queryPromises)).flat();
+    this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+      data: result,
+      query,
+    });
+    return result;
   }
 
   public async getRealtimeGroupsAggregation(
     query: IGroupsAggregationQuery,
   ): Promise<any[]> {
     if (!this.aggregator.bufferService) return [];
-
+    query = await this.pluginManager.executeWaterfallHook(
+      "beforeAggregateGenerated",
+      query,
+    );
     const aggregationSources = await this.listAggregationSources(
       query.reportId,
     );
@@ -753,14 +804,22 @@ export class Engine {
         source.filter,
       );
     });
-
-    return (await Promise.all(queryPromises)).flat();
+    const result = (await Promise.all(queryPromises)).flat();
+    this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+      data: result,
+      query,
+    });
+    return result;
   }
 
   public async getRealtimeFlatGroupsAggregation(
     query: IFlatGroupsAggregationQuery,
   ): Promise<any[]> {
     if (!this.aggregator.bufferService) return [];
+    query = await this.pluginManager.executeWaterfallHook(
+      "beforeAggregateGenerated",
+      query,
+    );
 
     const aggregationSources = await this.listAggregationSources(
       query.reportId,
@@ -777,6 +836,11 @@ export class Engine {
       );
     });
 
-    return (await Promise.all(queryPromises)).flat();
+    const result = (await Promise.all(queryPromises)).flat();
+    this.pluginManager.executeActionHook("afterAgrregateGenerated", {
+      data: result,
+      query,
+    });
+    return result;
   }
 }

@@ -10,7 +10,6 @@ import {
   Granularity,
   IQuery,
   IReportDataPoint,
-  ITimeRange,
 } from "../types.ts";
 import { getPartitionedCollectionNames } from "./Partition.ts";
 import { Engine } from "../engine.ts";
@@ -22,8 +21,6 @@ import {
   getFromCache,
   saveToCache,
 } from "./Cache.ts";
-import { IReportCacheDoc } from "./ReportCache.ts";
-import { createHash } from "node:crypto";
 
 /**
  * Queries a single aggregate
@@ -186,10 +183,6 @@ export async function getReport(
           query.granularity as Granularity,
           query.metric.type,
         );
-        await engine.pluginManager.executeActionHook("afterReportGenerated", {
-          report: finalReport,
-          query,
-        });
         return finalReport;
       }
 
@@ -213,10 +206,6 @@ export async function getReport(
         query.granularity as Granularity,
         query.metric.type,
       );
-      await engine.pluginManager.executeActionHook("afterReportGenerated", {
-        report: finalReport,
-        query,
-      });
       return finalReport;
     } else {
       // --- Standard (non-partial) caching logic ---
@@ -224,10 +213,6 @@ export async function getReport(
       if (!query.rebuildCache) {
         const cachedReport = await getFromCache(engine, cacheKey);
         if (cachedReport) {
-          await engine.pluginManager.executeActionHook("afterReportGenerated", {
-            report: cachedReport as any,
-            query,
-          });
           return cachedReport as any;
         }
       }
@@ -241,12 +226,6 @@ export async function getReport(
   if (shouldTryCache) {
     await saveToCache(query, finalResults, engine);
   }
-
-  // --- Plugin Hook: afterReportGenerated ---
-  await engine.pluginManager.executeActionHook("afterReportGenerated", {
-    report: finalResults,
-    query: query,
-  });
 
   return finalResults;
 }
@@ -294,21 +273,13 @@ async function getReportFromSources(
   query: IQuery,
   engine: Engine,
 ): Promise<IReportDataPoint[]> {
-  // --- Plugin Hook: beforeReportGenerated ---
-  // Note: This hook is intentionally run on the sub-query for gaps.
-  // The top-level hook is run at the end of the main getReport function.
-  const modifiedQuery = await engine.pluginManager.executeWaterfallHook(
-    "beforeReportGenerated",
-    query,
-  );
-
   // 1. Find the report configuration.
   const ReportModel = getReportModel(engine.connection);
-  const reportConfig = await ReportModel.findById(modifiedQuery.reportId)
+  const reportConfig = await ReportModel.findById(query.reportId)
     .lean();
 
   if (!reportConfig) {
-    throw new Error(`Report with ID "${modifiedQuery.reportId}" not found.`);
+    throw new Error(`Report with ID "${query.reportId}" not found.`);
   }
 
   // 2. Find all aggregation sources linked to this report.
@@ -325,7 +296,7 @@ async function getReportFromSources(
     const collectionNames = source.partition?.enabled
       ? getPartitionedCollectionNames(
         source.targetCollection,
-        modifiedQuery.timeRange,
+        query.timeRange,
         source.granularity!,
         source.partition.length,
       )
@@ -336,7 +307,7 @@ async function getReportFromSources(
         engine.connection,
         collectionName,
       );
-      return await queryMongo(modifiedQuery, model, source.filter);
+      return await queryMongo(query, model, source.filter);
     });
   });
 
@@ -346,7 +317,7 @@ async function getReportFromSources(
   // Note: The final merge for partial cache hits happens in the main getReport function.
   return mergeAndAggregateResults(
     mongoResults,
-    modifiedQuery.granularity as Granularity,
-    modifiedQuery.metric.type,
+    query.granularity as Granularity,
+    query.metric.type,
   );
 }

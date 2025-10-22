@@ -289,8 +289,6 @@ withTestDatabase({
         3575,
         "Total sum should  be 3575 (everythin is buffer)",
       );
-
-      await engine.aggregator.stop();
     },
   );
   await teardown();

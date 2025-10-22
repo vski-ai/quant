@@ -242,7 +242,14 @@ withTestDatabase({ dbName }, async (t, engine, teardown) => {
         "Total sum should still be 3575",
       );
 
-      await engine.aggregator.stop();
+      // Test 3f: Computed field
+      const computedQuery: IQuery = {
+        reportId: report._id.toString(),
+        metric: { type: AggregationType.SUM, field: "amount" },
+        timeRange: { start: oneHourAgo, end: now },
+        granularity: "minute",
+        compute: { "value_doubled": "value * 2" },
+      };
     },
   );
   await teardown();

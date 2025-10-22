@@ -53,7 +53,7 @@ export class PluginManager {
     hookName:
       | "beforeEventRecord"
       | "beforeMetricsWritten"
-      | "beforeReportGenerated",
+      | "beforeAggregateGenerated",
     ...args: any[]
   ): Promise<any> {
     let value = args[0];
@@ -76,9 +76,9 @@ export class PluginManager {
     hookName:
       | "afterEventRecord"
       | "afterMetricsWritten"
-      | "afterReportGenerated"
       | "afterRealtimeMetricsGenerated"
-      | "afterAggregationWritten",
+      | "afterAggregationWritten"
+      | "afterAgrregateGenerated",
     context: any,
   ): Promise<void> {
     for (const plugin of this.plugins) {
