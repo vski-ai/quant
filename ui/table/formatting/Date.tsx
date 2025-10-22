@@ -1,5 +1,5 @@
 import { Signal } from "@preact/signals";
-import { DateFormatting as DateFormattingType } from "@/islands/table/types.ts";
+import { DateFormatting as DateFormattingType } from "../types.ts";
 
 export const DateFormatting = (
   { column, formatting }: { column: string; formatting: Signal<any> },

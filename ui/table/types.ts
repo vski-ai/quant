@@ -1,4 +1,4 @@
-import { type JSX } from "preact";
+import { type JSX, type RefObject } from "preact";
 import { type Signal } from "@preact/signals";
 
 export interface VirtualTableViewProps {
@@ -11,7 +11,7 @@ export interface VirtualTableViewProps {
   loading?: boolean;
   rowHeight?: number;
   buffer?: number;
-  scrollContainerRef?: React.RefObject<HTMLElement>;
+  scrollContainerRef?: RefObject<HTMLElement>;
   selectedRows?: Signal<any[]>;
   groupStates?: Signal<Record<string, boolean>>;
   rowIdentifier?: string;
@@ -20,6 +20,7 @@ export interface VirtualTableViewProps {
   tableAddon?: JSX.Element;
   cellFormatting?: Signal<Record<string, CellFormatting>>;
   onColumnDrop?: (draggedColumn: string, targetColumn: string) => void;
+  formatColumnName?: (a: string) => string 
 }
 
 export enum FormattingType {

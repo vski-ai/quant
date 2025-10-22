@@ -3,7 +3,7 @@ import {
   CellStyle,
   ConditionOperator,
   StyleCondition,
-} from "@/islands/table/types.ts";
+} from "../types.ts";
 
 import Trash2Icon from "lucide-react/dist/esm/icons/trash-2.js";
 

@@ -41,7 +41,7 @@ function formatNumber(value: any, options?: NumberFormatting): string {
     return new Intl.NumberFormat(options?.locale, options).format(value);
   } catch (e) {
     console.error(e);
-    return value;
+    return value.toString();
   }
 }
 

@@ -1,5 +1,5 @@
 import { Signal } from "@preact/signals";
-import { NumberFormatting as NumberFormattingType } from "@/islands/table/types.ts";
+import { NumberFormatting as NumberFormattingType } from "../types.ts";
 
 export const NumberFormatting = (
   { column, formatting }: { column: string; formatting: Signal<any> },

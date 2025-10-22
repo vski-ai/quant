@@ -1,4 +1,4 @@
-import { useMediaQuery } from "../../shared/useMediaQuery.ts";
+import { useMediaQuery } from "../useMediaQuery.ts";
 import { CardView } from "./CardView.tsx";
 import { TablePlaceholder } from "./TablePlaceholder.tsx";
 import { VirtualTableView } from "./VirtualTableView.tsx";

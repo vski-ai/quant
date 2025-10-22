@@ -1,16 +1,20 @@
 import { Granularity } from "@/quant/core/types.ts";
-import { ColumnSelector } from "@/islands/table/ColumnSelector.tsx";
-import { GroupingSelector } from "@/islands/table/GroupingSelector.tsx";
-import { DynamicTable } from "@/islands/table/index.tsx";
+
+import {
+  ColumnMenu,
+  ColumnSelector,
+  ColumnSorter,
+  DynamicTable,
+  GeneralFormatting,
+  GroupingSelector,
+  SortState,
+} from "@/quant/ui/table/mod.ts";
 import { Signal, useSignal } from "@preact/signals";
 import { useMemo, useRef } from "preact/hooks";
+
 import GridIcon from "lucide-react/dist/esm/icons/grid-2x2-plus.js";
 import GroupIcon from "lucide-react/dist/esm/icons/group.js";
-import { ColumnSorter, SortState } from "@/islands/table/ColumnSorter.tsx";
-import { ColumnMenu } from "@/islands/table/ColumnMenu.tsx";
-import { GeneralFormatting } from "@/islands/table/formatting/General.tsx";
-import { StyleFormatting } from "@/islands/table/formatting/Style.tsx";
-import { DateFormatting } from "@/islands/table/formatting/Date.tsx";
+
 import { generateMockData } from "../../mocks/groupable-table.ts";
 
 interface AggregationViewProps {

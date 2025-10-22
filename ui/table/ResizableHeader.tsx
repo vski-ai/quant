@@ -1,8 +1,9 @@
 import { type JSX } from "preact";
 import { useSignal } from "@preact/signals";
-import { formatColumnName } from "../../shared/formatters.ts";
 import { useRef } from "preact/hooks";
 import { Draggable } from "./Draggable.tsx";
+
+
 export interface ResizableHeaderProps {
   column: string;
   width: number;
@@ -10,11 +11,12 @@ export interface ResizableHeaderProps {
   action?: (col: string) => JSX.Element;
   onResize: (column: string, newWidth: number) => void;
   onColumnDrop?: (draggedColumn: string, targetColumn: string) => void;
+  formatColumnName?: (a: string) => string
   children?: any;
 }
 
 export function ResizableHeader(
-  { column, width, onResize, extensions, action, onColumnDrop, children }:
+  { column, width, onResize, extensions, action, onColumnDrop, formatColumnName, children }:
     ResizableHeaderProps,
 ) {
   const isResizing = useSignal(false);
@@ -23,7 +25,7 @@ export function ResizableHeader(
   const edit = useSignal(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const formattedName = formatColumnName(column);
+  const formattedName = formatColumnName?.(column) ?? column;
 
   const handleMouseDown = (e: MouseEvent) => {
     e.preventDefault();

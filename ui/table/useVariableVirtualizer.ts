@@ -1,3 +1,4 @@
+import { type RefObject } from "preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 
 // This hook is responsible for calculating the visible range of items in a list with variable heights.
@@ -9,8 +10,8 @@ export function useVariableVirtualizer(
     rowHeights,
     buffer = 5,
   }: {
-    scrollContainerRef?: React.RefObject<HTMLElement>;
-    tableRef: React.RefObject<HTMLTableElement>;
+    scrollContainerRef?: RefObject<HTMLElement>;
+    tableRef: RefObject<HTMLTableElement>;
     itemCount: number;
     rowHeights: number[];
     buffer?: number;

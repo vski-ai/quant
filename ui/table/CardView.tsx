@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "preact/hooks";
-import { formatColumnName } from "../../shared/formatters.ts";
 import { useVariableVirtualizer } from "./useVariableVirtualizer.ts";
 import { VirtualTableViewProps } from "./types.ts";
 import { CellFormatter } from "./CellFormatter.tsx";
@@ -20,6 +19,7 @@ export function CardView(
     renderExpandedRow,
     expandedRows,
     cellFormatting,
+    formatColumnName
   }: CardViewProps,
 ) {
   const tableRef = useRef<HTMLDivElement>(null);
@@ -109,7 +109,7 @@ export function CardView(
             <div class="collapse-content">
               <div class="grid grid-cols-2 gap-2">
                 {columns.map((col) => {
-                  const formattedName = formatColumnName(col);
+                  const formattedName = formatColumnName?.(col) ?? col;
                   return (
                     <div
                       key={col}
