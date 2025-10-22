@@ -135,14 +135,11 @@ fn evaluate_ast(ast: &Expr, context: &HashMap<String, f64>) -> Result<f64, Strin
                 .collect::<Result<Vec<_>, _>>()?;
 
             match name.as_str() {
-                // Existing functions
                 "pow" if arg_vals.len() == 2 => Ok(arg_vals[0].powf(arg_vals[1])),
                 "sqrt" if arg_vals.len() == 1 => Ok(arg_vals[0].sqrt()),
                 "max" if !arg_vals.is_empty() => Ok(arg_vals.iter().cloned().fold(f64::NEG_INFINITY, f64::max)),
                 "min" if !arg_vals.is_empty() => Ok(arg_vals.iter().cloned().fold(f64::INFINITY, f64::min)),
                 "abs" if arg_vals.len() == 1 => Ok(arg_vals[0].abs()),
-
-                // Added functions
                 "round" if arg_vals.len() == 1 => Ok(arg_vals[0].round()),
                 "ceil" if arg_vals.len() == 1 => Ok(arg_vals[0].ceil()),
                 "floor" if arg_vals.len() == 1 => Ok(arg_vals[0].floor()),
