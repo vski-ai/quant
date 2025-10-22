@@ -40,7 +40,7 @@
       "post": {
         "operationId": "postApiAuthKeys",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "201": {
@@ -181,7 +181,7 @@
       "get": {
         "operationId": "getApiAuthKeys",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "200": {
@@ -273,7 +273,7 @@
       "patch": {
         "operationId": "patchApiAuthKeys:id",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "200": {
@@ -438,7 +438,7 @@
       "delete": {
         "operationId": "deleteApiAuthKeys:id",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "200": {
@@ -492,7 +492,7 @@
       "get": {
         "operationId": "getApiAuthKeys:id",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "200": {
@@ -600,7 +600,7 @@
       "get": {
         "operationId": "getApiAuthUsage",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "200": {
@@ -690,7 +690,7 @@
       "post": {
         "operationId": "postApiAuthUsageReport",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "200": {
@@ -755,6 +755,7 @@
                           "SUM",
                           "CATEGORY",
                           "COMPOUND_SUM",
+                          "LEAF_SUM",
                           "BOOLEAN"
                         ]
                       },
@@ -811,7 +812,7 @@
       "post": {
         "operationId": "postApiAuthUsageDataset",
         "tags": [
-          "auth"
+          "Auth"
         ],
         "responses": {
           "200": {
@@ -907,6 +908,10 @@
     "/api/events/{sourceId}/events": {
       "post": {
         "operationId": "postApiEvents:sourceIdEvents",
+        "tags": [
+          "Events",
+          "Event Sources"
+        ],
         "responses": {
           "200": {
             "description": "Event recorded successfully"
@@ -1664,6 +1669,7 @@
                               "SUM",
                               "CATEGORY",
                               "COMPOUND_SUM",
+                              "LEAF_SUM",
                               "BOOLEAN"
                             ]
                           },
@@ -1850,6 +1856,7 @@
                             "SUM",
                             "CATEGORY",
                             "COMPOUND_SUM",
+                            "LEAF_SUM",
                             "BOOLEAN"
                           ]
                         },
@@ -1937,6 +1944,7 @@
                                 "SUM",
                                 "CATEGORY",
                                 "COMPOUND_SUM",
+                                "LEAF_SUM",
                                 "BOOLEAN"
                               ]
                             },
@@ -2674,6 +2682,7 @@
                           "SUM",
                           "CATEGORY",
                           "COMPOUND_SUM",
+                          "LEAF_SUM",
                           "BOOLEAN"
                         ]
                       },
@@ -2978,6 +2987,7 @@
                           "SUM",
                           "CATEGORY",
                           "COMPOUND_SUM",
+                          "LEAF_SUM",
                           "BOOLEAN"
                         ]
                       },
@@ -3331,6 +3341,276 @@
                 },
                 "required": [
                   "metrics",
+                  "timeRange",
+                  "granularity"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/reports/{id}/flat-groups": {
+      "post": {
+        "operationId": "postApiReports:idFlat-groups",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Query a Report's flat groups",
+        "responses": {
+          "200": {
+            "description": "Flat groups data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "groupBy": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "timeRange": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end"
+                    ]
+                  },
+                  "granularity": {
+                    "enum": [
+                      "100ms",
+                      "200ms",
+                      "250ms",
+                      "500ms",
+                      "second",
+                      "minute",
+                      "5minute",
+                      "10minute",
+                      "15minute",
+                      "30minute",
+                      "hour",
+                      "2hour",
+                      "4hour",
+                      "6hour",
+                      "12hour",
+                      "day",
+                      "3day",
+                      "7day",
+                      "15day",
+                      "30day",
+                      "45day",
+                      "60day",
+                      "90day"
+                    ]
+                  },
+                  "sortBy": {
+                    "type": "string"
+                  },
+                  "sortOrder": {
+                    "enum": [
+                      "asc",
+                      "desc"
+                    ]
+                  },
+                  "wasm": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "groupBy",
+                  "timeRange",
+                  "granularity"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/reports/{id}/realtime/flat-groups": {
+      "post": {
+        "operationId": "postApiReports:idRealtimeFlat-groups",
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Query a Report's flat groups in realtime",
+        "responses": {
+          "200": {
+            "description": "Flat groups data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "groupBy": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "timeRange": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end"
+                    ]
+                  },
+                  "granularity": {
+                    "enum": [
+                      "100ms",
+                      "200ms",
+                      "250ms",
+                      "500ms",
+                      "second",
+                      "minute",
+                      "5minute",
+                      "10minute",
+                      "15minute",
+                      "30minute",
+                      "hour",
+                      "2hour",
+                      "4hour",
+                      "6hour",
+                      "12hour",
+                      "day",
+                      "3day",
+                      "7day",
+                      "15day",
+                      "30day",
+                      "45day",
+                      "60day",
+                      "90day"
+                    ]
+                  },
+                  "sortBy": {
+                    "type": "string"
+                  },
+                  "sortOrder": {
+                    "enum": [
+                      "asc",
+                      "desc"
+                    ]
+                  },
+                  "wasm": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "groupBy",
                   "timeRange",
                   "granularity"
                 ]

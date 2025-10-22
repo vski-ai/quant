@@ -288,7 +288,13 @@ export type GetApiAuthUsageResponse =
 export type PostApiAuthUsageReportData = {
   body?: {
     metric?: {
-      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      type:
+        | "COUNT"
+        | "SUM"
+        | "CATEGORY"
+        | "COMPOUND_SUM"
+        | "LEAF_SUM"
+        | "BOOLEAN";
       field?: string;
     };
     timeRange: {
@@ -735,7 +741,13 @@ export type GetApiAggregationSourcesResponses = {
       | "60day"
       | "90day";
     aggregations?: Array<{
-      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      type:
+        | "COUNT"
+        | "SUM"
+        | "CATEGORY"
+        | "COMPOUND_SUM"
+        | "LEAF_SUM"
+        | "BOOLEAN";
       payloadField?: string;
       categoryField?: string;
     }>;
@@ -787,7 +799,13 @@ export type PostApiAggregationSourcesData = {
       events: Array<string>;
     };
     aggregations?: Array<{
-      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      type:
+        | "COUNT"
+        | "SUM"
+        | "CATEGORY"
+        | "COMPOUND_SUM"
+        | "LEAF_SUM"
+        | "BOOLEAN";
       payloadField?: string;
       categoryField?: string;
     }>;
@@ -850,7 +868,13 @@ export type PostApiAggregationSourcesResponses = {
       | "60day"
       | "90day";
     aggregations?: Array<{
-      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      type:
+        | "COUNT"
+        | "SUM"
+        | "CATEGORY"
+        | "COMPOUND_SUM"
+        | "LEAF_SUM"
+        | "BOOLEAN";
       payloadField?: string;
       categoryField?: string;
     }>;
@@ -1135,7 +1159,13 @@ export type PatchApiReportsIdResponse =
 export type PostApiReportsIdDataData = {
   body?: {
     metric: {
-      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      type:
+        | "COUNT"
+        | "SUM"
+        | "CATEGORY"
+        | "COMPOUND_SUM"
+        | "LEAF_SUM"
+        | "BOOLEAN";
       field?: string;
     };
     timeRange: {
@@ -1276,7 +1306,13 @@ export type PostApiReportsIdDatasetResponse =
 export type PostApiReportsIdRealtimeDataData = {
   body?: {
     metric: {
-      type: "COUNT" | "SUM" | "CATEGORY" | "COMPOUND_SUM" | "BOOLEAN";
+      type:
+        | "COUNT"
+        | "SUM"
+        | "CATEGORY"
+        | "COMPOUND_SUM"
+        | "LEAF_SUM"
+        | "BOOLEAN";
       field?: string;
     };
     timeRange: {
@@ -1490,4 +1526,144 @@ export type PostApiReportsIdRealtimeGroupsResponses = {
 export type PostApiReportsIdRealtimeGroupsResponse =
   PostApiReportsIdRealtimeGroupsResponses[
     keyof PostApiReportsIdRealtimeGroupsResponses
+  ];
+
+export type PostApiReportsIdFlatGroupsData = {
+  body?: {
+    metrics?: Array<string>;
+    groupBy: Array<string>;
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    wasm?: boolean;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/flat-groups";
+};
+
+export type PostApiReportsIdFlatGroupsErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdFlatGroupsError =
+  PostApiReportsIdFlatGroupsErrors[keyof PostApiReportsIdFlatGroupsErrors];
+
+export type PostApiReportsIdFlatGroupsResponses = {
+  /**
+   * Flat groups data
+   */
+  200: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type PostApiReportsIdFlatGroupsResponse =
+  PostApiReportsIdFlatGroupsResponses[
+    keyof PostApiReportsIdFlatGroupsResponses
+  ];
+
+export type PostApiReportsIdRealtimeFlatGroupsData = {
+  body?: {
+    metrics?: Array<string>;
+    groupBy: Array<string>;
+    timeRange: {
+      start: string;
+      end: string;
+    };
+    granularity:
+      | "100ms"
+      | "200ms"
+      | "250ms"
+      | "500ms"
+      | "second"
+      | "minute"
+      | "5minute"
+      | "10minute"
+      | "15minute"
+      | "30minute"
+      | "hour"
+      | "2hour"
+      | "4hour"
+      | "6hour"
+      | "12hour"
+      | "day"
+      | "3day"
+      | "7day"
+      | "15day"
+      | "30day"
+      | "45day"
+      | "60day"
+      | "90day";
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    wasm?: boolean;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/reports/{id}/realtime/flat-groups";
+};
+
+export type PostApiReportsIdRealtimeFlatGroupsErrors = {
+  /**
+   * Error response
+   */
+  404: {
+    error: string;
+  };
+};
+
+export type PostApiReportsIdRealtimeFlatGroupsError =
+  PostApiReportsIdRealtimeFlatGroupsErrors[
+    keyof PostApiReportsIdRealtimeFlatGroupsErrors
+  ];
+
+export type PostApiReportsIdRealtimeFlatGroupsResponses = {
+  /**
+   * Flat groups data
+   */
+  200: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type PostApiReportsIdRealtimeFlatGroupsResponse =
+  PostApiReportsIdRealtimeFlatGroupsResponses[
+    keyof PostApiReportsIdRealtimeFlatGroupsResponses
   ];

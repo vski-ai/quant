@@ -82,12 +82,18 @@ import type {
   PostApiReportsIdDatasetData,
   PostApiReportsIdDatasetErrors,
   PostApiReportsIdDatasetResponses,
+  PostApiReportsIdFlatGroupsData,
+  PostApiReportsIdFlatGroupsErrors,
+  PostApiReportsIdFlatGroupsResponses,
   PostApiReportsIdRealtimeDataData,
   PostApiReportsIdRealtimeDataErrors,
   PostApiReportsIdRealtimeDataResponses,
   PostApiReportsIdRealtimeDatasetData,
   PostApiReportsIdRealtimeDatasetErrors,
   PostApiReportsIdRealtimeDatasetResponses,
+  PostApiReportsIdRealtimeFlatGroupsData,
+  PostApiReportsIdRealtimeFlatGroupsErrors,
+  PostApiReportsIdRealtimeFlatGroupsResponses,
   PostApiReportsIdRealtimeGroupsData,
   PostApiReportsIdRealtimeGroupsErrors,
   PostApiReportsIdRealtimeGroupsResponses,
@@ -890,6 +896,66 @@ export const postApiReportsIdRealtimeGroups = <
       },
     ],
     url: "/api/reports/{id}/realtime/groups",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's flat groups
+ */
+export const postApiReportsIdFlatGroups = <
+  ThrowOnError extends boolean = false,
+>(options: Options<PostApiReportsIdFlatGroupsData, ThrowOnError>) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdFlatGroupsResponses,
+    PostApiReportsIdFlatGroupsErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/flat-groups",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Query a Report's flat groups in realtime
+ */
+export const postApiReportsIdRealtimeFlatGroups = <
+  ThrowOnError extends boolean = false,
+>(options: Options<PostApiReportsIdRealtimeFlatGroupsData, ThrowOnError>) => {
+  return (options.client ?? client).post<
+    PostApiReportsIdRealtimeFlatGroupsResponses,
+    PostApiReportsIdRealtimeFlatGroupsErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "X-API-Key",
+        type: "apiKey",
+      },
+      {
+        name: "X-Master-Key",
+        type: "apiKey",
+      },
+    ],
+    url: "/api/reports/{id}/realtime/flat-groups",
     ...options,
     headers: {
       "Content-Type": "application/json",

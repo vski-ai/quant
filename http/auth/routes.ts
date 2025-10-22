@@ -9,7 +9,6 @@ import { ApiKeyNotFoundError } from "./errors.ts";
 import { HonoEnv } from "@/http/types.ts";
 import { ErrorResponse, SuccessResponse } from "@/http/schemas.ts";
 import { AggregationType } from "@/core/mod.ts";
-import { start } from "node:repl";
 
 const QuotaSchema = v.object({
   requestsPerSecond: v.pipe(v.number(), v.integer(), v.minValue(1)),
@@ -87,7 +86,7 @@ export function createAuthRoutes(
   admin.post(
     "/keys",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         201: {
           description: "API key created successfully",
@@ -127,7 +126,7 @@ export function createAuthRoutes(
   admin.patch(
     "/keys/:id",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         200: {
           description: "API key updated successfully",
@@ -170,7 +169,7 @@ export function createAuthRoutes(
   admin.delete(
     "/keys/:id",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         200: SuccessResponse,
         401: ErrorResponse,
@@ -192,7 +191,7 @@ export function createAuthRoutes(
   admin.get(
     "/keys/:id",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         200: {
           description: "API key details",
@@ -222,7 +221,7 @@ export function createAuthRoutes(
   admin.get(
     "/usage",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         200: {
           description: "Usage statistics",
@@ -257,7 +256,7 @@ export function createAuthRoutes(
   admin.post(
     "/usage/report",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         200: {
           description: "Usage report data",
@@ -320,7 +319,7 @@ export function createAuthRoutes(
   admin.post(
     "/usage/dataset",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         200: {
           description: "Usage dataset data",
@@ -371,7 +370,7 @@ export function createAuthRoutes(
   admin.get(
     "/keys",
     describeRoute({
-      tags: ["auth"],
+      tags: ["Auth"],
       responses: {
         200: {
           description: "A list of API keys",

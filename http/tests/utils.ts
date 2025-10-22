@@ -3,6 +3,7 @@ import { getTestDb } from "@/core/tests/utils.ts";
 import { createHttp } from "@/http/create_http.ts";
 import { client as apiClient } from "@/http/client.ts";
 import { CoreAuthPlugin, createHttpAuthPlugin } from "@/http/auth/mod.ts";
+import { delay } from "@std/async/delay";
 
 export function withTestApi(
   conf: {
@@ -68,6 +69,7 @@ export function withTestApi(
       // 6. Teardown
       ac.abort();
       await serverPromise;
+      await delay(2000);
       await engine.connection.dropDatabase();
     } finally {
       await engine?.disconnect();

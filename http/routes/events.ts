@@ -20,6 +20,7 @@ const RecordEventSchema = v.object({
 events.post(
   "/:sourceId/events",
   describeRoute({
+    tags: ["Events", "Event Sources"],
     responses: {
       200: { description: "Event recorded successfully" },
       400: { description: "Invalid request body or parameters" },

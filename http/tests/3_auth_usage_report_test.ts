@@ -106,7 +106,7 @@ withTestApi({ dbName }, async (t, { client }) => {
       const error = report.find((r) => r.category === "error");
 
       assertExists(success, "Success category should exist");
-      assertEquals(success.value, 5, "Expected 4 successful requests");
+      assertEquals(success.value, 5, "Expected 5 successful requests");
 
       assertExists(error, "Error category should exist");
       assertEquals(error.value, 1, "Expected 1 error request");
@@ -130,7 +130,7 @@ withTestApi({ dbName }, async (t, { client }) => {
       const realtimeError = realtimeReport.find((r) => r.category === "error");
       assertEquals(
         realtimeSuccess?.value,
-        6,
+        4,
         "Realtime success count should be 4",
       );
       assertEquals(realtimeError?.value, 1, "Realtime error count should be 1");
