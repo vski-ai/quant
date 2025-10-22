@@ -20,7 +20,7 @@ export interface VirtualTableViewProps {
   tableAddon?: JSX.Element;
   cellFormatting?: Signal<Record<string, CellFormatting>>;
   onColumnDrop?: (draggedColumn: string, targetColumn: string) => void;
-  formatColumnName?: (a: string) => string 
+  formatColumnName?: (a: string) => string;
 }
 
 export enum FormattingType {

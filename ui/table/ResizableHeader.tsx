@@ -3,7 +3,6 @@ import { useSignal } from "@preact/signals";
 import { useRef } from "preact/hooks";
 import { Draggable } from "./Draggable.tsx";
 
-
 export interface ResizableHeaderProps {
   column: string;
   width: number;
@@ -11,13 +10,21 @@ export interface ResizableHeaderProps {
   action?: (col: string) => JSX.Element;
   onResize: (column: string, newWidth: number) => void;
   onColumnDrop?: (draggedColumn: string, targetColumn: string) => void;
-  formatColumnName?: (a: string) => string
+  formatColumnName?: (a: string) => string;
   children?: any;
 }
 
 export function ResizableHeader(
-  { column, width, onResize, extensions, action, onColumnDrop, formatColumnName, children }:
-    ResizableHeaderProps,
+  {
+    column,
+    width,
+    onResize,
+    extensions,
+    action,
+    onColumnDrop,
+    formatColumnName,
+    children,
+  }: ResizableHeaderProps,
 ) {
   const isResizing = useSignal(false);
   const startX = useSignal(0);

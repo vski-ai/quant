@@ -19,7 +19,7 @@ export function CardView(
     renderExpandedRow,
     expandedRows,
     cellFormatting,
-    formatColumnName
+    formatColumnName,
   }: CardViewProps,
 ) {
   const tableRef = useRef<HTMLDivElement>(null);

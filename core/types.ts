@@ -246,7 +246,7 @@ export interface IDatasetQuery {
 
 /** Represents a single row in a dataset report, potentially containing multiple metrics for a single timestamp. */
 export interface IDatasetDataPoint
-  extends Record<string, number | Date | any[] | undefined> {
+  extends Record<string, number | Date | any[] | undefined | string> {
   timestamp: Date;
   /** A special field containing an array of all boolean events that occurred within this time bucket. */
   $boolean_groups?: { name: string; value: boolean; timestamp: Date }[];

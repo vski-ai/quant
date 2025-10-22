@@ -4,7 +4,7 @@ import { Draggable } from "./Draggable.tsx";
 interface ColumnManagerProps {
   allColumns: string[];
   selectedColumns: Signal<string[]>;
-  formatColumnName?: (a: string) => string
+  formatColumnName?: (a: string) => string;
 }
 
 export function ColumnSelector(
