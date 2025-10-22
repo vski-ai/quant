@@ -3,6 +3,7 @@ import init, {
   evaluate,
   parse_formula,
 } from "./pkg/formula_engine.js";
+export * from "./core.plugin.ts";
 
 // Initialize the Wasm module
 await init();

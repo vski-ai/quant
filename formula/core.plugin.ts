@@ -1,5 +1,24 @@
-import { IDatasetDataPoint, IDatasetQuery, IPlugin } from "@/core/types.ts";
 import { WasmFormulaExecutor } from "./mod.ts";
+import type {
+  IDatasetDataPoint,
+  IDatasetQuery,
+  IPlugin,
+} from "@/core/types.ts";
+import type { compute } from "./pkg/formula_engine.js";
+
+type ComputeType = typeof compute;
+declare module "@/core/mod.ts" {
+  interface IQuery {
+    compute?: Record<string, string>;
+  }
+  interface IDatasetQuery {
+    compute?: Record<string, string>;
+  }
+
+  interface Engine {
+    compute: ComputeType;
+  }
+}
 
 export class FormulaPlugin implements IPlugin {
   constructor(
@@ -21,5 +40,10 @@ export class FormulaPlugin implements IPlugin {
         Object.assign(dataPoint, result);
       });
     }
+  }
+  registerEngineMethods() {
+    return {
+      compute: this.executor.compute,
+    };
   }
 }

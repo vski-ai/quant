@@ -1,6 +1,11 @@
 export type * from "./db/AggregateQuery.ts";
 export type * from "./db/Aggregation.ts";
 export type * from "./db/Event.ts";
+
+import { Engine } from "./engine.ts";
+import { IEventDoc } from "./db/Event.ts";
+import { IMetricUpdate } from "./db/AggregateQuery.ts";
+
 export interface IReportFilter {
   sourceId: string;
   eventType: string;
@@ -217,7 +222,6 @@ export interface IQuery {
   rebuildCache?: boolean;
   cache?: boolean;
   groupBy?: string[];
-  compute?: Record<string, string>;
 }
 
 /**
@@ -238,7 +242,6 @@ export interface IDatasetQuery {
   sortBy?: string;
   sortDirection?: "asc" | "desc";
   cache?: boolean;
-  compute?: Record<string, string>;
 }
 
 /** Represents a single row in a dataset report, potentially containing multiple metrics for a single timestamp. */
@@ -266,11 +269,6 @@ export interface IReportMetadata {
   eventSources: string[];
   eventTypes: string[];
 }
-
-import { Engine } from "./engine.ts";
-import { IEventDoc } from "./db/Event.ts";
-import { IMetricUpdate } from "./db/AggregateQuery.ts";
-import { string } from "valibot";
 
 /**
  * Defines the contract for a data offloader plugin.
