@@ -1,0 +1,4 @@
+*.md linguist-documentation
+*.js linguist-generated
+*.wasm linguist-generated
+_bench/ linguist-documentation
