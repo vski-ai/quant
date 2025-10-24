@@ -8,8 +8,8 @@ import BarChart from "@/islands/BarChart.tsx";
 import ApiKeysTable from "@/islands/keys/ApiKeysTable.tsx";
 import api from "@/db/quant.ts";
 import { obfuscate } from "@/shared/obfuscate.ts";
-import { ApiKey } from "@/quant/http/auth/types.ts";
-import { AggregationType, Granularity } from "@/quant/core/types.ts";
+import { ApiKey } from "@/root/http/auth/types.ts";
+import { AggregationType, Granularity } from "@/root/core/types.ts";
 
 export const handler = define.handlers({
   async GET(ctx) {
@@ -20,9 +20,9 @@ export const handler = define.handlers({
       },
     });
     // @ts-ignore:
-    keys?.forEach((record: ApiKey) => {
-      record.key = obfuscate(record.key);
-    });
+    // keys?.forEach((record: ApiKey) => {
+    //   record.key = obfuscate(record.key);
+    // });
 
     const period = ctx.state.period || "1d";
     const granularity = ctx.state.granularity || "hour";

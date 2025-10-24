@@ -1,6 +1,6 @@
 // ! This is a client to make master requests
 // ! Use @/shared/api.ts to make user authenticated requests
-import { client } from "@/quant/http/client.ts";
+import { client } from "@/root/http/client.ts";
 
 const api = client();
 

@@ -927,20 +927,8 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string"
-                  },
-                  "uuid": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "payload": {
-                    "type": "object",
-                    "additionalProperties": {}
-                  },
-                  "attributions": {
+                "anyOf": [
+                  {
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -948,23 +936,83 @@
                         "type": {
                           "type": "string"
                         },
-                        "value": {
+                        "uuid": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "attributions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "value"
+                            ]
+                          }
+                        },
+                        "timestamp": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "type",
-                        "value"
+                        "uuid"
                       ]
                     }
                   },
-                  "timestamp": {
-                    "type": "string"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "uuid": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "payload": {
+                        "type": "object",
+                        "additionalProperties": {}
+                      },
+                      "attributions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ]
+                        }
+                      },
+                      "timestamp": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "uuid"
+                    ]
                   }
-                },
-                "required": [
-                  "type",
-                  "uuid"
                 ]
               }
             }

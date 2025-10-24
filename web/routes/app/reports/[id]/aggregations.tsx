@@ -1,10 +1,9 @@
 import { define, State } from "@/root.ts";
-import quant from "@/db/quant.ts";
 import { PageProps } from "fresh";
-import { GetApiAggregationSourcesResponse } from "@/quant/http/client.ts";
+import { GetApiAggregationSourcesResponse } from "@/root/http/client.ts";
 import { AggregationView } from "@/islands/reports/AggregationView.tsx";
 import { calculateTimeRange } from "@/shared/time.ts";
-import { Granularity } from "@/quant/core/types.ts";
+import { Granularity } from "@/root/core/types.ts";
 
 interface AggregationsData {
   availableMetrics: string[];
@@ -26,6 +25,8 @@ export const handler = define.handlers({
     if (sourcesError) {
       return Response.json(sourcesError.error, { status: 400 });
     }
+
+    console.log(aggregationSources);
 
     const availableMetrics = [
       ...new Set(

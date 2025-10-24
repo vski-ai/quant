@@ -108,7 +108,7 @@ data.post(
     },
   }),
   canAccessReport,
-  vValidator("json", ReportQuerySchema),
+  useSchema(ReportQuerySchema, (schema) => vValidator("json", schema)),
   async (c) => {
     const engine = c.get("engine");
     const { id } = c.req.param();
@@ -145,7 +145,7 @@ data.post(
     },
   }),
   canAccessReport,
-  vValidator("json", DatasetQuerySchema),
+  useSchema(DatasetQuerySchema, (schema) => vValidator("json", schema)),
   async (c) => {
     const engine = c.get("engine");
     const { id } = c.req.param();

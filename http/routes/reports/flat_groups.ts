@@ -5,6 +5,7 @@ import { ApiKey } from "@/http/auth/types.ts";
 import { ErrorResponse } from "@/http/schemas.ts";
 import { canAccessReport } from "@/http/auth/middleware.ts";
 import { FlatGroupsQuerySchema } from "@/http/schemas/flat_groups.ts";
+import { useSchema } from "@/http/schemas/schema_hook.ts";
 import * as v from "valibot";
 
 const flatGroups = new Hono<
@@ -29,7 +30,7 @@ flatGroups.post(
     },
   }),
   canAccessReport,
-  vValidator("json", FlatGroupsQuerySchema),
+  useSchema(FlatGroupsQuerySchema, (schema) => vValidator("json", schema)),
   async (c) => {
     const engine = c.get("engine");
     const { id } = c.req.param();

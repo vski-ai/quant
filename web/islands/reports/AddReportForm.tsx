@@ -1,5 +1,5 @@
 import { Reports, reports } from "./store.ts";
-import { GetApiEventSourcesResponse } from "@/quant/http/client.ts";
+import { GetApiEventSourcesResponse } from "@/root/http/client.ts";
 
 export const AddReportForm = (
   { data }: { data: { reports: Reports; sources: GetApiEventSourcesResponse } },

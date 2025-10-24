@@ -1,7 +1,7 @@
 import { Context } from "fresh";
 import { State } from "@/root.ts";
 import quant from "@/db/quant.ts";
-import { GetApiReportsIdResponse } from "@/quant/http/client.ts";
+import { GetApiReportsIdResponse } from "@/root/http/client.ts";
 
 declare module "@/root.ts" {
   interface State {

@@ -1,7 +1,7 @@
 @import "tailwindcss";
-@source "../../ui";
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
+@import "../../table/table/style.tailwind.css";
 
 @layer components {
   .main-navbar {

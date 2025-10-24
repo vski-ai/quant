@@ -1,7 +1,7 @@
 import { define } from "@/root.ts";
 import quant from "@/db/quant.ts";
 import { isAdmin, isAdminOn } from "@/db/rbac.ts";
-import { GetApiEventSourcesResponse } from "@/quant/http/client.ts";
+import { GetApiEventSourcesResponse } from "@/root/http/client.ts";
 
 import AdminToggle from "@/components/AdminToggle.tsx";
 import Modal from "@/islands/Modal.tsx";

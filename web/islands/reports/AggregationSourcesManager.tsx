@@ -3,7 +3,7 @@ import {
   GetApiAggregationSourcesResponse,
   GetApiEventSourcesResponse,
   GetApiReportsIdResponse,
-} from "@/quant/http/client.ts";
+} from "@/root/http/client.ts";
 import Modal from "@/islands/Modal.tsx";
 import { AddAggregationSourceForm } from "./AddAggregationSourceForm.tsx";
 import { showAlert } from "@/shared/alert.ts";

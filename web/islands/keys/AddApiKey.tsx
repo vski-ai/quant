@@ -2,7 +2,7 @@ import { useSignal } from "@preact/signals";
 import XIcon from "lucide-react/dist/esm/icons/x.js";
 import CheckCheckIcon from "lucide-react/dist/esm/icons/check-check.js";
 import CopyIcon from "lucide-react/dist/esm/icons/copy.js";
-import { ApiKey } from "@/quant/http/auth/types.ts";
+import { ApiKey } from "@/root/http/auth/types.ts";
 
 interface AddApiKeyProps {
   onClose: (key: ApiKey | null) => void;

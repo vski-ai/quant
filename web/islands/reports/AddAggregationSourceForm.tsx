@@ -3,8 +3,8 @@ import {
   GetApiAggregationSourcesResponse,
   GetApiEventSourcesResponse,
   GetApiReportsIdResponse,
-} from "@/quant/http/client.ts";
-import { Granularity } from "@/quant/core/types.ts";
+} from "@/root/http/client.ts";
+import { Granularity } from "@/root/core/types.ts";
 import { showAlert } from "@/shared/alert.ts";
 interface AddAggregationSourceFormProps {
   report: GetApiReportsIdResponse;
@@ -106,6 +106,8 @@ export function AddAggregationSourceForm(
           class="select select-bordered w-full"
           defaultValue="minute"
         >
+          <option value="500ms">500ms</option>
+          <option value="second">Minute</option>
           <option value="minute">Minute</option>
           <option value="hour">Hour</option>
           <option value="day">Day</option>

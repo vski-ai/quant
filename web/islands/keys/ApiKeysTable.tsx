@@ -3,7 +3,7 @@ import PlusIcon from "lucide-react/dist/esm/icons/plus.js";
 import Trash2Icon from "lucide-react/dist/esm/icons/trash-2.js";
 import AddApiKey from "./AddApiKey.tsx";
 import ConfirmDialog from "../ConfirmDialog.tsx";
-import { ApiKey } from "@/quant/http/auth/types.ts";
+import { ApiKey } from "@/root/http/auth/types.ts";
 import { obfuscate } from "@/shared/obfuscate.ts";
 
 interface ApiKeysTableProps {

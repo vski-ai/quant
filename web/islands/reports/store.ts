@@ -1,5 +1,5 @@
 import { createSharedSignal } from "@/shared/createSharedSignal.ts";
-import { GetApiReportsResponse } from "@/quant/http/client.ts";
+import { GetApiReportsResponse } from "@/root/http/client.ts";
 
 export type Reports = GetApiReportsResponse;
 

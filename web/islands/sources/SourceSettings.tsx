@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { GetApiEventSourcesIdResponse } from "@/quant/http/client.ts";
+import { GetApiEventSourcesIdResponse } from "@/root/http/client.ts";
 import ConfirmDialog from "@/islands/ConfirmDialog.tsx";
 import { showAlert } from "@/shared/alert.ts";
 

@@ -378,18 +378,31 @@ export type PostApiAuthUsageDatasetResponse =
   PostApiAuthUsageDatasetResponses[keyof PostApiAuthUsageDatasetResponses];
 
 export type PostApiEventsSourceIdEventsData = {
-  body?: {
-    type: string;
-    uuid: string;
-    payload?: {
-      [key: string]: unknown;
-    };
-    attributions?: Array<{
+  body?:
+    | Array<{
       type: string;
-      value: string;
-    }>;
-    timestamp?: string;
-  };
+      uuid: string;
+      payload?: {
+        [key: string]: unknown;
+      };
+      attributions?: Array<{
+        type: string;
+        value: string;
+      }>;
+      timestamp?: string;
+    }>
+    | {
+      type: string;
+      uuid: string;
+      payload?: {
+        [key: string]: unknown;
+      };
+      attributions?: Array<{
+        type: string;
+        value: string;
+      }>;
+      timestamp?: string;
+    };
   path: {
     sourceId: string;
   };

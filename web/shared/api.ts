@@ -1,5 +1,5 @@
 import { IS_BROWSER } from "fresh/runtime";
-import { client } from "@/quant/http/client.ts";
+import { client } from "@/root/http/client.ts";
 
 const pathName = "/api/quant"; // this is internal proxy base url
 const origin = IS_BROWSER

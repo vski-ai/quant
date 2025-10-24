@@ -4,7 +4,7 @@ import { isAdmin, isAdminOn } from "@/db/rbac.ts";
 import {
   GetApiEventSourcesResponse,
   GetApiReportsResponse,
-} from "@/quant/http/client.ts";
+} from "@/root/http/client.ts";
 
 import AdminToggle from "@/components/AdminToggle.tsx";
 import Modal from "@/islands/Modal.tsx";

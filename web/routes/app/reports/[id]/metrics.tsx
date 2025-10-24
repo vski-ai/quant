@@ -1,6 +1,6 @@
 import { define } from "@/root.ts";
 import quant from "@/db/quant.ts";
-import { AggregationType, Granularity } from "@/quant/core/types.ts";
+import { AggregationType, Granularity } from "@/root/core/types.ts";
 import { MetricsView } from "@/islands/reports/MetricsView.tsx";
 import { calculateTimeRange } from "@/shared/time.ts";
 

@@ -3,8 +3,8 @@ import { client } from "../http/client.ts";
 
 // --- Simulation Configuration ---
 const config = {
-  baseUrl: "http://localhost:8000",
-  apiKey: "test-api-key", // Replace with your actual API key
+  baseUrl: "http://localhost:9090",
+  apiKey: "qnt_5a104bc4093042e98dc1cacfad017762",
   sourceName: "crm_events",
   numInitialEvents: 10000,
   eventsPerSecond: { min: 2, max: 6 },
@@ -27,6 +27,13 @@ const dealStages = [
   "Negotiation",
   "Closed Won",
   "Closed Lost",
+];
+const salesReps = [
+  "Johanna Doe",
+  "Park Chickenberg",
+  "Sam Escman",
+  "Vin Gazoline",
+  "Dat Salesman",
 ];
 
 // --- HTTP Client Setup ---
@@ -66,26 +73,29 @@ async function runSimulation() {
   const sourceId = source!.id!;
 
   // 2. Seed Initial Data
-  console.log(`2. Seeding ${config.numInitialEvents} initial events...`);
-  const seedStartTime = performance.now();
-  for (let i = 0; i < config.numInitialEvents; i++) {
-    const event = generateRandomEvent();
-    await apiClient.postApiEventsSourceIdEvents({
-      path: { sourceId },
-      body: [event],
-    });
-    if ((i + 1) % 1000 === 0) {
-      console.log(`   - Seeded ${i + 1} / ${config.numInitialEvents} events`);
+  if (Deno.args.includes("--seed")) {
+    console.log(`2. Seeding ${config.numInitialEvents} initial events...`);
+    const seedStartTime = performance.now();
+    for (let i = 0; i < config.numInitialEvents; i++) {
+      const event = generateRandomEvent();
+      await apiClient.postApiEventsSourceIdEvents({
+        path: { sourceId },
+        body: event,
+      });
+      if ((i + 1) % 1000 === 0) {
+        console.log(`   - Seeded ${i + 1} / ${config.numInitialEvents} events`);
+      }
     }
+    const seedEndTime = performance.now();
+    console.log(
+      `   - Seeding finished in ${(seedEndTime - seedStartTime) / 1000}s`,
+    );
   }
-  const seedEndTime = performance.now();
-  console.log(
-    `   - Seeding finished in ${(seedEndTime - seedStartTime) / 1000}s`,
-  );
 
   // 3. Generate Real-time Events
   console.log("3. Starting real-time event generation...");
   let minuteDealValue = 0;
+
   setInterval(async () => {
     const numEvents = faker.number.int(config.eventsPerSecond);
     const events = [];
@@ -94,11 +104,12 @@ async function runSimulation() {
       // Adjust deal value to meet the constant sum per minute
       const remainingValue = config.totalDealValuePerMinute - minuteDealValue;
       const dealValue = faker.number.int({
-        min: 1000,
         max: Math.min(50000, remainingValue),
       });
       event.payload.deal_value = dealValue;
       minuteDealValue += dealValue;
+      event.timestamp = new Date(new Date().getTime() - i * (1000 / numEvents))
+        .toISOString();
       events.push(event);
     }
 
@@ -126,7 +137,8 @@ function generateRandomEvent(eventType?: string) {
   );
 
   return {
-    eventType: eventType ||
+    uuid: faker.string.uuid() as string,
+    type: eventType ||
       faker.helpers.arrayElement([
         "deal_created",
         "deal_stage_changed",
@@ -139,11 +151,11 @@ function generateRandomEvent(eventType?: string) {
       product_category: faker.helpers.arrayElement(productCategories),
       region,
       country,
-      sales_rep_id: faker.person.firstName() + " " + faker.person.lastName(),
+      sales_rep: faker.helpers.arrayElement(salesReps),
       customer_segment: faker.helpers.arrayElement(customerSegments),
       deal_stage: faker.helpers.arrayElement(dealStages),
     },
-    timestamp: faker.date.recent({ days: 30 }),
+    timestamp: faker.date.recent({ days: 30 }).toISOString(),
   };
 }
 

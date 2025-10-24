@@ -1,21 +1,19 @@
-import { Granularity } from "@/quant/core/types.ts";
-
+import { useSignal } from "@preact/signals";
+import { useRef } from "preact/hooks";
+import { Granularity } from "@/root/core/types.ts";
 import {
   ColumnMenu,
   ColumnSelector,
   ColumnSorter,
   DynamicTable,
-  GeneralFormatting,
   GroupingSelector,
   SortState,
-} from "@/quant/ui/table/mod.ts";
-import { Signal, useSignal } from "@preact/signals";
-import { useMemo, useRef } from "preact/hooks";
+} from "@vski/table/table/mod.ts";
+import { XYModal } from "@vski/table/popup/XYModal.tsx";
+import { GeneralFormatting } from "@vski/table/format/General.tsx";
 
 import GridIcon from "lucide-react/dist/esm/icons/grid-2x2-plus.js";
 import GroupIcon from "lucide-react/dist/esm/icons/group.js";
-
-import { generateMockData } from "../../mocks/groupable-table.ts";
 
 interface AggregationViewProps {
   granularity?: Granularity;
@@ -37,8 +35,7 @@ export const AggregationView = (
       "$is_group_root",
       "name",
     ].includes(col);
-  const data = useMemo(() => generateMockData(), []);
-  console.log("d", JSON.stringify(data, null, 2));
+  const data = aggregations; //useMemo(() => generateMockData(), []);
   const columns = Object.keys(data?.[0] ?? {}).filter((c) => !isReserved(c));
   const allColumns = useSignal<string[]>(columns);
   const selectedColumns = useSignal<string[]>(columns?.slice(0, 5));
@@ -66,8 +63,41 @@ export const AggregationView = (
     selectedColumns.value = newColumns;
   };
 
+  const columnMenuOpenSignal = useSignal(false);
+  const columnMenuTarget = useSignal("");
+
   return (
     <div ref={parent} class="-mx-4">
+      <div>
+        <XYModal
+          target={columnMenuTarget.value}
+          openSignal={columnMenuOpenSignal}
+        >
+          <div tabIndex={1} className="tabs-lift tabs w-full min-w-full">
+            <label className="tab">
+              <input
+                type="radio"
+                name="my_tabs_7"
+                defaultChecked
+              />
+              Filtering
+            </label>
+            <div className="start-0 tab-content min-h-100 max-w-full border-base-300 bg-base-100 p-6">
+              Tab content 1
+            </div>
+            <label className="tab">
+              <input
+                type="radio"
+                name="my_tabs_7"
+              />
+              Formatting
+            </label>
+            <div className=" start-0 tab-content max-w-full border-base-300 bg-base-100 p-6">
+              Tab content 2
+            </div>
+          </div>
+        </XYModal>
+      </div>
       <div className="fixed z-50 bottom-2 right-6 flex flex-col gap-2">
         <div className="dropdown dropdown-top dropdown-end">
           <button
@@ -110,30 +140,41 @@ export const AggregationView = (
         columnExtensions={(column: string) => {
           const activeTab = useSignal("general");
           return (
-            <ColumnMenu>
-              <div class="menu card bg-base-100 w-100 border">
-                <div class="tabs">
-                  <a
-                    tabIndex={1}
-                    class={`tab tab-lifted ${
-                      activeTab.value === "general" ? "tab-active" : ""
-                    }`}
-                    onClick={() => activeTab.value = "general"}
-                  >
-                    General
-                  </a>
-                </div>
+            <>
+              <button
+                onClick={() => {
+                  columnMenuTarget.value = `#column-header-${column}`;
+                  columnMenuOpenSignal.value = true;
+                }}
+              >
+                0
+              </button>
 
-                <div class="p-2">
-                  {activeTab.value === "general" && (
-                    <GeneralFormatting
-                      column={column}
-                      formatting={formatting}
-                    />
-                  )}
+              <ColumnMenu>
+                <div class="menu card bg-base-100 w-100 border">
+                  <div class="tabs">
+                    <a
+                      tabIndex={1}
+                      class={`tab tab-lifted ${
+                        activeTab.value === "general" ? "tab-active" : ""
+                      }`}
+                      onClick={() => activeTab.value = "general"}
+                    >
+                      General
+                    </a>
+                  </div>
+
+                  <div class="p-2">
+                    {activeTab.value === "general" && (
+                      <GeneralFormatting
+                        column={column}
+                        formatting={formatting}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </ColumnMenu>
+              </ColumnMenu>
+            </>
           );
         }}
         tableAddon={

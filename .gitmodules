@@ -1,0 +1,3 @@
+[submodule "table"]
+	path = table
+	url = git@github.com:vski-ai/table.git

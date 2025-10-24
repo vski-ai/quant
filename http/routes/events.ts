@@ -27,27 +27,33 @@ events.post(
       404: { description: "Source not found" },
     },
   }),
-  vValidator("json", RecordEventSchema),
+  vValidator("json", v.union([v.array(RecordEventSchema), RecordEventSchema])),
   async (c) => {
     const engine = c.get("engine");
     const { sourceId } = c.req.param();
-    const { uuid, type, payload, attributions, timestamp } = c.req.valid<any>(
-      "json",
-    );
-
     const sourceDef = await engine.getEventSourceDefinitionById(sourceId);
     if (!sourceDef) {
       return c.json({ error: "Source not found" }, 404);
     }
+
+    const data = c.req.valid<any>(
+      "json",
+    );
+    const events = Array.isArray(data) ? data : [data];
+
     const eventSource = new EventSource(engine, sourceDef);
 
-    const recordedEvent = await eventSource.record({
-      uuid,
-      eventType: type,
-      payload: payload ?? {},
-      attributions,
-      timestamp: timestamp ? new Date(timestamp) : undefined,
-    });
+    const recordedEvent = await eventSource.record(
+      events.map(({ uuid, type: eventType, timestamp, payload, ...rest }) => {
+        return {
+          uuid,
+          eventType,
+          payload: payload ?? {},
+          timestamp: timestamp ? new Date(timestamp) : undefined,
+          ...rest,
+        };
+      }),
+    );
     return c.json(recordedEvent);
   },
 );
